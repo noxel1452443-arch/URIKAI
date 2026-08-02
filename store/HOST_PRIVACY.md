@@ -1,62 +1,69 @@
 # プライバシーポリシーを GitHub Pages で公開する
 
-Play Console には **HTTPS の公開URL** が必要です。このリポジトリでは `docs/index.html` を Pages で公開します。
+Play Console には **HTTPS の公開URL** が必要です。  
+このリポジトリの `docs/index.html` を GitHub Pages で公開します。
 
 Contact: `noxel.1452443@gmail.com`
 
+ローカルの初回コミットは済みです（`keystore` 秘密情報は含めていません）。
+
 ---
 
-## まだ GitHub リポジトリがない場合（初回）
+## 手順（ブラウザ中心・推奨）
 
-ターミナル（PowerShell）でプロジェクトフォルダに移動してから:
+### 1. GitHub で空のリポジトリを作る
+
+1. ブラウザで [https://github.com/new](https://github.com/new) を開く（要ログイン）
+2. Repository name: `URIKAI`
+3. **Public** を選ぶ
+4. 「Add a README」などのチェックは **すべて外す**（空のまま Create）
+5. Create repository
+
+### 2. パソコンから push する
+
+PowerShell で:
 
 ```powershell
 cd C:\Users\reo\Documents\URIKAI
 
-# 初回コミット（keystore.properties は .gitignore 済み）
-git add -A
-git status
-git commit -m "Initial commit: URIKAI app and privacy policy page"
+# ★ 下の YOUR_GITHUB_USERNAME を自分の GitHub ユーザー名に書き換える
+git remote add origin https://github.com/YOUR_GITHUB_USERNAME/URIKAI.git
+git push -u origin main
+```
 
-# GitHub にリポジトリ作成して push（要: gh ログイン済み）
-gh auth status
+ログインを求められたら GitHub のユーザー名／パスワード（または Personal Access Token）を入力します。  
+（近年はパスワードの代わりに Token が必要なことがあります。[Token作成](https://github.com/settings/tokens)）
+
+### 3. Pages を有効にする
+
+1. リポジトリページ `https://github.com/YOUR_GITHUB_USERNAME/URIKAI` を開く
+2. **Settings** → 左の **Pages**
+3. Source: **Deploy from a branch**
+4. Branch: **main** 、 folder: **/docs** → **Save**
+5. 1〜2分待つ
+6. 上部に出る URL をコピー:
+
+   `https://YOUR_GITHUB_USERNAME.github.io/URIKAI/`
+
+7. シークレットウィンドウで開き、ポリシーが表示されることを確認
+8. [Play Console](https://play.google.com/console) → プライバシーポリシー欄にその URL を貼る
+
+---
+
+## （任意）GitHub CLI がある場合
+
+```powershell
+winget install --id GitHub.cli
+gh auth login
 gh repo create URIKAI --public --source=. --remote=origin --push
 ```
 
-`gh` が未ログインなら:
-
-```powershell
-gh auth login
-```
-
-ブラウザの指示に従って GitHub アカウントで認証してください。
+その後、上記「3. Pages を有効にする」と同じ。
 
 ---
 
-## GitHub Pages を有効にする
+## 文面を直すとき
 
-1. ブラウザでリポジトリを開く（例: `https://github.com/<あなたのID>/URIKAI`）
-2. **Settings** → 左メニュー **Pages**
-3. **Build and deployment** → Source: **Deploy from a branch**
-4. Branch: **main** 、 folder: **/docs** → **Save**
-5. 1〜2分待つ
-6. 同じ Pages 画面の上部に公開URLが出る:
-
-   `https://<あなたのID>.github.io/URIKAI/`
-
-7. シークレットウィンドウでそのURLを開き、ポリシーが表示されることを確認
-8. [Play Console](https://play.google.com/console) → アプリ → **プライバシーポリシー** にそのURLを貼って保存
-
----
-
-## あとから文面を直すとき
-
-1. `docs/index.html`（と必要なら `store/PRIVACY_POLICY.md`）を編集
-2. `git add` → `commit` → `git push`
-3. 数十秒〜数分で Pages が更新される
-
----
-
-## 別案: Notion
-
-GitHub が難しい場合は Notion 公開でも可（以前の手順）。ただしこのプロジェクトは GitHub Pages を推奨。
+1. `docs/index.html` を編集（必要なら `store/PRIVACY_POLICY.md` も）
+2. `git add` → `git commit` → `git push`
+3. 数十秒〜数分で Pages が更新されます
