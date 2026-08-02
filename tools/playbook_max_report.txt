@@ -1,0 +1,56 @@
+改善プレイブック max  lookback=5s  min_dwell=5s  lag=1s  cd=1s
+現金放置: Y10,480
+TF / MR / MAX=max(TF,MR,現金)  ※約定後は min_dwell 秒は再提出不可
+
+id   tier     shape                   TF      MR     MAX win  cash%  instrument
+----------------------------------------------------------------------------------------------------
+b01  STANDARD BUBBLE               9,788   9,367  10,480 CASH 100.0%  日経平均
+b02  STANDARD INVERSE_V           10,122   8,871  10,480 CASH 100.0%  ナスダック
+b03  STANDARD BUBBLE               9,409  10,304  10,480 CASH 100.0%  ビットコイン
+b04  STANDARD GRIND_UP             9,130  10,795  10,795 MR   97.1%  ナスダック
+b05  STANDARD BUBBLE               9,041   9,703  10,480 CASH 100.0%  日経平均
+b06  STANDARD INVERSE_V            9,571   8,970  10,480 CASH 100.0%  GameStop
+b07  STANDARD GRIND_DOWN           8,949  10,781  10,781 MR   97.2%  上海総合
+b08  STANDARD BUBBLE               9,905   9,540  10,480 CASH 100.0%  S&P500
+b09  STANDARD GRIND_UP            10,034   9,756  10,480 CASH 100.0%  テスラ
+b10  STANDARD GRIND_DOWN           9,755   9,641  10,480 CASH 100.0%  ナスダック
+e01  EXTREME  N_RALLY              8,845   4,839  10,480 CASH 100.0%  GameStop
+e02  EXTREME  N_RALLY              4,360  13,187  13,187 MR   79.5%  EURO STOXX 50
+e03  EXTREME  GRIND_UP             9,764   4,761  10,480 CASH 100.0%  日経平均
+e04  EXTREME  LATE_SPIKE          17,564  10,810  17,564 TF   59.7%  S&P500
+e05  EXTREME  EARLY_SHOCK         11,315   5,211  11,315 TF   92.6%  WTI原油
+e06  EXTREME  V_RECOVER           16,074  11,120  16,074 TF   65.2%  S&P500
+e07  EXTREME  V_RECOVER           11,024  16,108  16,108 MR   65.1%  FTSE100
+e08  EXTREME  BUBBLE              10,080   4,686  10,480 CASH 100.0%  ナスダック
+e09  EXTREME  INVERSE_V            4,286  12,003  12,003 MR   87.3%  GameStop
+e10  EXTREME  W_DOUBLE            14,248  10,126  14,248 TF   73.6%  ダウ平均
+e11  EXTREME  BUBBLE               7,295   9,125  10,480 CASH 100.0%  日経平均
+e12  EXTREME  INVERSE_V            9,921   6,137  10,480 CASH 100.0%  ナスダック
+e13  EXTREME  GRIND_UP            20,097  10,602  20,097 TF   52.1%  ナスダック
+e14  EXTREME  BUBBLE              22,990   6,022  22,990 TF   45.6%  ビットコイン
+e15  EXTREME  GRIND_UP            22,458  11,850  22,458 TF   46.7%  GameStop
+v01  STANDARD V_RECOVER            9,966  11,236  11,236 MR   93.3%  日経平均
+v02  STANDARD V_RECOVER            9,907  11,432  11,432 MR   91.7%  S&P500
+v03  STANDARD W_DOUBLE            11,463  10,664  11,463 TF   91.4%  ビットコイン
+v04  STANDARD EARLY_SHOCK         10,966  11,969  11,969 MR   87.6%  日経平均
+v05  STANDARD V_RECOVER            9,530  11,851  11,851 MR   88.4%  英ポンド/米ドル
+v06  STANDARD V_RECOVER           10,441  11,292  11,292 MR   92.8%  S&P500
+v07  STANDARD W_DOUBLE            11,653   9,951  11,653 TF   89.9%  上海総合
+v08  STANDARD EARLY_SHOCK         11,142  11,829  11,829 MR   88.6%  WTI原油
+v09  STANDARD EARLY_SHOCK         11,169  12,000  12,000 MR   87.3%  ダウ平均
+v10  STANDARD LATE_SPIKE           9,527  10,979  10,979 MR   95.5%  ナスダック
+z01  STANDARD RANGE                8,951  12,127  12,127 MR   86.4%  上海総合
+z02  STANDARD RANGE                9,036  11,483  11,483 MR   91.3%  日経平均
+z03  STANDARD INV_N                9,634  10,571  10,571 MR   99.1%  S&P500
+z04  STANDARD RANGE               10,630  10,506  10,630 TF   98.6%  S&P500
+z05  STANDARD N_RALLY              9,658  10,499  10,499 MR   99.8%  GameStop
+z06  STANDARD RANGE                9,303  11,229  11,229 MR   93.3%  英ポンド/米ドル
+z07  STANDARD INV_N               12,039   8,543  12,039 TF   87.0%  ナスダック
+z08  STANDARD RANGE                9,316  11,372  11,372 MR   92.2%  米ドル/円
+z09  STANDARD N_RALLY              9,927  10,224  10,480 CASH 100.0%  EURO STOXX 50
+z10  STANDARD RANGE                9,577  10,929  10,929 MR   95.9%  S&P500
+----------------------------------------------------------------------------------------------------
+全体 mean  TF=10,886  MR=10,111  MAX=12,243
+STANDARD mean  TF=9,985  MR=10,614  MAX=11,083
+EXTREME  mean  TF=12,688  MR=9,106  MAX=14,563
+勝者カウント: TF=11  MR=20  CASH=14  (n=45)

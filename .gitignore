@@ -1,0 +1,27 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+/app/build
+/captures
+.externalNativeBuild
+.cxx
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Play upload signing (never commit secrets / keystores)
+keystore.properties
+*.jks
+*.jks.old
+*.keystore
+urikai-upload.jks
+
+# Cursor chat recovery artifacts (local only)
+_cursor_chat_recovery_backup/
+_restore_cursor_chat.py
+_restore_cursor_chat.bat
+_watch_and_restore_chat.py

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- LCD風: 枠＋ステップチャート＋現在点。セーフゾーン内に収める。 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- 外枠 -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M28,28h52v52h-52z"
+        android:strokeWidth="3"
+        android:strokeColor="#1F241A" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M32,32h44v44h-44z"
+        android:strokeWidth="1.5"
+        android:strokeColor="#1F241A" />
+    <!-- ステップ折れ線（V字→戻り） -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M36,48 L44,48 L44,62 L52,62 L52,40 L60,40 L60,52 L68,52 L68,44 L72,44"
+        android:strokeWidth="3"
+        android:strokeColor="#1F241A"
+        android:strokeLineCap="square"
+        android:strokeLineJoin="miter" />
+    <!-- 現在点 ■ -->
+    <path
+        android:fillColor="#1F241A"
+        android:pathData="M69,41h6v6h-6z" />
+</vector>

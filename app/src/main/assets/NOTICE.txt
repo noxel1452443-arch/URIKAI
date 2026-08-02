@@ -1,0 +1,19 @@
+URIKAI third-party notices
+==========================
+
+DotGothic16
+-----------
+Copyright 2020 The DotGothic16 Project Authors
+(https://github.com/fontworks-fonts/DotGothic16)
+
+Licensed under the SIL Open Font License, Version 1.1.
+Full license text: assets/OFL.txt
+Also see: http://scripts.sil.org/OFL
+
+Sound effects (res/raw/se_*.wav)
+--------------------------------
+Original WAV assets created for URIKAI. All rights reserved by the URIKAI project.
+
+Background music (res/raw/bgm_*.ogg)
+------------------------------------
+Original BGM tracks created for URIKAI. All rights reserved by the URIKAI project.
