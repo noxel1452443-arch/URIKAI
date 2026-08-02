@@ -1,12 +1,6 @@
 package com.urikai.app.game
 
-import androidx.compose.runtime.Composable
-import com.urikai.app.ui.theme.LocalDisplayLanguage
-
 object UiStrings {
-
-    @Composable
-    fun lang(): DisplayLanguage = LocalDisplayLanguage.current
 
     fun buy(lang: DisplayLanguage): String = when (lang) {
         DisplayLanguage.EN -> "BUY"
@@ -83,21 +77,6 @@ object UiStrings {
         return when (lang) {
             DisplayLanguage.EN -> "${tradeLabel(lang)} $sign¥$amount"
             DisplayLanguage.JP -> "${tradeLabel(lang)}　$sign¥$amount"
-        }
-    }
-
-    /** セッション通算損益（最終資産 − 初期資産）。リザルトの金額ヒーロー。 */
-    fun pnlLabel(lang: DisplayLanguage): String = when (lang) {
-        DisplayLanguage.EN -> "P/L"
-        DisplayLanguage.JP -> "損益"
-    }
-
-    fun formatSessionPnl(netPnl: Int, lang: DisplayLanguage): String {
-        val sign = if (netPnl >= 0) "+" else "−"
-        val amount = "%,d".format(kotlin.math.abs(netPnl))
-        return when (lang) {
-            DisplayLanguage.EN -> "${pnlLabel(lang)}  $sign¥$amount"
-            DisplayLanguage.JP -> "${pnlLabel(lang)}　$sign¥$amount"
         }
     }
 

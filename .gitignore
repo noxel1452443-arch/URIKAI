@@ -25,3 +25,7 @@ _cursor_chat_recovery_backup/
 _restore_cursor_chat.py
 _restore_cursor_chat.bat
 _watch_and_restore_chat.py
+
+# Regenerated simulation outputs under tools/
+tools/*_report.txt
+tools/star_asset_thresholds.*

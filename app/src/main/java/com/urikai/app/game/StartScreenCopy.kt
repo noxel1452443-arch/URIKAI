@@ -28,9 +28,9 @@ object StartScreenCopy {
         }
     }
 
-    fun adviceCount(): Int = ADVICE_JP.size
+    private fun adviceCount(): Int = ADVICE_JP.size
 
-    fun tipCount(): Int = TIPS_JP.size
+    private fun tipCount(): Int = TIPS_JP.size
 
     private fun advice(lang: DisplayLanguage, index: Int): String {
         val list = if (lang == DisplayLanguage.EN) ADVICE_EN else ADVICE_JP

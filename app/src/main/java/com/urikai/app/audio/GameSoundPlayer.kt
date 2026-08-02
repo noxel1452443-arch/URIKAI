@@ -70,9 +70,6 @@ class GameSoundPlayer(context: Context) {
     /** 決定（大きなボタン・画面進行） */
     fun playUiConfirm() = play(uiConfirmId, rate = 1f, volume = 0.72f)
 
-    @Deprecated("Use playUiSelect / playUiConfirm", ReplaceWith("playUiSelect()"))
-    fun playUiClick() = playUiSelect()
-
     fun playCountdown(digit: Int) {
         val rate = (0.82f + (6 - digit.coerceIn(1, 5)) * 0.09f).coerceIn(0.75f, 1.25f)
         play(countdownId, rate = rate, volume = 0.72f)

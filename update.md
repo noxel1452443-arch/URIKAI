@@ -1676,3 +1676,20 @@ v01 / z01 / b01 の試遊時、他27本が混ざってパイロットプレイ�
 
 ---
 
+## 2026-08-02 — ドキュメント再構成と死コード整理（挙動不変）
+
+### 対応
+- `DESIGN.md` / `readme.md` / `goal.md` を現行実装に合わせて再構成（化石仕様・議論全文を削除）
+- 未使用削除: `StageAnchor.kt`、CONFIG死プレビュー、`ScanlinePreviewCanvas`、未参照文言／API、`store/privacy.html`、tools のレポート出力
+- `SyncRating` を `ShareTextBuilder.kt` から分離（同パッケージ・挙動同一）
+- `VisibleWindow` を窓固定＋TIMEパルス API に縮小
+- `DEVICE_CHECKLIST` に LIFE／終盤項目を追加
+
+### 触ったファイル
+- `DESIGN.md`, `readme.md`, `goal.md`, `DEVICE_CHECKLIST.md`, `update.md`, `.gitignore`
+- `SyncRating.kt`（新規）, `ShareTextBuilder.kt`, `VisibleWindow.kt`, `ConfigPreviews.kt`, `LcdBackdrop.kt`
+- `UiStrings.kt`, `FillQuality.kt`, `GameSoundPlayer.kt`, `GameViewModel.kt`, `StartScreenCopy.kt`
+- 削除: `StageAnchor.kt`, `store/privacy.html`, `tools/*_report.txt`, `tools/star_asset_thresholds.*`
+
+---
+

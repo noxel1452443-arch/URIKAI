@@ -7,11 +7,8 @@ package com.urikai.app.game
 object VisibleWindow {
 
     const val AT_START_SEC = 20f
-    const val STAGE_A_SEC = AT_START_SEC
 
     fun targetSeconds(elapsedSec: Float): Float = AT_START_SEC
-
-    fun targetSecondsForSecond(second: Int): Float = AT_START_SEC
 
     fun timePulsePeak(second: Int, finishing: Boolean): Float {
         if (finishing) return 1.28f

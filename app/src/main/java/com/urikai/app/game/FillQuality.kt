@@ -56,11 +56,6 @@ object FillEvaluator {
             else -> FillQuality.OK
         }
     }
-
-    fun isPositive(quality: FillQuality): Boolean =
-        quality == FillQuality.FANTASTIC ||
-            quality == FillQuality.PERFECT ||
-            quality == FillQuality.GREAT
 }
 
 /** 判定スタンプの表示時間。FANTASTIC は特に長く。 */

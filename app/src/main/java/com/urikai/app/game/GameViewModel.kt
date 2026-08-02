@@ -1549,7 +1549,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         const val FRAME_DELAY_MS = 16L
         const val LABEL_VISIBLE_MS = 2_200L
         const val MAX_START_OFFSET_INCLUSIVE = 10
-        const val VISIBLE_WINDOW_SECONDS = VisibleWindow.AT_START_SEC
         const val Y_ZOOM_ANIM_MS = 200
         const val NOW_X_FRACTION = 0.78f
         const val Y_PAD_RATIO = 0.10f
