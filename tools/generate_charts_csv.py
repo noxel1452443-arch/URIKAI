@@ -2,11 +2,11 @@
 content/ の編集用CSVから、アプリ用 charts.csv を生成する。
 
 正本（編集する場所）:
-  content/stages_meta.csv   … 表示名・史実コメント・ヒント等（1ステージ1行）
+  content/stages_meta.csv   … 架空銘柄・見出し・出来事・フレーバー・コツ等（1ステージ1行）
   content/keyframes.csv     … 形状の制御点（stage_id, second, price_ratio）
 
 成果物（手編集しない）:
-  app/src/main/assets/charts.csv  … ランタイム用・70秒展開済み
+  shared/src/commonMain/composeResources/files/charts.csv  … ランタイム用・70秒展開済み
 
 使い方:
   py -3 tools/generate_charts_csv.py
@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CONTENT = ROOT / "content"
 META_PATH = CONTENT / "stages_meta.csv"
 KF_PATH = CONTENT / "keyframes.csv"
-OUT_PATH = ROOT / "app" / "src" / "main" / "assets" / "charts.csv"
+OUT_PATH = ROOT / "shared" / "src" / "commonMain" / "composeResources" / "files" / "charts.csv"
 
 POINT_COUNT = 70
 INITIAL_ASSET = 10_000
@@ -90,6 +90,7 @@ class StageDef:
     market_kind: str
     instrument_name: str
     instrument_name_en: str
+    base_price: int
     calendar_start: str
     calendar_start_en: str
     calendar_end: str
@@ -102,8 +103,8 @@ class StageDef:
     macro_shape: str
     pivot_timing: str
     trick: str
-    hint_text: str
-    hint_text_en: str
+    flavor_text: str
+    flavor_text_en: str
     anchor_label: str
     anchor_label_en: str
     history_comment: str
@@ -164,23 +165,35 @@ def normalize_calendar_range(start: str, end: str, stage_id: str) -> tuple[str, 
     return cal_start, cal_end
 
 
+ANCHOR_WHEN_MAX_LEN = 14
+BASE_PRICE_MIN = 100
+BASE_PRICE_MAX = 99_999
+
+
+def normalize_base_price(raw: str | None, stage_id: str) -> int:
+    """開始時点の見せ株価（円）。売買計算は内部の ¥1,000 基準のまま。"""
+    try:
+        price = int((raw or "").strip())
+    except ValueError as exc:
+        raise ValueError(f"{stage_id}: base_price must be an integer, got {raw!r}") from exc
+    if not (BASE_PRICE_MIN <= price <= BASE_PRICE_MAX):
+        raise ValueError(
+            f"{stage_id}: base_price must be {BASE_PRICE_MIN}..{BASE_PRICE_MAX}, got {price}"
+        )
+    return price
+
+
 def normalize_anchor_when(raw: str, stage_id: str) -> str:
-    """peek 用: 特定日1つ（範囲・月のみ不可）。"""
+    """peek 用: 転換点の架空の出来事（チャート上の吹き出し1行目）。"""
     when = raw.strip()
     if not when:
         raise ValueError(f"{stage_id}: anchor_when is required")
-    if "〜" in when or "～" in when or "−" in when or "~" in when.lower():
+    if len(when) > ANCHOR_WHEN_MAX_LEN:
         raise ValueError(
-            f"{stage_id}: anchor_when must be a single day (no range): {when!r}"
+            f"{stage_id}: anchor_when must be <= {ANCHOR_WHEN_MAX_LEN} chars: {when!r}"
         )
-    if re.fullmatch(r"\d{4}年\d{1,2}月", when):
-        raise ValueError(
-            f"{stage_id}: anchor_when must include day, not month-only: {when!r}"
-        )
-    if not re.search(r"\d{1,2}日", when):
-        raise ValueError(
-            f"{stage_id}: anchor_when must include day (e.g. 2020年3月19日): {when!r}"
-        )
+    if re.search(r"\d{4}年", when):
+        raise ValueError(f"{stage_id}: anchor_when must not be a real date: {when!r}")
     return when
 
 
@@ -254,6 +267,8 @@ def load_stages_from_content() -> list[StageDef]:
             raise ValueError(f"{sid}: duplicate second in keyframes")
         if not row["anchor_label"].strip():
             raise ValueError(f"{sid}: anchor_label is required")
+        if not row.get("flavor_text", "").strip():
+            raise ValueError(f"{sid}: flavor_text is required")
         en_fields = {
             "brand_name_en": row.get("brand_name_en", "").strip(),
             "period_en": row.get("period_en", "").strip(),
@@ -261,7 +276,7 @@ def load_stages_from_content() -> list[StageDef]:
             "calendar_start_en": row.get("calendar_start_en", "").strip(),
             "calendar_end_en": row.get("calendar_end_en", "").strip(),
             "anchor_when_en": row.get("anchor_when_en", "").strip(),
-            "hint_text_en": row.get("hint_text_en", "").strip(),
+            "flavor_text_en": row.get("flavor_text_en", "").strip(),
             "anchor_label_en": row.get("anchor_label_en", "").strip(),
             "history_comment_en": row.get("history_comment_en", "").strip(),
         }
@@ -275,6 +290,7 @@ def load_stages_from_content() -> list[StageDef]:
             row["calendar_start"], row["calendar_end"], sid
         )
         anchor_when = normalize_anchor_when(row["anchor_when"], sid)
+        base_price = normalize_base_price(row.get("base_price"), sid)
         try:
             band_start = int(row["anchor_band_start"])
             band_end = int(row["anchor_band_end"])
@@ -296,6 +312,7 @@ def load_stages_from_content() -> list[StageDef]:
                 market_kind=market_kind,
                 instrument_name=instrument_name,
                 instrument_name_en=en_fields["instrument_name_en"],
+                base_price=base_price,
                 calendar_start=calendar_start,
                 calendar_start_en=en_fields["calendar_start_en"],
                 calendar_end=calendar_end,
@@ -308,8 +325,8 @@ def load_stages_from_content() -> list[StageDef]:
                 macro_shape=macro_shape,
                 pivot_timing=pivot_timing,
                 trick=trick,
-                hint_text=row["hint_text"].strip(),
-                hint_text_en=en_fields["hint_text_en"],
+                flavor_text=row["flavor_text"].strip(),
+                flavor_text_en=en_fields["flavor_text_en"],
                 anchor_label=row["anchor_label"].strip(),
                 anchor_label_en=en_fields["anchor_label_en"],
                 history_comment=row["history_comment"].strip(),
@@ -319,6 +336,15 @@ def load_stages_from_content() -> list[StageDef]:
                 keyframes=kfs,
             )
         )
+
+    price_by_instrument: dict[str, tuple[str, int]] = {}
+    for s in stages:
+        prev = price_by_instrument.setdefault(s.instrument_name, (s.stage_id, s.base_price))
+        if prev[1] != s.base_price:
+            raise ValueError(
+                f"{s.stage_id}: base_price {s.base_price} differs from {prev[0]} ({prev[1]}) "
+                f"for the same instrument {s.instrument_name!r}"
+            )
 
     orphan = set(kf_by_stage) - seen
     if orphan:
@@ -548,14 +574,15 @@ def main() -> None:
                     stage.anchor_band_start,
                     stage.anchor_band_end,
                     stage.scenario_type,
-                    stage.hint_text,
-                    stage.hint_text_en,
+                    stage.flavor_text,
+                    stage.flavor_text_en,
                     stage.history_comment,
                     stage.history_comment_en,
                     stage.anchor_label,
                     stage.anchor_label_en,
                     stage.pivot_timing,
                     stage.macro_shape,
+                    stage.base_price,
                     sec,
                     f"{p:.2f}",
                 ]
@@ -583,14 +610,15 @@ def main() -> None:
                 "anchor_band_start",
                 "anchor_band_end",
                 "scenario_type",
-                "hint_text",
-                "hint_text_en",
+                "flavor_text",
+                "flavor_text_en",
                 "history_comment",
                 "history_comment_en",
                 "anchor_label",
                 "anchor_label_en",
                 "pivot_timing",
                 "macro_shape",
+                "base_price",
                 "second",
                 "price_ratio",
             ]

@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
 ROOT = Path(__file__).resolve().parents[1]
-CHARTS = ROOT / "app" / "src" / "main" / "assets" / "charts.csv"
+CHARTS = ROOT / "shared" / "src" / "commonMain" / "composeResources" / "files" / "charts.csv"
 META = ROOT / "content" / "stages_meta.csv"
 REPORT_PB = ROOT / "tools" / "playbook_max_report.txt"
 OUT_PNG_PB = ROOT / "content" / "chart_overview_playbooks.png"

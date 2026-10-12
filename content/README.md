@@ -1,27 +1,27 @@
 # チャートコンテンツの編集ガイド
 
-アプリが読むのは `app/src/main/assets/charts.csv` ですが、**手で編集するのはこの `content/` 配下だけ**にしてください。
+アプリが読むのは `shared/src/commonMain/composeResources/files/charts.csv` ですが、**手で編集するのはこの `content/` 配下だけ**にしてください。
 
 ## ファイル構成
 
 | ファイル | 役割 | 行数の目安 |
 | --- | --- | --- |
-| `content/stages_meta.csv` | 表示名・期間・ヒント・史実コメント・乱数シード | **1ステージ = 1行** |
+| `content/stages_meta.csv` | 架空銘柄・見出し・出来事・ヒント・波のコツ・乱数シード | **1ステージ = 1行** |
 | `content/keyframes.csv` | チャート形状の制御点 | 1ステージあたり数〜十数行 |
-| `app/src/main/assets/charts.csv` | 実行用（70秒に展開済み） | **生成物・直接編集しない** |
+| `shared/src/commonMain/composeResources/files/charts.csv` | 実行用（70秒に展開済み） | **生成物・直接編集しない** |
 
 ## データの流れ
 
 ```
 content/stages_meta.csv  ─┐
-                          ├─► py -3 tools/generate_charts_csv.py ─► assets/charts.csv ─► アプリ
+                          ├─► py -3 tools/generate_charts_csv.py ─► files/charts.csv ─► アプリ
 content/keyframes.csv    ─┘
 ```
 
-## 表示名や史実コメントだけ変えたい
+## 表示名やコメントだけ変えたい
 
 1. Excel / VS Code で `content/stages_meta.csv` を開く
-2. `brand_name` / `period` / `hint_text` / `history_comment` を編集
+2. `brand_name` / `instrument_name` / `anchor_when` / `flavor_text` / `history_comment` を編集
 3. ターミナルで:
 
 ```bat
@@ -88,14 +88,20 @@ second 35 → 92   ← 1秒で -16（大暴落）
 | 列 | 説明 |
 | --- | --- |
 | `stage_id` | 内部ID（図鑑の解放キーにも使用） |
-| `brand_name` | クリア後に出る正式名称 |
-| `period` | 時期表示（例: 2020年3月） |
+| `brand_name` | クリア後に出る見出し（架空ニュース） |
+| `instrument_name` | 架空の銘柄名（同じ銘柄を複数ステージで使い回してよい） |
+| `base_price` | 開始時点の株価（円、100〜99,999の整数）。ゲーム中の株価表示に使う（売買の計算には影響しない）。同じ銘柄は同じ値にする（違うと生成時エラー） |
+| `period` / `calendar_start` / `calendar_end` | ジャンル（例: 食品）。3列とも同じ値にする。リザルト・図鑑で「銘柄名（ジャンル）」と表示 |
+| `anchor_when` | 転換点の架空の出来事（14文字以内。実在の日付は不可）。リザルトのチャートと図鑑詳細に表示。タイトルなしでも分かるよう「誰が・何をした」を1文で書く。良い知らせは上昇の起点、悪い知らせは下落の起点に置く |
+| `anchor_label` | 値動きの説明（現在は画面に表示していない） |
+| `anchor_band_start` / `anchor_band_end` | 出来事の秒（charts.csv 絶対秒）。実際の転換点（底・天井・急変の始まり）に合わせ、通常は同じ値にする |
+| `market_kind` | 内部タグ（UI非表示）。通常は `STOCK`、コインは `CRYPTO`、通貨は `FX` |
 | `scenario_type` | 内部タグ: `DROP_REBOUND` / `WHIPSAW` / `RUNAWAY`（ノイズ強度用。UI非表示） |
 | `macro_shape` | マクロ形状タグ（keyframes 生成用。UI非表示） |
 | `pivot_timing` | 転換タイミング: `EARLY` / `MID` / `LATE` |
 | `trick` | だまし（任意）: `BEAR_TRAP` / `BULL_TRAP` / `DEAD_CAT` / `SECOND_WAVE` または空 |
-| `hint_text` | 開始3秒のヒント |
-| `history_comment` | クリア後・図鑑の史実1行 |
+| `flavor_text` | 図鑑詳細の出来事の掘り下げ（2〜3文）。イラストは `app/src/main/res/drawable/stage_<stage_id>.png` に置くと図鑑に表示（無ければシルエット） |
+| `history_comment` | 物語の締めのひとこと（現在は画面に表示していない予備テキスト） |
 | `seed` | 微細ノイズの乱数シード |
 
 ## 注意
@@ -103,7 +109,7 @@ second 35 → 92   ← 1秒で -16（大暴落）
 - CSVは **UTF-8（Excelなら UTF-8 BOM 付きで保存可）**
 - コメント内にカンマがある場合は `"..."` で囲む
 - `stage_id` を変えると、既存ユーザーの図鑑解放状態はそのIDでは引き継がれない
-- 生成スクリプトは内容を検証し、エラー時は `assets/charts.csv` を更新しない
+- 生成スクリプトは内容を検証し、エラー時は `files/charts.csv` を更新しない
 
 ## macro_shape タグ一覧（30本配分用）
 
@@ -122,8 +128,3 @@ second 35 → 92   ← 1秒で -16（大暴落）
 | `GRIND_DOWN` | 漸進下落 | 2 |
 
 `scenario_type` は `macro_shape` と対応関係が決まっている（不一致は生成時エラー）。
-
-## 将来検討: 史実アンカー（未実装）
-
-クリア後に、チャート上の転換点と史実年月・出来事を照合できる仕組み。  
-候補: `content/timeline_anchors.csv`（`stage_id`, `game_second`, `calendar_label`, `event_label`）を追加し、**図鑑詳細 or RESULT peek のみ**で細い目盛り＋タップで1行表示。プレイ中は非表示。

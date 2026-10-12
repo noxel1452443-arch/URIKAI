@@ -6,13 +6,14 @@ import android.media.MediaPlayer
 import android.os.Handler
 import android.os.Looper
 import com.urikai.app.R
+import com.urikai.app.platform.BgmController
 import kotlin.random.Random
 
 /**
  * アンビエントBGM。プレイ中以外・BGM音量ON・フォアグラウンド時のみ。
  * 曲末フェード → 約10秒ギャップ → ランダム次曲（直近の連続回避）。
  */
-class BgmPlayer(context: Context) {
+class BgmPlayer(context: Context) : BgmController {
 
     private val appContext = context.applicationContext
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -69,7 +70,7 @@ class BgmPlayer(context: Context) {
     private var currentVolume: Float = DEFAULT_VOLUME
     private var resumeScheduled: Boolean = false
 
-    fun setTargetVolume(volume: Float) {
+    override fun setTargetVolume(volume: Float) {
         mainHandler.post {
             targetVolume = volume.coerceIn(0f, 1f)
             fadeStep = (targetVolume / FADE_STEPS).coerceAtLeast(0.001f)
@@ -85,21 +86,21 @@ class BgmPlayer(context: Context) {
         }
     }
 
-    fun setForeground(isForeground: Boolean) {
+    override fun setForeground(isForeground: Boolean) {
         mainHandler.post {
             foreground = isForeground
             reconcile()
         }
     }
 
-    fun setAmbientAllowed(allowed: Boolean) {
+    override fun setAmbientAllowed(allowed: Boolean) {
         mainHandler.post {
             ambientAllowed = allowed
             reconcile()
         }
     }
 
-    fun release() {
+    override fun release() {
         mainHandler.post {
             cancelScheduled()
             releasePlayer()

@@ -3,7 +3,7 @@
 
   py -3 tools/preview_charts.py
 
-入力: app/src/main/assets/charts.csv
+入力: shared/src/commonMain/composeResources/files/charts.csv
 出力: content/chart_overview.png
 """
 from __future__ import annotations
@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
 ROOT = Path(__file__).resolve().parents[1]
-CHARTS = ROOT / "app" / "src" / "main" / "assets" / "charts.csv"
+CHARTS = ROOT / "shared" / "src" / "commonMain" / "composeResources" / "files" / "charts.csv"
 META = ROOT / "content" / "stages_meta.csv"
 OUT = ROOT / "content" / "chart_overview.png"
 

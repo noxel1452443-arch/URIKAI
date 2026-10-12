@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-CHARTS = ROOT / "app" / "src" / "main" / "assets" / "charts.csv"
+CHARTS = ROOT / "shared" / "src" / "commonMain" / "composeResources" / "files" / "charts.csv"
 META = ROOT / "content" / "stages_meta.csv"
 
 INITIAL_ASSET = 10_000
