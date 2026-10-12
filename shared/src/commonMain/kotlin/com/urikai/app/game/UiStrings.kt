@@ -462,12 +462,12 @@ object UiStrings {
         DisplayLanguage.JP -> when (step) {
             0 -> "URIKAIへようこそ！\nこのゲームは、1分間のチャートを見ながら、1つのボタンで買い・売りをするタイミングゲームです。\n安い所で買って、高い所で売ると、お金が増えるよ。"
             1 -> "ボタンを押してから、注文されるまでには1秒かかります。\n山と谷をよく見て、いちばんいいタイミングをねらってみよう！"
-            else -> "買った時より安く売ると、左上のLIFEが１つ減ります。すべてなくなるとRETIREになってしまうので気を付けよう！"
+            else -> "買った時より安く売ると、LIFEが１つ減ります。すべてなくなるとRETIREになってしまうので気を付けよう！"
         }
         DisplayLanguage.EN -> when (step) {
             0 -> "Welcome to URIKAI!\nIt's a 1-minute timing game: one button to buy and sell on a live chart.\nBuy low, sell high, and your money grows."
             1 -> "After you press the button, it takes 1 second for the order to fill.\nWatch the peaks and valleys, and aim for the best moment!"
-            else -> "Sell cheaper than you bought and you lose one LIFE (top-left). Lose them all and it's RETIRE — so watch out!"
+            else -> "Sell cheaper than you bought and you lose one LIFE. Lose them all and it's RETIRE — so watch out!"
         }
     }
 
@@ -488,29 +488,17 @@ object UiStrings {
 
     fun resultTutorialStep(step: Int, lang: DisplayLanguage): String = when (lang) {
         DisplayLanguage.JP -> when (step) {
-            0 -> "これで1ゲームが終了です！\nどれだけ稼げたか確認してみましょう。"
-            1 -> "今回、残高が何％増えた（減った）かと★です。\nタップすると、この試合の目標と★の内訳が見られます。"
-            2 -> "口座残高です。毎回、残高の全額で勝負します。\n横の数字は今回増えた（減った）金額です。"
-            3 -> "勝つほど次の勝負の元手が大きくなり、残高は複利で増えていきます。\n残高が¥5,000を下回ると破産です。"
+            0 -> "ゲームが終わると、成績が出ます。\n「＋4.9% ★★☆☆☆」のような大きな表示は、今回の勝負で残高が何％増えた（減った）かと、その評価です。\nタップすると★ごとの目安が見られます。"
+            1 -> "「口座残高」は勝負のあとの残高、となりの＋−の金額は今回増えた（減った）分です。\n口座残高をタップすると、これまでの収益TOP10が見られます。"
+            2 -> "毎回、残高の全額で勝負します。勝つほど次の元手が大きくなり、残高は複利で増えていきます。\n残高が¥5,000を下回ると破産です。"
             else -> "注文は1秒遅れて届きます。先の波を想像して押すほど、うまくいきやすい。\n何度でも挑戦して、自分のタイミングを見つけてね。"
         }
         DisplayLanguage.EN -> when (step) {
-            0 -> "That's one full game!\nLet's check how much you made."
-            1 -> "How much your balance grew (or shrank) this run, and your ★.\nTap for this run's target and ★ breakdown."
-            2 -> "Your account balance. Every run bets the whole balance.\nThe signed amount beside it is what you gained or lost."
-            3 -> "Win and your next stake grows — your balance compounds.\nFall below ¥5,000 and you go bankrupt."
+            0 -> "When a game ends, your result appears.\nThe big line like \"+4.9% ★★☆☆☆\" shows how much your balance grew (or shrank) this run, and your rating.\nTap it to see what each ★ takes."
+            1 -> "BALANCE is your balance after the run; the signed amount next to it is what you gained or lost.\nTap the balance to see your top 10 returns."
+            2 -> "Every run bets the whole balance. Win and your next stake grows — your balance compounds.\nFall below ¥5,000 and you go bankrupt."
             else -> "Orders arrive 1 second late. The more you read ahead, the better you'll do.\nPlay again and find your own timing."
         }
-    }
-
-    fun resultTutorialNext(lang: DisplayLanguage): String = when (lang) {
-        DisplayLanguage.EN -> "NEXT"
-        DisplayLanguage.JP -> "つぎへ"
-    }
-
-    fun resultTutorialOk(lang: DisplayLanguage): String = when (lang) {
-        DisplayLanguage.EN -> "GOT IT"
-        DisplayLanguage.JP -> "わかった"
     }
 
     fun tutorialGuideButton(lang: DisplayLanguage): String = when (lang) {
@@ -535,7 +523,7 @@ object UiStrings {
 
     fun tutorialGuidePageCount(kind: TutorialGuideKind): Int = when (kind) {
         TutorialGuideKind.FIRST_PLAY -> 3
-        TutorialGuideKind.RESULT -> 5
+        TutorialGuideKind.RESULT -> 4
     }
 
     fun tutorialGuidePage(

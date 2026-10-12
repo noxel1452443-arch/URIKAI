@@ -181,9 +181,6 @@ class GameViewModel(
     private val _showFirstPlayTutorial = MutableStateFlow(false)
     val showFirstPlayTutorial: StateFlow<Boolean> = _showFirstPlayTutorial.asStateFlow()
 
-    private val _showResultTutorial = MutableStateFlow(false)
-    val showResultTutorial: StateFlow<Boolean> = _showResultTutorial.asStateFlow()
-
     private val _showContentDisclaimer = MutableStateFlow(!settingsRepository.hasSeenContentDisclaimer())
     val showContentDisclaimer: StateFlow<Boolean> = _showContentDisclaimer.asStateFlow()
 
@@ -304,7 +301,6 @@ class GameViewModel(
                     claimResultPayout()
                 }
                 GameState.RESULT -> {
-                    if (_showResultTutorial.value) return
                     if (!_chartFrame.value.resultPayoutClaimed) {
                         soundPlayer.playUiConfirm()
                         claimResultPayout()
@@ -320,7 +316,7 @@ class GameViewModel(
     }
 
     fun openScrapbook() {
-        if (_showFirstPlayTutorial.value || _showResultTutorial.value) return
+        if (_showFirstPlayTutorial.value) return
         if (_chartFrame.value.retireLocked) return
         if (_uiState.value.gameState == GameState.PLAYING ||
             _uiState.value.gameState == GameState.FINISHING
@@ -337,7 +333,7 @@ class GameViewModel(
     }
 
     fun openOption() {
-        if (_showFirstPlayTutorial.value || _showResultTutorial.value) return
+        if (_showFirstPlayTutorial.value) return
         if (_chartFrame.value.retireLocked) return
         if (_uiState.value.gameState == GameState.PLAYING ||
             _uiState.value.gameState == GameState.FINISHING
@@ -379,9 +375,6 @@ class GameViewModel(
         if (_uiState.value.gameState != GameState.RESULT) return
         if (!_chartFrame.value.resultPayoutClaimed) return
         _resultIntroFinished.value = true
-        if (_showResultTutorial.value) return
-        if (settingsRepository.hasSeenResultTutorial()) return
-        _showResultTutorial.value = true
     }
 
     fun dismissRelicRewardToast() {
@@ -416,12 +409,6 @@ class GameViewModel(
     fun cueUiConfirm() = soundPlayer.playUiConfirm()
 
     fun cueUiSelect() = soundPlayer.playUiSelect()
-
-    fun dismissResultTutorial() {
-        if (!_showResultTutorial.value) return
-        settingsRepository.setResultTutorialSeen()
-        _showResultTutorial.value = false
-    }
 
     fun assetRankBoardForCurrentResult(): AssetRankBoard? {
         val result = _chartFrame.value.resultInfo ?: return null
@@ -1449,7 +1436,6 @@ class GameViewModel(
         _startSmallText.value = StartScreenCopy.randomSmallText(_displayLanguage.value)
         _uiState.value = GameUiState()
         _chartFrame.value = ChartFrame()
-        _showResultTutorial.value = false
         _resultIntroFinished.value = false
         _newlyPendingRelics.value = emptyList()
         stakeBalance = _balance.value

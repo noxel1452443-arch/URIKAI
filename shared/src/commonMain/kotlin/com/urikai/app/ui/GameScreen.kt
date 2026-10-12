@@ -158,7 +158,6 @@ fun GameScreen(
     claimedRelics: List<RelicId> = emptyList(),
     relicEffects: RelicEffects = RelicEffects(),
     showFirstPlayTutorial: Boolean = false,
-    showResultTutorial: Boolean = false,
     showContentDisclaimer: Boolean,
     chartsLoadError: String?,
     onDismissContentDisclaimer: () -> Unit,
@@ -185,7 +184,6 @@ fun GameScreen(
     relicStagePrefs: Map<RelicUpgradeGroup, RelicId> = emptyMap(),
     onDismissFirstPlayTutorial: () -> Unit = {},
     onResultIntroFinished: () -> Unit = {},
-    onDismissResultTutorial: () -> Unit = {},
     onRequestAssetRank: () -> com.urikai.app.data.AssetRankBoard? = { null },
     devRelicLab: Map<RelicId, Boolean>? = null,
     onEnableDevRelicLab: () -> Unit = {},
@@ -237,7 +235,6 @@ fun GameScreen(
             claimedRelics = claimedRelics,
             relicEffects = relicEffects,
             showFirstPlayTutorial = showFirstPlayTutorial,
-            showResultTutorial = showResultTutorial,
             showContentDisclaimer = showContentDisclaimer,
             chartsLoadError = chartsLoadError,
             onDismissContentDisclaimer = onDismissContentDisclaimer,
@@ -264,7 +261,6 @@ fun GameScreen(
             relicStagePrefs = relicStagePrefs,
             onDismissFirstPlayTutorial = onDismissFirstPlayTutorial,
             onResultIntroFinished = onResultIntroFinished,
-            onDismissResultTutorial = onDismissResultTutorial,
             onRequestAssetRank = onRequestAssetRank,
             devRelicLab = devRelicLab,
             onEnableDevRelicLab = onEnableDevRelicLab,
@@ -315,7 +311,6 @@ private fun GameScreenContent(
     claimedRelics: List<RelicId> = emptyList(),
     relicEffects: RelicEffects = RelicEffects(),
     showFirstPlayTutorial: Boolean = false,
-    showResultTutorial: Boolean = false,
     showContentDisclaimer: Boolean,
     chartsLoadError: String?,
     onDismissContentDisclaimer: () -> Unit,
@@ -342,7 +337,6 @@ private fun GameScreenContent(
     relicStagePrefs: Map<RelicUpgradeGroup, RelicId> = emptyMap(),
     onDismissFirstPlayTutorial: () -> Unit = {},
     onResultIntroFinished: () -> Unit = {},
-    onDismissResultTutorial: () -> Unit = {},
     onRequestAssetRank: () -> com.urikai.app.data.AssetRankBoard? = { null },
     devRelicLab: Map<RelicId, Boolean>? = null,
     onEnableDevRelicLab: () -> Unit = {},
@@ -424,7 +418,6 @@ private fun GameScreenContent(
             chartFrame.resultPayoutClaimed &&
             payoutAnimDone &&
             resultIntroDone &&
-            !showResultTutorial &&
             newlyPendingRelics.isNotEmpty()
     val startModalOpen =
         claimRelicTarget != null ||
@@ -438,7 +431,6 @@ private fun GameScreenContent(
             (!payoutAnimDone || !resultIntroDone || showRelicRewardToast)
     val modalNavLocked =
         showFirstPlayTutorial ||
-            showResultTutorial ||
             startModalOpen ||
             resultPresentationOpen
     LaunchedEffect(chartFrame.fillJudgmentUntilEpochMs, chartFrame.fillJudgmentQuality) {
@@ -777,12 +769,10 @@ private fun GameScreenContent(
                                             result = chartFrame.resultInfo,
                                             playIntro = !resultIntroDone,
                                             introDone = resultIntroDone,
-                                            showResultTutorial = showResultTutorial,
                                             onIntroFinished = {
                                                 resultIntroDone = true
                                                 onResultIntroFinished()
                                             },
-                                            onDismissResultTutorial = onDismissResultTutorial,
                                             onShare = onShare,
                                             onRequestAssetRank = onRequestAssetRank,
                                             onPanelIn = onResultPanelIn,
@@ -812,7 +802,7 @@ private fun GameScreenContent(
                 resultIntroDone = resultIntroDone,
                 blockStart = startModalOpen || showBankrupt || awayReport != null,
                 blockPlaying = showFirstPlayTutorial || chartFrame.retireLocked,
-                blockResult = showResultTutorial || showRelicRewardToast || showResultNews,
+                blockResult = showRelicRewardToast || showResultNews,
                 onClick = onPrimaryButtonClick,
                 onStartLongPress = { titleSecretInvert = true },
                 modifier = Modifier
@@ -1554,9 +1544,7 @@ private fun ResultOverlay(
     result: ResultInfo?,
     playIntro: Boolean,
     introDone: Boolean,
-    showResultTutorial: Boolean = false,
     onIntroFinished: () -> Unit,
-    onDismissResultTutorial: () -> Unit = {},
     onShare: () -> Unit,
     onRequestAssetRank: () -> AssetRankBoard? = { null },
     onPanelIn: () -> Unit = {},
@@ -1572,11 +1560,6 @@ private fun ResultOverlay(
     var showAssetRank by remember { mutableStateOf(false) }
     var assetRankBoard by remember { mutableStateOf<AssetRankBoard?>(null) }
     var showSyncBreakdown by remember { mutableStateOf(false) }
-    var resultTutStep by remember { mutableIntStateOf(0) }
-    val resultTutSteps = 5
-    LaunchedEffect(showResultTutorial) {
-        if (showResultTutorial) resultTutStep = 0
-    }
     val assetPressScale = remember { Animatable(1f) }
     val starCount = if (result.isRetired) {
         0
@@ -1738,19 +1721,6 @@ private fun ResultOverlay(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            if (showResultTutorial && introDone) {
-                ResultTutorialCard(
-                    step = resultTutStep,
-                    totalSteps = resultTutSteps,
-                    onNext = {
-                        if (resultTutStep < resultTutSteps - 1) {
-                            resultTutStep += 1
-                        } else {
-                            onDismissResultTutorial()
-                        }
-                    }
-                )
-            }
             Column(
                 modifier = Modifier
                     .fillMaxWidth(0.92f)
@@ -1796,7 +1766,7 @@ private fun ResultOverlay(
                 } else {
                     Modifier.uiClickable(
                         kind = UiSoundKind.SELECT,
-                        enabled = introDone && !showResultTutorial,
+                        enabled = introDone,
                         onClick = onOpenScrapbookDetail
                     )
                 }
@@ -1843,148 +1813,144 @@ private fun ResultOverlay(
             )
         }
         if (!result.isRetired) {
-            TutorialSpotlight(active = showResultTutorial && introDone && resultTutStep == 1) {
-                // 反転パネルは％＋★のみ（以前のパンチを復元）。縦を食わない一塊。
-                Box {
-                    LcdInvertedPanel(
-                        modifier = Modifier.uiClickable(
-                            kind = UiSoundKind.CONFIRM,
-                            enabled = introDone && !showResultTutorial,
-                            onClick = { showSyncBreakdown = true }
-                        )
-                    ) {
-                        Text(
-                            text = if (result.isGhostRun) {
+            // 反転パネルは％＋★のみ（以前のパンチを復元）。縦を食わない一塊。
+            Box {
+                LcdInvertedPanel(
+                    modifier = Modifier.uiClickable(
+                        kind = UiSoundKind.CONFIRM,
+                        enabled = introDone,
+                        onClick = { showSyncBreakdown = true }
+                    )
+                ) {
+                    Text(
+                        text = if (result.isGhostRun) {
+                            ratingSuffix
+                        } else {
+                            "%s  %s".fmt(
+                                UiStrings.formatSignedPercent(
+                                    SyncRating.returnPercent(animatedNotional.value.roundToInt())
+                                ),
                                 ratingSuffix
-                            } else {
-                                "%s  %s".fmt(
-                                    UiStrings.formatSignedPercent(
-                                        SyncRating.returnPercent(animatedNotional.value.roundToInt())
-                                    ),
-                                    ratingSuffix
-                                )
-                            },
-                            color = LcdInvertedText,
-                            fontSize = if (result.isGhostRun) 16.sp else 28.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = PixelFont,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                    if (result.isNewBest) {
-                        Text(
-                            text = UiStrings.bestStamp(lang),
-                            color = Ink,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = PixelFont,
-                            letterSpacing = 1.sp,
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .offset(x = 10.dp, y = (-10).dp)
-                                .alpha(bestStampAlpha.value)
-                                .graphicsLayer {
-                                    scaleX = bestStampScale.value
-                                    scaleY = bestStampScale.value
-                                    rotationZ = -12f
-                                }
-                                .background(LcdBackground)
-                                .lcdBorder(width = 2.dp)
-                                .padding(horizontal = 5.dp, vertical = 2.dp)
-                        )
-                    }
+                            )
+                        },
+                        color = LcdInvertedText,
+                        fontSize = if (result.isGhostRun) 16.sp else 28.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = PixelFont,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                if (result.isNewBest) {
+                    Text(
+                        text = UiStrings.bestStamp(lang),
+                        color = Ink,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = PixelFont,
+                        letterSpacing = 1.sp,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .offset(x = 10.dp, y = (-10).dp)
+                            .alpha(bestStampAlpha.value)
+                            .graphicsLayer {
+                                scaleX = bestStampScale.value
+                                scaleY = bestStampScale.value
+                                rotationZ = -12f
+                            }
+                            .background(LcdBackground)
+                            .lcdBorder(width = 2.dp)
+                            .padding(horizontal = 5.dp, vertical = 2.dp)
+                    )
                 }
             }
         }
-        TutorialSpotlight(active = showResultTutorial && introDone && resultTutStep == 2) {
-            // 資産は二重枠の一行。反転を重ねない
-            val chaseHint = remember(
-                result.finalAsset,
-                result.theoreticalMaxAsset,
-                result.isRetired,
-                result.priorBestAsset
-            ) {
-                ResultChaseHints.resolve(
-                    finalAsset = result.finalAsset,
-                    theoreticalMax = result.theoreticalMaxAsset,
-                    isRetired = result.isRetired,
-                    priorBestAsset = result.priorBestAsset,
-                )
-            }
-            val chaseText = when (val h = chaseHint) {
-                is ResultChaseHint.StarGap ->
-                    UiStrings.chaseHintStar(h.nextStars, h.yenLeft, lang)
-                is ResultChaseHint.BestGap ->
-                    UiStrings.chaseHintBest(h.yenLeft, lang)
-                null -> null
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(modifier = Modifier.weight(1f))
-                Box {
-                    Text(
-                        text = "${UiStrings.assetLabel(lang)}  ¥%,d".fmt(shownBalance),
-                        color = Ink,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = PixelFont,
-                        modifier = Modifier
-                            .scale(assetPressScale.value)
-                            .lcdDoubleBorder()
-                            .clickable(
-                                enabled = introDone && !showResultTutorial,
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() }
-                            ) {
-                                if (introDone && !showResultTutorial) {
-                                    uiSound.play(UiSoundKind.CONFIRM)
-                                }
-                                scope.launch {
-                                    assetPressScale.snapTo(0.90f)
-                                    assetPressScale.animateTo(
-                                        1f,
-                                        tween(140, easing = FastOutSlowInEasing)
-                                    )
-                                    assetRankBoard = onRequestAssetRank()
-                                    showAssetRank = assetRankBoard != null
-                                }
+        // 資産は二重枠の一行。反転を重ねない
+        val chaseHint = remember(
+            result.finalAsset,
+            result.theoreticalMaxAsset,
+            result.isRetired,
+            result.priorBestAsset
+        ) {
+            ResultChaseHints.resolve(
+                finalAsset = result.finalAsset,
+                theoreticalMax = result.theoreticalMaxAsset,
+                isRetired = result.isRetired,
+                priorBestAsset = result.priorBestAsset,
+            )
+        }
+        val chaseText = when (val h = chaseHint) {
+            is ResultChaseHint.StarGap ->
+                UiStrings.chaseHintStar(h.nextStars, h.yenLeft, lang)
+            is ResultChaseHint.BestGap ->
+                UiStrings.chaseHintBest(h.yenLeft, lang)
+            null -> null
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(modifier = Modifier.weight(1f))
+            Box {
+                Text(
+                    text = "${UiStrings.assetLabel(lang)}  ¥%,d".fmt(shownBalance),
+                    color = Ink,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = PixelFont,
+                    modifier = Modifier
+                        .scale(assetPressScale.value)
+                        .lcdDoubleBorder()
+                        .clickable(
+                            enabled = introDone,
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {
+                            if (introDone) {
+                                uiSound.play(UiSoundKind.CONFIRM)
                             }
-                            .padding(horizontal = 10.dp, vertical = 4.dp)
-                    )
-                    if (chaseText != null && introDone && !showResultTutorial) {
-                        Text(
-                            text = chaseText,
-                            color = Ink,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            fontFamily = PixelFont,
-                            maxLines = 1,
-                            modifier = Modifier
-                                .align(Alignment.TopEnd)
-                                .offset(x = 6.dp, y = (-12).dp)
-                                .background(LcdBackground)
-                                .lcdBorder(width = 2.dp)
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
-                        )
-                    }
-                }
-                Box(
-                    modifier = Modifier.weight(1f),
-                    contentAlignment = Alignment.CenterStart
-                ) {
+                            scope.launch {
+                                assetPressScale.snapTo(0.90f)
+                                assetPressScale.animateTo(
+                                    1f,
+                                    tween(140, easing = FastOutSlowInEasing)
+                                )
+                                assetRankBoard = onRequestAssetRank()
+                                showAssetRank = assetRankBoard != null
+                            }
+                        }
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                )
+                if (chaseText != null && introDone) {
                     Text(
-                        text = UiStrings.formatSignedYen(netPnl),
-                        color = InkMuted,
-                        fontSize = 13.sp,
+                        text = chaseText,
+                        color = Ink,
+                        fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = PixelFont,
+                        maxLines = 1,
                         modifier = Modifier
-                            .padding(start = 8.dp)
-                            .alpha(if (introDone) pnlAlpha else 1f)
+                            .align(Alignment.TopEnd)
+                            .offset(x = 6.dp, y = (-12).dp)
+                            .background(LcdBackground)
+                            .lcdBorder(width = 2.dp)
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
                     )
                 }
+            }
+            Box(
+                modifier = Modifier.weight(1f),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Text(
+                    text = UiStrings.formatSignedYen(netPnl),
+                    color = InkMuted,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = PixelFont,
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .alpha(if (introDone) pnlAlpha else 1f)
+                )
             }
         }
         if (result.maxCombo > 0) {
@@ -2020,7 +1986,7 @@ private fun ResultOverlay(
                 .lcdBorder()
                 .uiClickable(
                     kind = UiSoundKind.CONFIRM,
-                    enabled = introDone && !showResultTutorial,
+                    enabled = introDone,
                     onClick = onShare
                 )
                 .padding(horizontal = 14.dp, vertical = 5.dp)

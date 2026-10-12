@@ -93,7 +93,6 @@ private fun UriKaiRoot(viewModel: GameViewModel, onShare: () -> Unit) {
         val relicEffects by viewModel.relicEffects.collectAsStateWithLifecycle()
         val relicStagePrefs by viewModel.relicStagePrefs.collectAsStateWithLifecycle()
         val showFirstPlayTutorial by viewModel.showFirstPlayTutorial.collectAsStateWithLifecycle()
-        val showResultTutorial by viewModel.showResultTutorial.collectAsStateWithLifecycle()
         val showContentDisclaimer by viewModel.showContentDisclaimer.collectAsStateWithLifecycle()
         val seLevel by viewModel.seLevel.collectAsStateWithLifecycle()
         val bgmLevel by viewModel.bgmLevel.collectAsStateWithLifecycle()
@@ -134,7 +133,6 @@ private fun UriKaiRoot(viewModel: GameViewModel, onShare: () -> Unit) {
             claimedRelics = claimedRelics,
             relicEffects = relicEffects,
             showFirstPlayTutorial = showFirstPlayTutorial,
-            showResultTutorial = showResultTutorial,
             showContentDisclaimer = showContentDisclaimer,
             chartsLoadError = chartsLoadError,
             onDismissContentDisclaimer = viewModel::dismissContentDisclaimer,
@@ -161,7 +159,6 @@ private fun UriKaiRoot(viewModel: GameViewModel, onShare: () -> Unit) {
             relicStagePrefs = relicStagePrefs,
             onDismissFirstPlayTutorial = viewModel::dismissFirstPlayTutorial,
             onResultIntroFinished = viewModel::onResultIntroFinished,
-            onDismissResultTutorial = viewModel::dismissResultTutorial,
             onRequestAssetRank = viewModel::assetRankBoardForCurrentResult,
             devRelicLab = devRelicLab,
             onEnableDevRelicLab = viewModel::enableDevRelicLab,

@@ -1,13 +1,5 @@
 package com.urikai.app.ui
 
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -17,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,11 +18,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.urikai.app.game.TutorialGuideKind
@@ -77,33 +65,6 @@ fun FirstPlayTutorialOverlay(
             modifier = Modifier.fillMaxWidth(0.9f)
         )
     }
-}
-
-/**
- * リザルト演出後の見方ガイド。
- * @param step 0=導入, 1=％★, 2=資産+損益, 3=売買+利子, 4=締め
- */
-@Composable
-fun ResultTutorialCard(
-    step: Int,
-    totalSteps: Int,
-    onNext: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val lang = LocalDisplayLanguage.current
-    val last = totalSteps - 1
-    TutorialCard(
-        title = UiStrings.resultTutorialTitle(lang),
-        body = UiStrings.resultTutorialStep(step, lang),
-        stepLabel = "${step + 1}/$totalSteps",
-        actionLabel = if (step < last) {
-            UiStrings.resultTutorialNext(lang)
-        } else {
-            UiStrings.resultTutorialOk(lang)
-        },
-        onAction = onNext,
-        modifier = modifier.fillMaxWidth(0.92f)
-    )
 }
 
 @Composable
@@ -156,75 +117,6 @@ internal fun TutorialCard(
                 .uiClickable(kind = UiSoundKind.CONFIRM, onClick = onAction)
                 .padding(horizontal = 18.dp, vertical = 10.dp)
         )
-    }
-}
-
-/** 四隅ブラケット＋軽拡縮で対象を指す（親の余白まで広げない）。 */
-@Composable
-fun TutorialSpotlight(
-    active: Boolean,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
-) {
-    val pulse = rememberInfiniteTransition(label = "tut_spot")
-    val scale by pulse.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.05f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(520, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "tut_spot_scale"
-    )
-    val bracketAlpha by pulse.animateFloat(
-        initialValue = 0.55f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(520, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "tut_spot_alpha"
-    )
-    Box(
-        modifier = modifier
-            .wrapContentHeight()
-            .graphicsLayer {
-                if (active) {
-                    scaleX = scale
-                    scaleY = scale
-                }
-            }
-    ) {
-        content()
-        if (active) {
-            TutorialCornerBrackets(
-                alpha = bracketAlpha,
-                modifier = Modifier.matchParentSize()
-            )
-        }
-    }
-}
-
-@Composable
-private fun TutorialCornerBrackets(
-    alpha: Float,
-    modifier: Modifier = Modifier,
-    arm: Dp = 10.dp,
-    stroke: Dp = 2.5.dp
-) {
-    val ink = Ink
-    Canvas(modifier = modifier.padding(2.dp)) {
-        val a = arm.toPx()
-        val sw = stroke.toPx()
-        val color = ink.copy(alpha = alpha)
-        drawLine(color, Offset(0f, 0f), Offset(a, 0f), sw)
-        drawLine(color, Offset(0f, 0f), Offset(0f, a), sw)
-        drawLine(color, Offset(size.width, 0f), Offset(size.width - a, 0f), sw)
-        drawLine(color, Offset(size.width, 0f), Offset(size.width, a), sw)
-        drawLine(color, Offset(0f, size.height), Offset(a, size.height), sw)
-        drawLine(color, Offset(0f, size.height), Offset(0f, size.height - a), sw)
-        drawLine(color, Offset(size.width, size.height), Offset(size.width - a, size.height), sw)
-        drawLine(color, Offset(size.width, size.height), Offset(size.width, size.height - a), sw)
     }
 }
 

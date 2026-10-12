@@ -128,13 +128,6 @@ class SettingsRepository(openStore: (String) -> KeyValueStore) {
         prefs.edit().putBoolean(KEY_FIRST_PLAY_TUTORIAL_SEEN, true).apply()
     }
 
-    fun hasSeenResultTutorial(): Boolean =
-        prefs.getBoolean(KEY_RESULT_TUTORIAL_SEEN, false)
-
-    fun setResultTutorialSeen() {
-        prefs.edit().putBoolean(KEY_RESULT_TUTORIAL_SEEN, true).apply()
-    }
-
     fun isSoundEnabled(): Boolean = prefs.getBoolean(KEY_SOUND_ENABLED, true)
 
     fun setSoundEnabled(enabled: Boolean) {
@@ -219,7 +212,6 @@ class SettingsRepository(openStore: (String) -> KeyValueStore) {
         private const val KEY_SCRAPBOOK_SORT = "scrapbook_sort"
         private const val KEY_CONTENT_DISCLAIMER_SEEN = "content_disclaimer_seen"
         private const val KEY_FIRST_PLAY_TUTORIAL_SEEN = "first_play_tutorial_seen"
-        private const val KEY_RESULT_TUTORIAL_SEEN = "result_tutorial_seen"
         private const val KEY_SOUND_ENABLED = "sound_enabled"
         private const val KEY_SE_LEVEL = "se_level"
         private const val KEY_BGM_LEVEL = "bgm_level"
