@@ -172,7 +172,7 @@ fun RelicRewardToast(
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
-                text = "✦  ✦  ✦",
+                text = "◆  ◆  ◆",
                 color = Ink,
                 fontSize = 14.sp,
                 fontFamily = PixelFont,
@@ -205,7 +205,7 @@ fun RelicRewardToast(
                 )
             }
             Text(
-                text = "✦  ✦  ✦",
+                text = "◆  ◆  ◆",
                 color = Ink,
                 fontSize = 14.sp,
                 fontFamily = PixelFont,
@@ -627,14 +627,14 @@ private fun relicFrameModifier(style: RelicFrameStyle): Modifier {
 @Composable
 fun RelicGlyph(relic: RelicId, large: Boolean) {
     val mark = when (relic) {
-        RelicId.PAPER -> "▥"
-        RelicId.DARK -> "▦"
-        RelicId.SMOOTH -> "∿"
+        RelicId.PAPER -> "□"
+        RelicId.DARK -> "■"
+        RelicId.SMOOTH -> "～"
         RelicId.INTEREST_120, RelicId.INTEREST_150 -> "%"
         RelicId.PNL_BONUS_120, RelicId.PNL_BONUS_150 -> "¥"
-        RelicId.BONUS_10_150, RelicId.BONUS_10_200 -> "☾"
+        RelicId.BONUS_10_150, RelicId.BONUS_10_200 -> "月"
         RelicId.COOLDOWN_25, RelicId.COOLDOWN_50 -> "▷"
-        RelicId.LAG_25, RelicId.LAG_50 -> "⇢"
+        RelicId.LAG_25, RelicId.LAG_50 -> "→"
         RelicId.JUDGE -> "◎"
         RelicId.COMBO -> "‡"
         RelicId.MISS_LIFE_1, RelicId.MISS_COMBO_HEAL -> "◇"
@@ -733,11 +733,11 @@ fun SyncRatingBreakdownOverlay(
 
     val rows = listOf(
         LadderRow("★1", "< ${pct(SyncRating.STAR2_FLOOR_ASSET)}", starCount == 1),
-        LadderRow("★2", "≥ ${pct(thresholds.star2Min)}", starCount == 2),
-        LadderRow("★3", "≥ ${pct(thresholds.star3Min)}", starCount == 3),
-        LadderRow("★4", "≥ ${pct(thresholds.star4Min)}", starCount == 4),
-        LadderRow("★5", "≥ ${pct(thresholds.star5Min)}", starCount == 5 && !over),
-        LadderRow("★5+", "≥ ${pct(thresholds.star5PlusMin)}", over),
+        LadderRow("★2", "≧ ${pct(thresholds.star2Min)}", starCount == 2),
+        LadderRow("★3", "≧ ${pct(thresholds.star3Min)}", starCount == 3),
+        LadderRow("★4", "≧ ${pct(thresholds.star4Min)}", starCount == 4),
+        LadderRow("★5", "≧ ${pct(thresholds.star5Min)}", starCount == 5 && !over),
+        LadderRow("★5+", "≧ ${pct(thresholds.star5PlusMin)}", over),
     )
 
     Box(

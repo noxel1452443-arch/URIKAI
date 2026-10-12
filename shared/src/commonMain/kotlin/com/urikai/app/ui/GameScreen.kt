@@ -1280,7 +1280,10 @@ private fun TopHud(
         }
         if (appLayer == AppLayer.PLAY && uiState.gameState != GameState.START) {
             when (uiState.gameState) {
-                GameState.RESULT -> ReservedPlayHudSlot(hudMode = hudMode)
+                // 入金後のリザルトは HUD 枠を畳み、縦の短い画面でもパネルが収まるようにする
+                GameState.RESULT -> if (!chartFrame.resultPayoutClaimed) {
+                    ReservedPlayHudSlot(hudMode = hudMode)
+                }
 
                 else -> PlayStageHud(
                     uiState = uiState,

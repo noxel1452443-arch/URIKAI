@@ -176,7 +176,7 @@ fun OptionPane(
                                     val short = id.name.take(11)
                                     Box(modifier = Modifier.weight(1f)) {
                                         ConfigChip(
-                                            label = if (on) "$short✓" else short,
+                                            label = if (on) "$short●" else short,
                                             selected = on
                                         ) {
                                             onSetDevRelicEnabled(id, !on)

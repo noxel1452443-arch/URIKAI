@@ -51,7 +51,12 @@ fun main() {
             modifier = Modifier.fillMaxSize().background(Color(0xFF1B2410)),
             contentAlignment = Alignment.Center
         ) {
-            val frameWidth = minOf(maxWidth, maxHeight * MAX_WIDTH_PER_HEIGHT)
+            // 縦長のスマホは比率に関係なく全幅を使う（SE など縦の短い画面で幅まで削られないように）
+            val frameWidth = if (maxWidth > maxHeight) {
+                minOf(maxWidth, maxHeight * MAX_WIDTH_PER_HEIGHT)
+            } else {
+                maxWidth
+            }
             Box(Modifier.width(frameWidth).fillMaxHeight()) {
                 CompositionLocalProvider(LocalPrimaryButtonHeight provides WEB_PRIMARY_BUTTON_HEIGHT) {
                     UriKaiApp(services)
