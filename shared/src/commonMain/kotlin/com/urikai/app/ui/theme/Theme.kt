@@ -5,6 +5,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.unit.dp
 import com.urikai.app.game.ChartLineStyle
 import com.urikai.app.game.DisplayLanguage
 import com.urikai.app.game.LcdThemeMode
@@ -17,6 +18,9 @@ val LocalChartLineStyle = staticCompositionLocalOf { ChartLineStyle.STEP }
 val LocalScanlineStrength = staticCompositionLocalOf { ScanlineStrength.LOW }
 val LocalPanelContrast = staticCompositionLocalOf { PanelContrast.NORMAL }
 val LocalIsDebugBuild = staticCompositionLocalOf { false }
+
+/** 画面最下部の1ボタン（開始・買う・売る…）の高さ。縦の短いブラウザでは低くする。 */
+val LocalPrimaryButtonHeight = staticCompositionLocalOf { 160.dp }
 
 @Composable
 fun UriKaiTheme(

@@ -10,7 +10,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ComposeViewport
+import com.urikai.app.ui.theme.LocalPrimaryButtonHeight
 import com.urikai.app.platform.LocalStorageStore
 import com.urikai.app.platform.PlatformServices
 import com.urikai.app.platform.WebBgm
@@ -31,6 +34,9 @@ private fun jsShareText(text: String): Unit = js(
 /** 横長画面（PC）では縦長スマホ比率の枠に収める。 */
 private const val MAX_WIDTH_PER_HEIGHT = 0.56f
 
+/** ブラウザはアドレスバー等で縦が短いので、Android(160dp) より大幅に低くする。 */
+private val WEB_PRIMARY_BUTTON_HEIGHT = 80.dp
+
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
     val services = PlatformServices(
@@ -47,7 +53,9 @@ fun main() {
         ) {
             val frameWidth = minOf(maxWidth, maxHeight * MAX_WIDTH_PER_HEIGHT)
             Box(Modifier.width(frameWidth).fillMaxHeight()) {
-                UriKaiApp(services)
+                CompositionLocalProvider(LocalPrimaryButtonHeight provides WEB_PRIMARY_BUTTON_HEIGHT) {
+                    UriKaiApp(services)
+                }
             }
         }
     }

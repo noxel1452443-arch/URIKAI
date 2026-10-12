@@ -103,6 +103,7 @@ import com.urikai.app.game.holdingPnlMood
 import com.urikai.app.game.toTimingFocus
 import com.urikai.app.game.UiStrings
 import com.urikai.app.ui.theme.Ink
+import com.urikai.app.ui.theme.LocalPrimaryButtonHeight
 import com.urikai.app.ui.theme.InkFaint
 import com.urikai.app.ui.theme.InkMuted
 import com.urikai.app.ui.theme.LcdBackground
@@ -816,7 +817,7 @@ private fun GameScreenContent(
                 onStartLongPress = { titleSecretInvert = true },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(160.dp)
+                    .height(LocalPrimaryButtonHeight.current)
             )
         }
 

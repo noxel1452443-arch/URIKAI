@@ -860,100 +860,105 @@ fun BalanceHistoryOverlay(
                 )
             }
             Spacer(modifier = Modifier.height(8.dp))
-            BalanceSummary(balance = balance, peakBalance = peakBalance)
-            Spacer(modifier = Modifier.height(6.dp))
-            BalanceHistoryChart(
-                history = history,
+            // 縦が短い画面でも閉じるボタンが押し出されないよう、見出しと閉じるの間をまとめてスクロールさせる
+            Column(
                 modifier = Modifier
+                    .weight(1f)
                     .fillMaxWidth()
-                    .height(130.dp)
-                    .lcdBorder()
-                    .padding(horizontal = 6.dp, vertical = 8.dp)
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            InvestPlanPicker(
-                selected = investPlan,
-                peakBalance = peakBalance,
-                onSelect = onSelectInvestPlan
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-            Text(
-                text = UiStrings.sessionPnlHistoryTitle(lang),
-                color = InkMuted,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = PixelFont
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            if (entries.isEmpty()) {
-                Box(
+                    .verticalScroll(rememberScrollState())
+            ) {
+                BalanceSummary(balance = balance, peakBalance = peakBalance)
+                Spacer(modifier = Modifier.height(6.dp))
+                BalanceHistoryChart(
+                    history = history,
                     modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = UiStrings.sessionPnlHistoryEmpty(lang),
-                        color = InkMuted,
-                        fontSize = 12.sp,
-                        fontFamily = PixelFont,
-                        textAlign = TextAlign.Center
-                    )
-                }
-            } else {
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .verticalScroll(rememberScrollState()),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    entries.forEachIndexed { index, entry ->
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .zIndex(if (index == 0) 1f else 0f)
-                        ) {
-                            Row(
+                        .fillMaxWidth()
+                        .height(130.dp)
+                        .lcdBorder()
+                        .padding(horizontal = 6.dp, vertical = 8.dp)
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                InvestPlanPicker(
+                    selected = investPlan,
+                    peakBalance = peakBalance,
+                    onSelect = onSelectInvestPlan
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = UiStrings.sessionPnlHistoryTitle(lang),
+                    color = InkMuted,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = PixelFont
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                if (entries.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = UiStrings.sessionPnlHistoryEmpty(lang),
+                            color = InkMuted,
+                            fontSize = 12.sp,
+                            fontFamily = PixelFont,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                } else {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        entries.forEachIndexed { index, entry ->
+                            Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(top = if (index == 0) 10.dp else 0.dp)
-                                    .lcdBorder()
-                                    .padding(horizontal = 8.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
+                                    .zIndex(if (index == 0) 1f else 0f)
                             ) {
-                                Text(
-                                    text = entry.brandName(lang),
-                                    color = Ink,
-                                    fontSize = 11.sp,
-                                    fontFamily = PixelFont,
+                                Row(
                                     modifier = Modifier
-                                        .weight(1f)
-                                        .padding(end = 8.dp),
-                                    maxLines = 2
-                                )
-                                Text(
-                                    text = UiStrings.formatSignedYen(entry.pnl),
-                                    color = if (entry.pnl < 0) InkFaint else Ink,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    fontFamily = PixelFont
-                                )
-                            }
-                            if (index == 0) {
-                                Text(
-                                    text = UiStrings.historyNewestMark(),
-                                    color = LcdInvertedText,
-                                    fontSize = 9.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    fontFamily = PixelFont,
-                                    letterSpacing = 0.8.sp,
-                                    modifier = Modifier
-                                        .align(Alignment.TopEnd)
-                                        .offset(x = 4.dp, y = 1.dp)
-                                        .background(Ink)
-                                        .padding(horizontal = 6.dp, vertical = 2.dp)
-                                )
+                                        .fillMaxWidth()
+                                        .padding(top = if (index == 0) 10.dp else 0.dp)
+                                        .lcdBorder()
+                                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Text(
+                                        text = entry.brandName(lang),
+                                        color = Ink,
+                                        fontSize = 11.sp,
+                                        fontFamily = PixelFont,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .padding(end = 8.dp),
+                                        maxLines = 2
+                                    )
+                                    Text(
+                                        text = UiStrings.formatSignedYen(entry.pnl),
+                                        color = if (entry.pnl < 0) InkFaint else Ink,
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        fontFamily = PixelFont
+                                    )
+                                }
+                                if (index == 0) {
+                                    Text(
+                                        text = UiStrings.historyNewestMark(),
+                                        color = LcdInvertedText,
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        fontFamily = PixelFont,
+                                        letterSpacing = 0.8.sp,
+                                        modifier = Modifier
+                                            .align(Alignment.TopEnd)
+                                            .offset(x = 4.dp, y = 1.dp)
+                                            .background(Ink)
+                                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                                    )
+                                }
                             }
                         }
                     }
