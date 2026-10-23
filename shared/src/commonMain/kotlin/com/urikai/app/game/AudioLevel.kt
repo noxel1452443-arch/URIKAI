@@ -18,12 +18,12 @@ enum class AudioLevel {
         HIGH -> 1.2f
     }
 
-    /** BGM の MediaPlayer 音量（SEより控えめ） */
+    /** BGM の MediaPlayer 音量（SEより控えめ。既定を少し上げて「聞こえる」側へ） */
     fun bgmVolume(): Float = when (this) {
         OFF -> 0f
-        LOW -> 0.22f
-        MID -> 0.32f
-        HIGH -> 0.45f
+        LOW -> 0.26f
+        MID -> 0.38f
+        HIGH -> 0.52f
     }
 
     val isOn: Boolean get() = this != OFF

@@ -1,0 +1,124 @@
+URIKAI カイ（A4）スプライト規格 + 生成プロンプト
+================================================
+
+目的
+----
+図鑑 stage_* と同じく「アプリ側で Ink 着色できる」素材を最初から作る。
+JPG→強引な変換をやめて、差分追加・ホーム常駐アニメでも同じセルに載せられるようにする。
+
+
+1. セル規格（必須）
+------------------
+- キャンバス: 正方形 160×160 px（生成は 1024 でも可。最終は 160 に揃える）
+- 背景: 単色の紙色のみ（#C3CBA0 相当の薄い緑）。模様・UI・文字なし
+- 配置:
+  - 足元 Y を全差分で同じ（下端から約 10px）
+  - 胴体の見た目サイズを全差分で同じ（赤道幅の目安: セル幅の約 55%）
+  - 顔の中心をほぼ同じ位置に
+- 余白: 耳先が上端に張り付かない（上に 8px 以上）
+- 1ファイル = 1表情/1ポーズ。浮遊ドット（考えごと等）も同じセル内
+
+
+2. 絵のルール（必須）
+--------------------
+- 液晶ドット絵（Game Boy 風）。くっきりした画素、強いアンチエイリアス禁止
+- 色はオリーブ系の 3〜4 階調だけ（カラー禁止）
+  - 紙色（背景）
+  - 本体フィル ← 紙色と同じか、ほんの少しだけ濃い程度（グレーアウトに見えない明るさ）
+  - 中間（ヘッドセット・耳の内側・必要ならお尻の影）
+  - 濃（輪郭・目・口）
+- 輪郭はほぼ 1px の濃い線
+- 丸枠・台座・フキダシなし
+- キャラは正面やや寄り、丸い胴体＋長い耳＋ヘッドセット＋小さな足
+
+
+3. マスター1枚
+-------------
+ファイル: docs/kai-concepts/kai_master_lcd.jpg
+（生成済み。表情の基準ポーズ = idle / talk 手前）
+
+
+4. マスター生成プロンプト（英語・画像生成用）
+------------------------------------------
+Copy below as-is. Attach kai_master_lcd.jpg or kai-A4-radio-bunny.jpg as reference when possible.
+
+---BEGIN MASTER PROMPT---
+Square 1:1 Game Boy LCD pixel-art sprite cell of URIKAI mascot "Kai".
+Round chubby bunny-blob, two tall pointed ears, tiny stubby feet, large dark eyes with tiny white highlights, small w-shaped mouth, dark headset with headband, earcup on viewer's right, thin boom mic.
+Neutral friendly idle, facing camera.
+STRICT palette: only olive LCD greens on flat paper background #C3CBA0.
+Body fill MUST match the paper background brightness (almost same as #C3CBA0), not mid-gray.
+Medium olive only for headset and soft underside body shadow; near-black for clean 1px outlines, eyes, mouth.
+Crisp chunky pixels, no blur, no anti-alias glow, no extra colors, no text, no UI, no circle frame, no speech bubble.
+Character centered, feet near bottom with consistent padding, finished handheld game sprite.
+---END MASTER PROMPT---
+
+
+5. 差分プロンプト（マスターを参照画像にして追記）
+----------------------------------------------
+共通の接頭辞:
+  Same character, same cell framing, same size, same foot line, same LCD palette and rules as the reference master sprite. Only change the expression/pose as specified:
+
+talk:
+  Mouth slightly more open as if speaking; eyes bright; same idle body.
+
+smile:
+  Happy closed or curved eyes; soft smile; same body.
+
+think:
+  Calm small flat mouth; thoughtful eyes; optional 2–3 tiny thought dots above one ear (inside the same 160 cell, not changing body scale).
+
+wink:
+  One eye closed wink; other eye open with highlight; playful mouth.
+
+ouch:
+  Pained after bumping a wall; eyes squeezed or X-eyes; frown / tight downturned mouth;
+  optional tiny sweat or impact marks inside the same cell (no body scale change).
+
+cry:
+  Cute cry after many wall hits; watery eyes with small tear drops on cheeks;
+  open wavering sob mouth; distressed brows; tears stay inside the same cell.
+
+（将来ホーム用の例）
+idle_blink:
+  Same as master but eyes briefly closed (for 1-frame blink).
+wave:
+  Same body scale; one tiny arm/nub raised in a wave; feet still on the same baseline.
+
+
+6. アプリへの入れ方（変換は最小）
+--------------------------------
+理想:
+  1) 背景 #C3CBA0 を透過にする（flood）
+  2) 濃淡をアルファ（または sil + ink）に落とす
+  3) 160×160 セルに足元揃えで配置
+  tools/cut_kai_sprites.py をこの前提向けに簡略化していく
+
+禁止に近いこと:
+  1024 の「それっぽい実写風ピクセル」を無理に 96px NEAREST で潰すこと
+
+
+7. チェックリスト（差分ごと）
+----------------------------
+[ ] 背景は単色紙色だけ
+[ ] 本体がガイド枠くらい明るい
+[ ] 輪郭・目がはっきり
+[ ] 足元ラインがマスターと一致
+[ ] 胴体の大きさがマスターと一致
+[ ] 丸枠・文字・余分な小物なし
+
+
+8. ホーム常駐アニメ（実装方針）
+------------------------------
+ガイド用の talk/smile/wave を「歩行の代用」にしない。
+
+いまのアプリ側（HomeKaiResident）:
+  - 呼吸: 縦伸び／横つぶれの低周波スカッシュ
+  - 瞬き: 短時間の縦つぶれ＋閉眼（wink は閉眼専用）
+  - 歩き: 整数px離散移動＋偶数/奇数スカッシュ、数歩ごとに一拍、左右反転
+  - 出現: ホーム入場ごとにスポット抽選（滞在中の消滅ランダムではない）
+
+将来アセットを足すなら（任意）:
+  - kai_walk_a / kai_walk_b（2コマ足踏み）を同じセル規格で追加
+  - 歩行位相に合わせてコマ送り（変形は補助に下げる）
+

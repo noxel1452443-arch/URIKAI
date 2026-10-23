@@ -18,6 +18,8 @@ val LocalChartLineStyle = staticCompositionLocalOf { ChartLineStyle.STEP }
 val LocalScanlineStrength = staticCompositionLocalOf { ScanlineStrength.LOW }
 val LocalPanelContrast = staticCompositionLocalOf { PanelContrast.NORMAL }
 val LocalIsDebugBuild = staticCompositionLocalOf { false }
+/** false のとき広告・リワード導線（半額／2倍／広告除去購入など）を出さない。Web 用。 */
+val LocalEnableAdFeatures = staticCompositionLocalOf { true }
 
 /** 画面最下部の1ボタン（開始・買う・売る…）の高さ。縦の短いブラウザでは低くする。 */
 val LocalPrimaryButtonHeight = staticCompositionLocalOf { 160.dp }

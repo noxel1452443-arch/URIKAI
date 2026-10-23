@@ -1693,3 +1693,68 @@ v01 / z01 / b01 の試遊時、他27本が混ざってパイロットプレイ�
 
 ---
 
+## 2026-10-23 — カイの寝床（固定インカム g）＋収益化ドキュメント更新
+
+### 目的
+運用方針(r)・チャート(r)とは別レーンの固定給与(g)を、家具1種（寝床）で実装する。
+広告はランクアップ待ちの短縮のみ。M0人手作業チェックリストを store/MONETIZATION.md に固定。
+
+### 追加・変更
+- KaiBedRank / 永続（ランク・readyAt）/ 出金後給与 / 口座¥アップグレード / リワードで待ち短縮
+- ホーム下部に寝床スポット＋シート UI（Canvas 段階見た目）
+- MonetizationController.showRewarded（スタブは Debug/adsRemoved で成功）
+- BalanceEventKind.KAI / BED
+- DESIGN.md / store/MONETIZATION.md 更新
+
+### 触ったファイル
+- shared/.../KaiBed.kt, KaiBedUi.kt, LifetimePnlRepository.kt, GameViewModel.kt, UiStrings.kt
+- GameScreen.kt, UriKaiApp.kt, PlatformServices.kt
+- pp/.../StubMonetizationController.kt
+- store/MONETIZATION.md, DESIGN.md, update.md
+
+## 2026-10-23 — 寝床進行を進捗ゲートへ／ポリシー更新
+
+### 目的
+分〜時間の待ち（Tower研究所型）を撤回。序盤で消化されないよう出金回数＋最高残高で解禁。
+プライバシーを広告・課金前提に更新。寝床イラスト手順を仕様化。
+
+### 変更
+- KaiBedRank: minCashOuts / minPeakBalance。壁時計クールダウン削除
+- UI: 「待ち時間」ではなく未達ヒント＋次ランクプレビュー
+- docs/index.html / store/PRIVACY_POLICY.md 更新
+- docs/kai-concepts/BED_SPRITE_SPEC.txt 追加
+- store/MONETIZATION.md FAQ（クローズド×課金×AdMob）
+
+## 2026-10-23 — 広告は後回し／寝床・カイ生活を本線に
+
+AdMob 接続はリリース前まで保留。優先は寝床の設計・UI・イラスト・カイ連携。
+Billing（urikai_remove_ads）は維持。MONETIZATION / DESIGN のフェーズ順を更新。
+
+## 2026-10-23 — カイ寝床一段落／AdMob インタースティシャル接続
+
+寝床イラスト・占用・入退室・導入フローを一段落とし、M2 AdMob を接続。
+
+- `InterstitialAdGate` + `PlayBillingController.maybeShowInterstitial`
+- 既定は Google 公式テスト ID。本番は `local.properties` の `admob.app.id` / `admob.interstitial.id`
+- 未準備・失敗・広告除去時は即ホーム（従来どおりブロックしない）
+- 頻度ロジック（出金≥3・3回に1回）は ViewModel 側のまま
+
+---
+
+## 2026-10-24 — 1.7.4（versionCode 7）クローズド更新準備
+
+### 目的
+テスターに初回導線（チュートリアル〜カイ引っ越し〜すみか）を見せつつ、すみか／設定／広告導線の不具合を潰す。
+
+### 主な変更
+- カイ引っ越し導入が「出金済み＝視聴済み」誤判定でスキップされる不具合を修正
+- ほしぐさ受け取りセリフ整理／g1 閾値 ¥11,000
+- g4/g5 入口・内観（inside＋共通 sit/sleep）／給料2倍キャンセル再提示
+- 設定: タブ＋下半分常時応援、ABOUT 分離
+- 進捗エポック 2 で旧セーブのみ初回ワイプ
+- Web: `enableAdFeatures=false`（広告／半額／2倍／広告除去購入なし）。`docs/play` へ再配置可能
+
+### リリースメモ
+- `store/RELEASE_1.7.4.md`
+- `app/build.gradle.kts`: versionName `1.7.4` / versionCode `7`
+

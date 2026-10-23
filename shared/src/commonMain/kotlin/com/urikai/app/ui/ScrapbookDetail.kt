@@ -21,7 +21,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -86,14 +85,13 @@ fun StageIllustration(
 }
 
 /**
- * @param newsLabel 初回クリア直後の「ニュース」表示ではラベル（NEW など）を出す
+ * 初回クリア直後も通常の図鑑詳細と同じ見た目（ニュースカモフラージュ用ラベルは出さない）。
  */
 @Composable
 fun ScrapbookDetailOverlay(
     entry: ScrapbookEntry,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
-    newsLabel: String? = null,
 ) {
     val lang = LocalDisplayLanguage.current
     Box(
@@ -119,19 +117,6 @@ fun ScrapbookDetailOverlay(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                if (newsLabel != null) {
-                    Text(
-                        text = newsLabel,
-                        color = LcdBackground,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = PixelFont,
-                        letterSpacing = 2.sp,
-                        modifier = Modifier
-                            .background(Ink)
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                    )
-                }
                 StageIllustration(
                     stageId = entry.stageId,
                     macroShape = entry.macroShape,

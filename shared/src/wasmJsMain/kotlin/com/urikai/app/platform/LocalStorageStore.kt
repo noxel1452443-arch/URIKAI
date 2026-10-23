@@ -6,6 +6,17 @@ private fun lsSet(key: String, value: String): Unit = js("{ try { window.localSt
 
 private fun lsRemove(key: String): Unit = js("{ try { window.localStorage.removeItem(key); } catch (e) {} }")
 
+private fun lsClearPrefix(prefix: String): Unit = js(
+    """{ try {
+      var keys = [];
+      for (var i = 0; i < window.localStorage.length; i++) {
+        var k = window.localStorage.key(i);
+        if (k && k.indexOf(prefix) === 0) keys.push(k);
+      }
+      for (var j = 0; j < keys.length; j++) window.localStorage.removeItem(keys[j]);
+    } catch (e) {} }"""
+)
+
 /** localStorage 上の KV。キーは `urikai/<name>/<key>`、値はすべて文字列で保存する。 */
 class LocalStorageStore(name: String) : KeyValueStore {
 
@@ -32,7 +43,12 @@ class LocalStorageStore(name: String) : KeyValueStore {
         override fun putString(key: String, value: String?) = put(key, value)
         override fun putStringSet(key: String, value: Set<String>?) = put(key, value?.let(::encodeSet))
         override fun remove(key: String) = put(key, null)
+        override fun clear() = apply { ops += { lsClearPrefix(prefix) } }
         override fun apply() = ops.forEach { it() }
+        override fun commit(): Boolean {
+            ops.forEach { it() }
+            return true
+        }
     }
 
     private companion object {

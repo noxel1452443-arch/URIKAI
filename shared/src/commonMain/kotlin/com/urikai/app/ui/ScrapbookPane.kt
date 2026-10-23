@@ -2,7 +2,6 @@ package com.urikai.app.ui
 
 import com.urikai.app.game.fmt
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,20 +47,23 @@ fun ScrapbookPane(
     revealAll: Boolean = false
 ) {
     var detailStageId by remember { mutableStateOf<String?>(null) }
-    val entries = if (revealAll) {
-        entries.map { if (it.unlocked) it else it.copy(unlocked = true) }
-    } else {
-        entries
+    // 続き話はクリアするまで一覧に出さない（物語構造を図鑑で先に教えない）
+    val visibleEntries = remember(entries, revealAll) {
+        if (revealAll) {
+            entries.map { it.copy(unlocked = true, awaitingPrevious = false) }
+        } else {
+            entries.filter { it.unlocked || it.sagaEp <= 1 }
+        }
     }
 
     Box(modifier = modifier.fillMaxSize()) {
         ScrapbookList(
-            entries = entries,
+            entries = visibleEntries,
             sort = sort,
             onSortChange = onSortChange,
             onOpen = { detailStageId = it }
         )
-        entries.firstOrNull { it.stageId == detailStageId && it.unlocked }?.let { entry ->
+        visibleEntries.firstOrNull { it.stageId == detailStageId && it.unlocked }?.let { entry ->
             ScrapbookDetailOverlay(
                 entry = entry,
                 onDismiss = { detailStageId = null },
@@ -116,7 +118,10 @@ private fun ScrapbookList(
             modifier = Modifier.weight(1f)
         ) {
             items(entries, key = { it.stageId }) { entry ->
-                ScrapRow(entry, onOpen = { onOpen(entry.stageId) })
+                ScrapRow(
+                    entry = entry,
+                    onOpen = { onOpen(entry.stageId) }
+                )
             }
         }
 
@@ -153,7 +158,10 @@ private fun SortChip(
 }
 
 @Composable
-private fun ScrapRow(entry: ScrapbookEntry, onOpen: () -> Unit) {
+private fun ScrapRow(
+    entry: ScrapbookEntry,
+    onOpen: () -> Unit,
+) {
     val lang = LocalDisplayLanguage.current
     val isHighScore = entry.unlocked && entry.bestAsset != null &&
         SyncRating.stars(entry.bestAsset, entry.referenceTheoAsset) >= 3
@@ -164,23 +172,21 @@ private fun ScrapRow(entry: ScrapbookEntry, onOpen: () -> Unit) {
     }
     var peekReveal by remember(entry.stageId) { mutableFloatStateOf(0f) }
     val scope = rememberCoroutineScope()
+    val allowPeek = !entry.unlocked && entry.macroShape.isNotBlank()
 
     Column(
-        modifier = rowModifier
+        modifier = Modifier
             .fillMaxWidth()
+            .then(rowModifier)
             .background(
                 if (entry.unlocked) LcdBackground
                 else LcdBackground.copy(alpha = 0.7f)
             )
             .then(if (!entry.unlocked) Modifier.lcdHatch() else Modifier)
             .lcdSquish(
-                onTap = if (entry.unlocked) {
-                    onOpen
-                } else {
-                    null
-                },
+                onTap = if (entry.unlocked) onOpen else null,
                 tapSound = if (entry.unlocked) UiSoundKind.SELECT else null,
-                onLongPress = if (!entry.unlocked && entry.macroShape.isNotBlank()) {
+                onLongPress = if (allowPeek) {
                     {
                         scope.launch {
                             peekReveal = 1f
@@ -212,14 +218,16 @@ private fun ScrapRow(entry: ScrapbookEntry, onOpen: () -> Unit) {
                 },
                 color = if (entry.unlocked) InkMuted else InkFaint,
                 fontSize = 10.sp,
-                fontFamily = PixelFont
+                fontFamily = PixelFont,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f, fill = false)
             )
             Text(
                 text = if (entry.unlocked && entry.bestAsset != null) {
-                    "${UiStrings.bestLabel(lang)} %s  %s".fmt(
-                        UiStrings.formatSignedPercent(SyncRating.returnPercent(entry.bestAsset)),
-                        SyncRating.starsText(entry.bestAsset, entry.referenceTheoAsset)
-                    )
+                    val pct = SyncRating.returnPercent(entry.bestAsset)
+                    val pctText = if (pct >= 0f) "+${pct.toInt()}%" else "${pct.toInt()}%"
+                    "${UiStrings.bestLabel(lang)} $pctText ${SyncRating.starsText(entry.bestAsset, entry.referenceTheoAsset)}"
                 } else {
                     UiStrings.locked(lang)
                 },
@@ -251,7 +259,7 @@ private fun ScrapRow(entry: ScrapbookEntry, onOpen: () -> Unit) {
                     entry = entry,
                     modifier = Modifier.padding(start = 8.dp, top = 2.dp)
                 )
-            } else {
+            } else if (allowPeek) {
                 MacroShapeSilhouetteLocked(
                     peekMacroShape = entry.macroShape,
                     reveal = peekReveal,

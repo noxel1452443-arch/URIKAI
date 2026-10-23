@@ -12,16 +12,41 @@ if (keystorePropertiesFile.exists()) {
     keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
 }
 
+val localPropertiesFile = rootProject.file("local.properties")
+val localProperties = Properties()
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { localProperties.load(it) }
+}
+
+/** Google 公式サンプル（デバッグ／ID 未設定時）。本番 ID は local.properties へ。 */
+private val defaultAdmobAppId = "ca-app-pub-3940256099942544~3347511713"
+private val defaultAdmobInterstitialId = "ca-app-pub-3940256099942544/1033173712"
+private val defaultAdmobRewardedId = "ca-app-pub-3940256099942544/5224354917"
+
+val admobAppId = localProperties.getProperty("admob.app.id")?.takeIf { it.isNotBlank() }
+    ?: defaultAdmobAppId
+val admobInterstitialId =
+    localProperties.getProperty("admob.interstitial.id")?.takeIf { it.isNotBlank() }
+        ?: defaultAdmobInterstitialId
+val admobRewardedId =
+    localProperties.getProperty("admob.rewarded.id")?.takeIf { it.isNotBlank() }
+        ?: defaultAdmobRewardedId
+
 android {
     namespace = "com.urikai.app"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.urikai.app"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 1
-        versionName = "1.6.0"
+        targetSdk = 36
+        versionCode = 7
+        versionName = "1.7.4"
+        // Play Console の商品 ID（作成後は変更不可）。未作成でも AAB アップロードは可能。
+        buildConfigField("String", "REMOVE_ADS_PRODUCT_ID", "\"urikai_remove_ads\"")
+        buildConfigField("String", "ADMOB_INTERSTITIAL_UNIT_ID", "\"$admobInterstitialId\"")
+        buildConfigField("String", "ADMOB_REWARDED_UNIT_ID", "\"$admobRewardedId\"")
+        manifestPlaceholders["admobAppId"] = admobAppId
     }
 
     signingConfigs {
@@ -72,4 +97,6 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.activity:activity-compose:1.10.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.9.1")
+    implementation("com.android.billingclient:billing-ktx:8.0.0")
+    implementation("com.google.android.gms:play-services-ads:24.4.0")
 }

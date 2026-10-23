@@ -18,7 +18,14 @@ interface KeyValueEditor {
     fun putString(key: String, value: String?): KeyValueEditor
     fun putStringSet(key: String, value: Set<String>?): KeyValueEditor
     fun remove(key: String): KeyValueEditor
+    /** ストア全体を空にする（デバッグ用リセットなど）。 */
+    fun clear(): KeyValueEditor
     fun apply()
+    /**
+     * 同期書き込み。ワイプ直後のプロセス再起動前など、apply の非同期完了を待てないときに使う。
+     * @return 成功なら true
+     */
+    fun commit(): Boolean
 }
 
 /** メモリ上の KV（保存不可環境のフォールバック）。 */
@@ -45,6 +52,11 @@ class InMemoryKeyValueStore : KeyValueStore {
         override fun putStringSet(key: String, value: Set<String>?) =
             op { if (value == null) it.remove(key) else it[key] = value.toSet() }
         override fun remove(key: String) = op { it.remove(key) }
+        override fun clear() = op { it.clear() }
         override fun apply() = ops.forEach { it(map) }
+        override fun commit(): Boolean {
+            ops.forEach { it(map) }
+            return true
+        }
     }
 }

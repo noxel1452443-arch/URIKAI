@@ -6,6 +6,7 @@ import com.urikai.app.game.ChartLineStyle
 import com.urikai.app.game.DisplayLanguage
 import com.urikai.app.game.HudMode
 import com.urikai.app.game.LcdThemeMode
+import com.urikai.app.game.NotebookEntryId
 import com.urikai.app.game.PanelContrast
 import com.urikai.app.game.RelicId
 import com.urikai.app.game.RelicUpgradeGroup
@@ -126,6 +127,181 @@ class SettingsRepository(openStore: (String) -> KeyValueStore) {
 
     fun setFirstPlayTutorialSeen() {
         prefs.edit().putBoolean(KEY_FIRST_PLAY_TUTORIAL_SEEN, true).apply()
+        unlockNotebookRead(NotebookEntryId.HOW_TO_PLAY)
+    }
+
+    fun hasSeenLifeTutorial(): Boolean =
+        prefs.getBoolean(KEY_LIFE_TUTORIAL_SEEN, false)
+
+    fun setLifeTutorialSeen() {
+        prefs.edit().putBoolean(KEY_LIFE_TUTORIAL_SEEN, true).apply()
+        unlockNotebookRead(NotebookEntryId.LIFE)
+    }
+
+    fun hasSeenInvestOpenTutorial(): Boolean =
+        prefs.getBoolean(KEY_INVEST_OPEN_TUTORIAL_SEEN, false)
+
+    fun setInvestOpenTutorialSeen() {
+        prefs.edit().putBoolean(KEY_INVEST_OPEN_TUTORIAL_SEEN, true).apply()
+        unlockNotebookRead(NotebookEntryId.BALANCE)
+    }
+
+    fun hasSeenInvestCloseTip(): Boolean =
+        prefs.getBoolean(KEY_INVEST_CLOSE_TIP_SEEN, false)
+
+    fun setInvestCloseTipSeen() {
+        prefs.edit().putBoolean(KEY_INVEST_CLOSE_TIP_SEEN, true).apply()
+    }
+
+    fun hasSeenScrapbookTutorial(): Boolean =
+        prefs.getBoolean(KEY_SCRAPBOOK_TUTORIAL_SEEN, false)
+
+    fun setScrapbookTutorialSeen() {
+        prefs.edit().putBoolean(KEY_SCRAPBOOK_TUTORIAL_SEEN, true).apply()
+        unlockNotebookRead(NotebookEntryId.SCRAPBOOK)
+    }
+
+    fun hasSeenStampCornerHint(): Boolean =
+        prefs.getBoolean(KEY_STAMP_CORNER_HINT_SEEN, false)
+
+    fun setStampCornerHintSeen() {
+        prefs.edit().putBoolean(KEY_STAMP_CORNER_HINT_SEEN, true).apply()
+    }
+
+    fun hasSeenStampBackTutorial(): Boolean =
+        prefs.getBoolean(KEY_STAMP_BACK_TUTORIAL_SEEN, false)
+
+    fun setStampBackTutorialSeen() {
+        prefs.edit().putBoolean(KEY_STAMP_BACK_TUTORIAL_SEEN, true).apply()
+        unlockNotebookRead(NotebookEntryId.STAMPS)
+    }
+
+    fun hasSeenSumikaSheetTutorial(): Boolean =
+        prefs.getBoolean(KEY_SUMIKA_SHEET_TUTORIAL_SEEN, false)
+
+    fun setSumikaSheetTutorialSeen() {
+        prefs.edit().putBoolean(KEY_SUMIKA_SHEET_TUTORIAL_SEEN, true).apply()
+    }
+
+    /**
+     * カイがホームに住み着く導入を見たか。
+     * キー未作成は未視聴（ワイプ後の初回出金でもストーリーを出す）。
+     * [cashOutCount] は呼び出し互換のため残す。
+     */
+    @Suppress("UNUSED_PARAMETER")
+    fun hasSeenKaiHomeIntro(cashOutCount: Int): Boolean =
+        prefs.getBoolean(KEY_KAI_HOME_INTRO_SEEN, false)
+
+    fun setKaiHomeIntroSeen() {
+        prefs.edit().putBoolean(KEY_KAI_HOME_INTRO_SEEN, true).apply()
+    }
+
+    /**
+     * すみかグレード導入セリフを出すのに必要な最低出金回数。
+     * 0 = 制限なし。カイ引っ越しと同タイミングで解放されたとき、+1 プレイ後まで抑止する。
+     */
+    fun sumikaGradeIntroMinCashOut(): Int =
+        prefs.getInt(KEY_SUMIKA_GRADE_INTRO_MIN_CASHOUT, 0)
+
+    fun deferSumikaGradeIntroUntilCashOut(minCashOut: Int) {
+        if (minCashOut <= 0) return
+        val cur = sumikaGradeIntroMinCashOut()
+        val next = if (cur > 0) maxOf(cur, minCashOut) else minCashOut
+        prefs.edit().putInt(KEY_SUMIKA_GRADE_INTRO_MIN_CASHOUT, next).apply()
+    }
+
+    fun clearSumikaGradeIntroDefer() {
+        if (!prefs.contains(KEY_SUMIKA_GRADE_INTRO_MIN_CASHOUT)) return
+        prefs.edit().remove(KEY_SUMIKA_GRADE_INTRO_MIN_CASHOUT).apply()
+    }
+
+    fun getUnlockedNotebookIds(): Set<NotebookEntryId> {
+        migrateNotebookIfNeeded()
+        val raw = prefs.getStringSet(KEY_NOTEBOOK_UNLOCKED, emptySet()) ?: emptySet()
+        return raw.mapNotNull { NotebookEntryId.fromPersisted(it) }.toSet()
+    }
+
+    fun getReadNotebookIds(): Set<NotebookEntryId> {
+        migrateNotebookIfNeeded()
+        val raw = prefs.getStringSet(KEY_NOTEBOOK_READ, emptySet()) ?: emptySet()
+        return raw.mapNotNull { NotebookEntryId.fromPersisted(it) }.toSet()
+    }
+
+    fun hasUnreadNotebook(): Boolean {
+        val unlocked = getUnlockedNotebookIds()
+        val read = getReadNotebookIds()
+        return unlocked.any { it !in read }
+    }
+
+    /** サイレント解禁。すでに解禁済みなら何もしない。未読のまま追加。 */
+    fun unlockNotebookUnread(id: NotebookEntryId): Boolean {
+        migrateNotebookIfNeeded()
+        val unlocked = getUnlockedNotebookIds().map { it.name }.toMutableSet()
+        if (!unlocked.add(id.name)) return false
+        prefs.edit().putStringSet(KEY_NOTEBOOK_UNLOCKED, unlocked).apply()
+        return true
+    }
+
+    /** 強制チュート後など。解禁＋既読。 */
+    fun unlockNotebookRead(id: NotebookEntryId) {
+        migrateNotebookIfNeeded()
+        val unlocked = getUnlockedNotebookIds().map { it.name }.toMutableSet()
+        unlocked.add(id.name)
+        val read = getReadNotebookIds().map { it.name }.toMutableSet()
+        read.add(id.name)
+        prefs.edit()
+            .putStringSet(KEY_NOTEBOOK_UNLOCKED, unlocked)
+            .putStringSet(KEY_NOTEBOOK_READ, read)
+            .apply()
+    }
+
+    fun markNotebookRead(id: NotebookEntryId) {
+        migrateNotebookIfNeeded()
+        val unlocked = getUnlockedNotebookIds()
+        if (id !in unlocked) return
+        val read = getReadNotebookIds().map { it.name }.toMutableSet()
+        if (!read.add(id.name)) return
+        prefs.edit().putStringSet(KEY_NOTEBOOK_READ, read).apply()
+    }
+
+    fun getLifetimeMaxCombo(): Int = prefs.getInt(KEY_LIFETIME_MAX_COMBO, 0)
+
+    fun noteLifetimeMaxCombo(combo: Int) {
+        if (combo <= getLifetimeMaxCombo()) return
+        prefs.edit().putInt(KEY_LIFETIME_MAX_COMBO, combo).apply()
+    }
+
+    /** 広告除去 IAP 済み。 */
+    fun isAdsRemoved(): Boolean = prefs.getBoolean(KEY_ADS_REMOVED, false)
+
+    fun setAdsRemoved(removed: Boolean) {
+        prefs.edit().putBoolean(KEY_ADS_REMOVED, removed).apply()
+    }
+
+    /** インタースティシャル候補の出金回数カウンタ（頻度キャップ用）。 */
+    fun getAdEligibleCashOuts(): Int = prefs.getInt(KEY_AD_ELIGIBLE_CASHOUTS, 0)
+
+    fun bumpAdEligibleCashOut(): Int {
+        val next = getAdEligibleCashOuts() + 1
+        prefs.edit().putInt(KEY_AD_ELIGIBLE_CASHOUTS, next).apply()
+        return next
+    }
+
+    private fun migrateNotebookIfNeeded() {
+        if (prefs.getBoolean(KEY_NOTEBOOK_MIGRATED, false)) return
+        val editor = prefs.edit().putBoolean(KEY_NOTEBOOK_MIGRATED, true)
+        if (hasSeenFirstPlayTutorial()) {
+            val unlocked = (prefs.getStringSet(KEY_NOTEBOOK_UNLOCKED, emptySet()) ?: emptySet())
+                .toMutableSet()
+            val read = (prefs.getStringSet(KEY_NOTEBOOK_READ, emptySet()) ?: emptySet())
+                .toMutableSet()
+            unlocked.add(NotebookEntryId.HOW_TO_PLAY.name)
+            read.add(NotebookEntryId.HOW_TO_PLAY.name)
+            editor
+                .putStringSet(KEY_NOTEBOOK_UNLOCKED, unlocked)
+                .putStringSet(KEY_NOTEBOOK_READ, read)
+        }
+        editor.apply()
     }
 
     fun isSoundEnabled(): Boolean = prefs.getBoolean(KEY_SOUND_ENABLED, true)
@@ -180,7 +356,36 @@ class SettingsRepository(openStore: (String) -> KeyValueStore) {
         val next = getRelicStagePrefs().toMutableMap()
         next[group] = id
         val encoded = next.map { "${it.key.name}:${it.value.name}" }.toSet()
-        prefs.edit().putStringSet(KEY_RELIC_STAGE_PREFS, encoded).apply()
+        val disabled = getDisabledUpgradeGroups().map { it.name }.toMutableSet()
+        disabled.remove(group.name)
+        prefs.edit()
+            .putStringSet(KEY_RELIC_STAGE_PREFS, encoded)
+            .putStringSet(KEY_DISABLED_UPGRADE_GROUPS, disabled)
+            .apply()
+    }
+
+    /** 段階グループ効果を完全オフ（ホーム強化トグル用）。 */
+    fun getDisabledUpgradeGroups(): Set<RelicUpgradeGroup> {
+        val raw = prefs.getStringSet(KEY_DISABLED_UPGRADE_GROUPS, emptySet()) ?: emptySet()
+        return raw.mapNotNull { name -> RelicUpgradeGroup.entries.find { it.name == name } }.toSet()
+    }
+
+    fun setUpgradeGroupDisabled(group: RelicUpgradeGroup, disabled: Boolean) {
+        val next = getDisabledUpgradeGroups().map { it.name }.toMutableSet()
+        if (disabled) next.add(group.name) else next.remove(group.name)
+        prefs.edit().putStringSet(KEY_DISABLED_UPGRADE_GROUPS, next).apply()
+    }
+
+    /** 単体強化（LIFE 等）のオフ。 */
+    fun getDisabledRelics(): Set<RelicId> {
+        val raw = prefs.getStringSet(KEY_DISABLED_RELICS, emptySet()) ?: emptySet()
+        return raw.mapNotNull { RelicId.fromPersistedName(it) }.toSet()
+    }
+
+    fun setRelicDisabled(id: RelicId, disabled: Boolean) {
+        val next = getDisabledRelics().map { it.name }.toMutableSet()
+        if (disabled) next.add(id.name) else next.remove(id.name)
+        prefs.edit().putStringSet(KEY_DISABLED_RELICS, next).apply()
     }
 
     private fun parseDisplayLanguage(stored: String): DisplayLanguage {
@@ -212,10 +417,27 @@ class SettingsRepository(openStore: (String) -> KeyValueStore) {
         private const val KEY_SCRAPBOOK_SORT = "scrapbook_sort"
         private const val KEY_CONTENT_DISCLAIMER_SEEN = "content_disclaimer_seen"
         private const val KEY_FIRST_PLAY_TUTORIAL_SEEN = "first_play_tutorial_seen"
+        private const val KEY_LIFE_TUTORIAL_SEEN = "life_tutorial_seen"
+        private const val KEY_INVEST_OPEN_TUTORIAL_SEEN = "invest_open_tutorial_seen"
+        private const val KEY_INVEST_CLOSE_TIP_SEEN = "invest_close_tip_seen"
+        private const val KEY_SCRAPBOOK_TUTORIAL_SEEN = "scrapbook_tutorial_seen"
+        private const val KEY_STAMP_CORNER_HINT_SEEN = "stamp_corner_hint_seen"
+        private const val KEY_STAMP_BACK_TUTORIAL_SEEN = "stamp_back_tutorial_seen"
+        private const val KEY_KAI_HOME_INTRO_SEEN = "kai_home_intro_seen"
+        private const val KEY_SUMIKA_GRADE_INTRO_MIN_CASHOUT = "sumika_grade_intro_min_cashout"
+        private const val KEY_SUMIKA_SHEET_TUTORIAL_SEEN = "sumika_sheet_tutorial_seen"
+        private const val KEY_NOTEBOOK_UNLOCKED = "notebook_unlocked"
+        private const val KEY_NOTEBOOK_READ = "notebook_read"
+        private const val KEY_NOTEBOOK_MIGRATED = "notebook_migrated"
+        private const val KEY_LIFETIME_MAX_COMBO = "lifetime_max_combo"
         private const val KEY_SOUND_ENABLED = "sound_enabled"
         private const val KEY_SE_LEVEL = "se_level"
         private const val KEY_BGM_LEVEL = "bgm_level"
         private const val KEY_HAPTIC_ENABLED = "haptic_enabled"
         private const val KEY_RELIC_STAGE_PREFS = "relic_stage_prefs"
+        private const val KEY_DISABLED_UPGRADE_GROUPS = "disabled_upgrade_groups"
+        private const val KEY_DISABLED_RELICS = "disabled_relics"
+        private const val KEY_ADS_REMOVED = "ads_removed"
+        private const val KEY_AD_ELIGIBLE_CASHOUTS = "ad_eligible_cashouts"
     }
 }

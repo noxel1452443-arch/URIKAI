@@ -10,7 +10,9 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,24 +40,26 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import com.urikai.app.data.AssetRankBoard
-import com.urikai.app.game.ChartLineStyle
-import com.urikai.app.game.LcdThemeMode
 import com.urikai.app.game.RelicFrameStyle
 import com.urikai.app.game.RelicId
-import com.urikai.app.game.RelicKind
-import com.urikai.app.game.RelicUpgradeGroup
 import com.urikai.app.game.SyncRating
 import com.urikai.app.game.UiStrings
 import com.urikai.app.game.frameStyle
+import com.urikai.app.res.Res
+import com.urikai.app.res.allDrawableResources
 import com.urikai.app.ui.theme.Ink
 import com.urikai.app.ui.theme.InkFaint
 import com.urikai.app.ui.theme.InkMuted
@@ -63,50 +67,9 @@ import com.urikai.app.ui.theme.LcdBackground
 import com.urikai.app.ui.theme.LcdInvertedText
 import com.urikai.app.ui.theme.LocalDisplayLanguage
 import com.urikai.app.ui.theme.PixelFont
-import androidx.compose.foundation.border
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.draw.drawWithContent
-import kotlin.math.sin
-
-/** 報酬箱の1行（単独 or 段階グループ）。 */
-private sealed class RelicBoxItem {
-    data class Single(val id: RelicId) : RelicBoxItem()
-    data class Group(
-        val group: RelicUpgradeGroup,
-        val owned: List<RelicId>,
-        val viewing: RelicId
-    ) : RelicBoxItem()
-}
-
-private fun buildRelicBoxItems(
-    claimed: List<RelicId>,
-    stagePrefs: Map<RelicUpgradeGroup, RelicId>
-): List<RelicBoxItem> {
-    val claimedSet = claimed.toSet()
-    val seenGroups = mutableSetOf<RelicUpgradeGroup>()
-    val items = mutableListOf<RelicBoxItem>()
-    for (id in claimed) {
-        val group = RelicUpgradeGroup.of(id)
-        if (group != null) {
-            if (group in seenGroups) continue
-            seenGroups.add(group)
-            val owned = group.members.filter { it in claimedSet }
-            if (owned.isEmpty()) continue
-            if (owned.size == 1) {
-                items.add(RelicBoxItem.Single(owned.first()))
-            } else {
-                val viewing = stagePrefs[group]?.takeIf { it in owned }
-                    ?: owned.maxBy { it.threshold }
-                items.add(RelicBoxItem.Group(group, owned, viewing))
-            }
-        } else {
-            items.add(RelicBoxItem.Single(id))
-        }
-    }
-    return items
-}
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.imageResource
 
 /**
  * リザルト導入後の短い獲得ポップ。受取自体は START 右下のまま。
@@ -248,57 +211,6 @@ fun RelicGiftBadge(
     }
 }
 
-/** 受け取り済みレリックが1つ以上あるときだけ表示。LCD色の宝箱（白背景なし）。 */
-@Composable
-fun RelicBoxButton(
-    unlocked: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    if (!unlocked) return
-    val ink = Ink
-    val bg = LcdBackground
-    LcdChromeChip(
-        onClick = onClick,
-        modifier = modifier
-    ) {
-        Canvas(modifier = Modifier.size(28.dp)) {
-            val w = size.width
-            val h = size.height
-            drawRect(
-                color = ink,
-                topLeft = Offset(w * 0.12f, h * 0.52f),
-                size = Size(w * 0.76f, h * 0.36f)
-            )
-            drawRect(
-                color = bg,
-                topLeft = Offset(w * 0.18f, h * 0.58f),
-                size = Size(w * 0.64f, h * 0.24f)
-            )
-            drawRect(
-                color = ink,
-                topLeft = Offset(w * 0.10f, h * 0.22f),
-                size = Size(w * 0.80f, h * 0.32f)
-            )
-            drawRect(
-                color = bg,
-                topLeft = Offset(w * 0.16f, h * 0.28f),
-                size = Size(w * 0.68f, h * 0.18f)
-            )
-            drawRect(
-                color = ink,
-                topLeft = Offset(w * 0.44f, h * 0.42f),
-                size = Size(w * 0.12f, h * 0.18f)
-            )
-            drawRect(
-                color = bg,
-                topLeft = Offset(w * 0.47f, h * 0.48f),
-                size = Size(w * 0.06f, h * 0.06f)
-            )
-        }
-    }
-}
-
 @Composable
 fun RelicClaimOverlay(
     relic: RelicId,
@@ -325,7 +237,7 @@ fun RelicClaimOverlay(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            RelicGlyph(relic = relic, large = true)
+            ClaimUnlockArt(relic = relic)
             Text(
                 text = UiStrings.relicName(relic, lang),
                 color = Ink,
@@ -348,6 +260,14 @@ fun RelicClaimOverlay(
                 fontSize = 12.sp,
                 fontFamily = PixelFont,
                 lineHeight = 17.sp,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = UiStrings.relicPlacementHint(relic, lang),
+                color = InkFaint,
+                fontSize = 10.sp,
+                fontFamily = PixelFont,
+                lineHeight = 14.sp,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(4.dp))
@@ -376,254 +296,49 @@ fun RelicClaimOverlay(
     }
 }
 
+/** 受取画面のビジュアル（PLAY=切手、他=簡易グリフ）。 */
 @Composable
-fun RelicBoxOverlay(
-    claimed: List<RelicId>,
-    lcdTheme: LcdThemeMode,
-    chartLineStyle: ChartLineStyle,
-    stagePrefs: Map<RelicUpgradeGroup, RelicId> = emptyMap(),
-    onToggleVisual: (RelicId) -> Unit,
-    onCycleStage: (RelicUpgradeGroup) -> Unit = {},
-    onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val lang = LocalDisplayLanguage.current
-    val items = remember(claimed, stagePrefs) {
-        buildRelicBoxItems(claimed, stagePrefs)
-    }
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Ink.copy(alpha = 0.45f))
-            .clickable(onClick = onDismiss),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth(0.92f)
-                .fillMaxSize(0.82f)
-                .lcdDoubleBorder()
-                .background(LcdBackground)
-                .clickable(enabled = false, onClick = {})
-                .padding(12.dp)
-        ) {
-            Text(
-                text = UiStrings.relicBoxLabel(lang),
-                color = Ink,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = PixelFont,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items.forEach { item ->
-                    when (item) {
-                        is RelicBoxItem.Single -> RelicBoxRow(
-                            relic = item.id,
-                            lcdTheme = lcdTheme,
-                            chartLineStyle = chartLineStyle,
-                            stageLabel = null,
-                            onToggleVisual = { onToggleVisual(item.id) },
-                            onCycleStage = null
-                        )
-                        is RelicBoxItem.Group -> RelicBoxRow(
-                            relic = item.viewing,
-                            lcdTheme = lcdTheme,
-                            chartLineStyle = chartLineStyle,
-                            stageLabel = "${item.owned.indexOf(item.viewing) + 1}/${item.owned.size}",
-                            onToggleVisual = { onToggleVisual(item.viewing) },
-                            onCycleStage = { onCycleStage(item.group) }
-                        )
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = UiStrings.relicClose(lang),
-                color = Ink,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = PixelFont,
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .lcdBorder()
-                    .uiClickable(kind = UiSoundKind.SELECT, onClick = onDismiss)
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            )
-        }
-    }
-}
-
-@Composable
-private fun RelicBoxRow(
-    relic: RelicId,
-    lcdTheme: LcdThemeMode,
-    chartLineStyle: ChartLineStyle,
-    stageLabel: String?,
-    onToggleVisual: () -> Unit,
-    onCycleStage: (() -> Unit)?
-) {
-    val lang = LocalDisplayLanguage.current
-    val canToggle = relic.kind == RelicKind.VISUAL
-    val isActive = when (relic) {
-        RelicId.PAPER -> lcdTheme == LcdThemeMode.E_PAPER
-        RelicId.DARK -> lcdTheme == LcdThemeMode.E_PAPER_INVERT
-        RelicId.SMOOTH -> chartLineStyle == ChartLineStyle.SMOOTH
-        else -> false
-    }
-    val actionLabel = when {
-        onCycleStage != null -> UiStrings.relicCycleStage(lang)
-        !canToggle -> null
-        relic == RelicId.SMOOTH && isActive -> UiStrings.relicRevertToStep(lang)
-        (relic == RelicId.PAPER || relic == RelicId.DARK) && isActive -> UiStrings.relicRevertToGb(lang)
-        else -> UiStrings.relicApply(lang)
-    }
-    val actionClick = when {
-        onCycleStage != null -> onCycleStage
-        canToggle -> onToggleVisual
-        else -> null
-    }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .then(relicFrameModifier(relic.frameStyle()))
-            .padding(horizontal = 8.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        RelicGlyph(relic = relic, large = false)
-        Column(modifier = Modifier.weight(1f)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Text(
-                    text = UiStrings.relicName(relic, lang),
-                    color = Ink,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = PixelFont
-                )
-                if (stageLabel != null) {
-                    Text(
-                        text = stageLabel,
-                        color = InkMuted,
-                        fontSize = 9.sp,
-                        fontFamily = PixelFont
-                    )
-                }
-            }
-            Text(
-                text = UiStrings.relicThresholdQuiet(relic.threshold, lang),
-                color = InkFaint,
-                fontSize = 9.sp,
-                fontFamily = PixelFont
-            )
-            Text(
-                text = UiStrings.relicDescription(relic, lang),
-                color = InkMuted,
-                fontSize = 10.sp,
-                fontFamily = PixelFont,
-                lineHeight = 13.sp
-            )
-        }
-        // 適用／切替ボタンの有無で行レイアウトがズレないよう幅を確保
+private fun ClaimUnlockArt(relic: RelicId) {
+    val stampKey = claimStampArtKey(relic)
+    val res = stampKey?.let { Res.allDrawableResources[it] }
+    if (res != null) {
+        val paper = LcdBackground
         Box(
-            modifier = Modifier.width(100.dp),
-            contentAlignment = Alignment.CenterEnd
+            modifier = Modifier.size(88.dp),
+            contentAlignment = Alignment.Center
         ) {
-            if (actionLabel != null && actionClick != null) {
-                Text(
-                    text = actionLabel,
-                    color = Ink,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = PixelFont,
-                    modifier = Modifier
-                        .lcdBorder()
-                        .uiClickable(kind = UiSoundKind.SELECT, onClick = actionClick)
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun relicFrameModifier(style: RelicFrameStyle): Modifier {
-    val ink = Ink
-    val bg = LcdBackground
-    return when (style) {
-        RelicFrameStyle.THEME -> {
-            Modifier
-                .border(1.dp, ink.copy(alpha = 0.55f), RectangleShape)
-                .border(3.dp, ink.copy(alpha = 0.2f), RectangleShape)
-                .padding(1.dp)
-                .background(bg)
-        }
-        RelicFrameStyle.TIER1 -> {
-            Modifier
-                .lcdBorder()
-                .background(bg)
-        }
-        RelicFrameStyle.TIER2 -> {
-            val shimmer = rememberInfiniteTransition(label = "relic_tier2")
-            val phase by shimmer.animateFloat(
-                initialValue = 0f,
-                targetValue = 1f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(1600, easing = LinearEasing),
-                    repeatMode = RepeatMode.Restart
-                ),
-                label = "relic_tier2_phase"
+            Box(
+                modifier = Modifier
+                    .fillMaxSize(0.88f)
+                    .background(paper)
             )
-            Modifier
-                .border(2.dp, ink, RectangleShape)
-                .padding(2.dp)
-                .border(1.dp, ink.copy(alpha = 0.45f), RectangleShape)
-                .background(bg)
-                .drawWithContent {
-                    drawContent()
-                    val w = size.width
-                    val h = size.height
-                    val x = -w * 0.3f + (w * 1.6f) * phase
-                    drawRect(
-                        brush = Brush.linearGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                ink.copy(alpha = 0.18f),
-                                Color.Transparent
-                            ),
-                            start = Offset(x, 0f),
-                            end = Offset(x + w * 0.35f, h)
-                        ),
-                        size = size
-                    )
-                    // 角の金っぽい点滅
-                    val spark = (0.35f + 0.65f * ((sin(phase * kotlin.math.PI * 2).toFloat() + 1f) / 2f))
-                    drawCircle(
-                        color = ink.copy(alpha = 0.55f * spark),
-                        radius = 3.5f,
-                        center = Offset(6f, 6f)
-                    )
-                    drawCircle(
-                        color = ink.copy(alpha = 0.4f * spark),
-                        radius = 2.5f,
-                        center = Offset(w - 6f, h - 6f)
-                    )
-                }
+            Image(
+                bitmap = imageResource(res),
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                filterQuality = FilterQuality.None,
+                colorFilter = ColorFilter.tint(Ink),
+                modifier = Modifier.fillMaxSize(0.92f)
+            )
         }
+    } else {
+        RelicGlyph(relic = relic, large = true)
     }
 }
 
-/** レリックごとの簡易グリフ（ユニーク見え）。 */
+private fun claimStampArtKey(relic: RelicId): String? = when (relic) {
+    RelicId.COOLDOWN_25 -> "stamp_cooldown_t1"
+    RelicId.COOLDOWN_50 -> "stamp_cooldown_t2"
+    RelicId.LAG_25 -> "stamp_lag_t1"
+    RelicId.LAG_50 -> "stamp_lag_t2"
+    RelicId.PNL_BONUS_120 -> "stamp_pnl_t1"
+    RelicId.PNL_BONUS_150 -> "stamp_pnl_t2"
+    RelicId.MISS_LIFE_1 -> "stamp_life_t1"
+    RelicId.MISS_COMBO_HEAL -> "stamp_combo_t1"
+    else -> null
+}
+
+/** レリックごとの簡易グリフ（LOOK / INVEST 受取用）。 */
 @Composable
 fun RelicGlyph(relic: RelicId, large: Boolean) {
     val mark = when (relic) {
@@ -822,6 +537,10 @@ fun BalanceHistoryOverlay(
     history: List<com.urikai.app.data.BalancePoint>,
     entries: List<com.urikai.app.data.SessionPnlHistoryEntry>,
     playCount: Int,
+    claimedUnlocks: List<RelicId> = emptyList(),
+    pendingUnlocks: List<RelicId> = emptyList(),
+    planYieldMult: Float = 1f,
+    maxAwayDays: Int = 30,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -869,25 +588,37 @@ fun BalanceHistoryOverlay(
             ) {
                 BalanceSummary(balance = balance, peakBalance = peakBalance)
                 Spacer(modifier = Modifier.height(6.dp))
-                BalanceHistoryChart(
-                    history = history,
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(130.dp)
                         .lcdBorder()
-                        .padding(horizontal = 6.dp, vertical = 8.dp)
-                )
+                ) {
+                    AccountMilestoneStrip(
+                        peakBalance = peakBalance,
+                        claimed = claimedUnlocks.toSet(),
+                        pending = pendingUnlocks.toSet()
+                    )
+                    BalanceHistoryChart(
+                        history = history,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(100.dp)
+                            .padding(horizontal = 6.dp, vertical = 4.dp)
+                    )
+                }
                 Spacer(modifier = Modifier.height(10.dp))
                 InvestPlanPicker(
                     selected = investPlan,
                     peakBalance = peakBalance,
-                    onSelect = onSelectInvestPlan
+                    onSelect = onSelectInvestPlan,
+                    planYieldMult = planYieldMult,
+                    maxAwayDays = maxAwayDays
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = UiStrings.sessionPnlHistoryTitle(lang),
                     color = InkMuted,
-                    fontSize = 11.sp,
+                    fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = PixelFont
                 )

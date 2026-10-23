@@ -31,6 +31,14 @@ private fun jsShareText(text: String): Unit = js(
     }"""
 )
 
+private fun jsReload(): Unit = js("{ try { window.location.reload(); } catch (e) {} }")
+
+private fun jsOpenStoreListing(): Unit = js(
+    """{ try {
+      window.open('https://play.google.com/store/apps/details?id=com.urikai.app', '_blank');
+    } catch (e) {} }"""
+)
+
 /** 横長画面（PC）では縦長スマホ比率の枠に収める。 */
 private const val MAX_WIDTH_PER_HEIGHT = 0.56f
 
@@ -39,12 +47,17 @@ private val WEB_PRIMARY_BUTTON_HEIGHT = 80.dp
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
+    val openStore = { name: String -> LocalStorageStore(name) }
+    com.urikai.app.data.ProgressFreshStart.applyIfNeeded(openStore)
     val services = PlatformServices(
-        openStore = { name -> LocalStorageStore(name) },
+        openStore = openStore,
         sound = WebSoundBackend,
         haptics = WebHaptics,
         bgm = WebBgm,
+        enableAdFeatures = false,
         shareText = { text, _ -> jsShareText(text) },
+        restartApp = { jsReload() },
+        openStoreListing = { jsOpenStoreListing() },
     )
     ComposeViewport("composeApp") {
         BoxWithConstraints(

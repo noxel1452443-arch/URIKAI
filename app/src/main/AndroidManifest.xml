@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- Play Console でアプリ内商品を作るために必須。Billing Library でも付くが明示する。 -->
+    <uses-permission android:name="com.android.vending.BILLING" />
 
     <application
         android:allowBackup="false"
@@ -9,6 +12,10 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.URIKAI">
+        <!-- local.properties の admob.app.id。未設定時は Google 公式テスト ID。 -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="${admobAppId}" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

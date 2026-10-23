@@ -83,7 +83,8 @@ fun LcdChromeChip(
 }
 
 /**
- * Balatro風タイトルカード: ドラッグで傾き、大きく弾いたらコールバック。
+ * タイトルカード: 軽い押し込み＋フリックでTipsシャッフル。
+ * 大きなグラグラはやめ、文字いじり（UriKaiTitleLetters）を主役にする。
  */
 fun Modifier.lcdTitleCard(
     onFlingShuffle: () -> Unit,
@@ -97,7 +98,7 @@ fun Modifier.lcdTitleCard(
     pointerInput(Unit) {
         detectTapGestures(
             onPress = {
-                scope.launch { scale.animateTo(0.96f, spring(stiffness = 800f)) }
+                scope.launch { scale.animateTo(0.98f, spring(stiffness = 800f)) }
                 tryAwaitRelease()
                 scope.launch { scale.animateTo(1f, spring(stiffness = 450f, dampingRatio = 0.5f)) }
             },
@@ -106,20 +107,20 @@ fun Modifier.lcdTitleCard(
     }.pointerInput(onFlingShuffle) {
         detectDragGestures(
             onDragEnd = {
-                val flung = abs(offsetX.value) > 48f || abs(offsetY.value) > 48f || abs(rot.value) > 8f
+                val flung = abs(offsetX.value) > 28f || abs(offsetY.value) > 28f
                 if (flung) onFlingShuffle()
                 scope.launch {
-                    offsetX.animateTo(0f, spring(stiffness = 280f, dampingRatio = 0.55f))
-                    offsetY.animateTo(0f, spring(stiffness = 280f, dampingRatio = 0.55f))
-                    rot.animateTo(0f, spring(stiffness = 280f, dampingRatio = 0.55f))
+                    offsetX.animateTo(0f, spring(stiffness = 320f, dampingRatio = 0.6f))
+                    offsetY.animateTo(0f, spring(stiffness = 320f, dampingRatio = 0.6f))
+                    rot.animateTo(0f, spring(stiffness = 320f, dampingRatio = 0.6f))
                 }
             },
             onDrag = { change, drag ->
                 change.consume()
                 scope.launch {
-                    offsetX.snapTo((offsetX.value + drag.x).coerceIn(-56f, 56f))
-                    offsetY.snapTo((offsetY.value + drag.y).coerceIn(-40f, 40f))
-                    rot.snapTo((rot.value + drag.x * 0.12f).coerceIn(-14f, 14f))
+                    offsetX.snapTo((offsetX.value + drag.x).coerceIn(-22f, 22f))
+                    offsetY.snapTo((offsetY.value + drag.y).coerceIn(-16f, 16f))
+                    rot.snapTo((rot.value + drag.x * 0.06f).coerceIn(-5f, 5f))
                 }
             }
         )

@@ -32,6 +32,7 @@ object ChartCsvParser {
         "pivot_timing",
         "macro_shape",
         "base_price",
+        "saga_ep",
         "second",
         "price_ratio"
     )
@@ -76,8 +77,9 @@ object ChartCsvParser {
                 pivotTiming = cols[23],
                 macroShape = cols[24],
                 basePrice = cols[25].toInt(),
-                second = cols[26].toInt(),
-                priceRatio = cols[27].toFloat()
+                sagaEp = cols[26].toInt(),
+                second = cols[27].toInt(),
+                priceRatio = cols[28].toFloat()
             )
             rowsByStage.getOrPut(row.stageId) { mutableListOf() }.add(row)
         }
@@ -115,6 +117,7 @@ object ChartCsvParser {
                 pivotTiming = meta.pivotTiming,
                 macroShape = meta.macroShape,
                 basePrice = meta.basePrice,
+                sagaEp = meta.sagaEp,
                 priceRatios = FloatArray(StageChart.POINT_COUNT) { i -> sorted[i].priceRatio }
             )
         }
@@ -178,6 +181,7 @@ object ChartCsvParser {
         val pivotTiming: String,
         val macroShape: String,
         val basePrice: Int,
+        val sagaEp: Int,
         val second: Int,
         val priceRatio: Float
     )

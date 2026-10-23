@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.urikai.app.game.GameViewModel
@@ -47,6 +48,7 @@ import com.urikai.app.game.UiStrings
 import com.urikai.app.ui.theme.Ink
 import com.urikai.app.ui.theme.LcdBackground
 import com.urikai.app.ui.theme.LcdInvertedText
+import com.urikai.app.ui.theme.LocalDisplayLanguage
 import com.urikai.app.ui.theme.PixelFont
 import kotlin.math.cos
 import kotlin.math.min
@@ -153,7 +155,9 @@ fun HealthNanotechBar(
     }
 
     Column(
-        modifier = modifier.graphicsLayer { translationX = barShake.value },
+        modifier = modifier
+            .guideSpotlightTarget(GuideSpotlightTarget.LIFE_ORBS)
+            .graphicsLayer { translationX = barShake.value },
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         Row(
@@ -386,23 +390,43 @@ fun RetireOverlay(
         contentAlignment = Alignment.Center
     ) {
         if (phase == RetirePhase.BANNER) {
-            Text(
-                text = UiStrings.retireBanner(),
-                color = LcdBackground,
-                fontSize = 42.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = PixelFont,
-                letterSpacing = 6.sp,
+            val lang = LocalDisplayLanguage.current
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier
-                    .padding(horizontal = 16.dp)
                     .graphicsLayer {
                         alpha = bannerAlpha.value * pulseA
                         scaleX = bannerScale.value.coerceAtMost(1.08f)
                         scaleY = bannerScale.value.coerceAtMost(1.08f)
                     }
-                    .border(3.dp, LcdBackground, RectangleShape)
-                    .padding(horizontal = 22.dp, vertical = 12.dp)
-            )
+            ) {
+                GuideBuddyFace(
+                    mood = GuideBuddyMood.THINK,
+                    size = 88.dp
+                )
+                Text(
+                    text = UiStrings.retireBanner(),
+                    color = LcdBackground,
+                    fontSize = 42.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = PixelFont,
+                    letterSpacing = 6.sp,
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .border(3.dp, LcdBackground, RectangleShape)
+                        .padding(horizontal = 22.dp, vertical = 12.dp)
+                )
+                Text(
+                    text = UiStrings.kaiRetireLine(lang),
+                    color = LcdBackground,
+                    fontSize = 12.sp,
+                    fontFamily = PixelFont,
+                    lineHeight = 17.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 24.dp)
+                )
+            }
         }
     }
 }

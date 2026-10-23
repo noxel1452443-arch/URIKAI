@@ -63,13 +63,75 @@ object NoBgm : BgmController {
     override fun release() {}
 }
 
+/**
+ * 広告・課金ゲート。
+ * M1: スタブ可。M2 で AdMob / Play Billing を接続。
+ */
+interface MonetizationController {
+    /** リザルト→ホーム前。広告なし／未準備ならすぐ [onContinue]。 */
+    fun maybeShowInterstitial(adsRemoved: Boolean, onContinue: () -> Unit)
+
+    /**
+     * リワード広告（寝床クールダウン短縮など）。
+     * [adsRemoved] なら視聴なしで成功扱い。未準備／失敗は false。
+     */
+    fun showRewarded(adsRemoved: Boolean, onResult: (rewarded: Boolean) -> Unit)
+
+    /** 広告除去 IAP。成功時 true。 */
+    fun purchaseRemoveAds(onResult: (purchased: Boolean) -> Unit)
+
+    /** 購入復元。 */
+    fun restorePurchases(onResult: (adsRemoved: Boolean) -> Unit)
+
+    /** 広告除去の表示価格（Billing 未取得時はフォールバック）。 */
+    fun removeAdsPriceLabel(): String = "¥290"
+
+    /**
+     * MobileAds 初期化後に呼ぶ。起動直後の同時プリロードを避ける。
+     * 既定は何もしない（スタブ／非 Android）。
+     */
+    fun warmUpAds() {}
+
+    fun release() {}
+}
+
+object NoMonetization : MonetizationController {
+    override fun maybeShowInterstitial(adsRemoved: Boolean, onContinue: () -> Unit) {
+        onContinue()
+    }
+
+    override fun showRewarded(adsRemoved: Boolean, onResult: (rewarded: Boolean) -> Unit) {
+        onResult(adsRemoved)
+    }
+
+    override fun purchaseRemoveAds(onResult: (purchased: Boolean) -> Unit) {
+        onResult(false)
+    }
+
+    override fun restorePurchases(onResult: (adsRemoved: Boolean) -> Unit) {
+        onResult(false)
+    }
+}
+
 /** プラットフォームごとの実装をまとめて ViewModel に渡す。 */
 class PlatformServices(
     val openStore: (name: String) -> KeyValueStore,
     val sound: SoundBackend = NoSound,
     val haptics: HapticBackend = NoHaptics,
     val bgm: BgmController = NoBgm,
+    val monetization: MonetizationController = NoMonetization,
     val isDebugBuild: Boolean = false,
+    /**
+     * 広告・リワード導線（インタースティシャル／半額／給料2倍／広告除去購入）を出すか。
+     * Web（GitHub Pages）では false。
+     */
+    val enableAdFeatures: Boolean = true,
+    /** Android versionCode（進捗マイグレーション判定用）。Web は 0 可。 */
+    val appVersionCode: Int = 0,
     /** 共有テキストを OS の共有 UI 等へ渡す。title は選択画面の見出し。 */
     val shareText: (text: String, title: String) -> Unit = { _, _ -> },
+    /** デバッグ用: 進捗ワイプ後にプロセスを立ち上げ直す。 */
+    val restartApp: () -> Unit = {},
+    /** ストアのアプリページ（レビュー投稿）を開く。 */
+    val openStoreListing: () -> Unit = {},
 )

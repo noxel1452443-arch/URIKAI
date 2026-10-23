@@ -110,6 +110,7 @@ class StageDef:
     history_comment: str
     history_comment_en: str
     seed: int
+    saga_ep: int
     tier: str
     keyframes: list[tuple[int, float]]
 
@@ -155,6 +156,16 @@ def normalize_tier(raw: str | None) -> str:
     if tier not in ALLOWED_TIERS:
         raise ValueError(f"tier must be one of {ALLOWED_TIERS} or empty, got {raw!r}")
     return tier
+
+
+def normalize_saga_ep(raw: str | None, stage_id: str) -> int:
+    try:
+        ep = int((raw or "1").strip() or "1")
+    except ValueError as exc:
+        raise ValueError(f"{stage_id}: saga_ep must be an integer, got {raw!r}") from exc
+    if ep < 1:
+        raise ValueError(f"{stage_id}: saga_ep must be >= 1, got {ep}")
+    return ep
 
 
 def normalize_calendar_range(start: str, end: str, stage_id: str) -> tuple[str, str]:
@@ -332,6 +343,7 @@ def load_stages_from_content() -> list[StageDef]:
                 history_comment=row["history_comment"].strip(),
                 history_comment_en=en_fields["history_comment_en"],
                 seed=int(row["seed"]),
+                saga_ep=normalize_saga_ep(row.get("saga_ep"), sid),
                 tier=tier,
                 keyframes=kfs,
             )
@@ -346,16 +358,29 @@ def load_stages_from_content() -> list[StageDef]:
                 f"for the same instrument {s.instrument_name!r}"
             )
 
+    by_instrument: dict[str, list[StageDef]] = {}
+    for s in stages:
+        by_instrument.setdefault(s.instrument_name, []).append(s)
+    for instrument, group in by_instrument.items():
+        eps = sorted(x.saga_ep for x in group)
+        if len(eps) != len(set(eps)):
+            raise ValueError(f"{instrument!r}: duplicate saga_ep in {[x.stage_id for x in group]}")
+        if eps[0] != 1 or eps != list(range(1, len(eps) + 1)):
+            raise ValueError(
+                f"{instrument!r}: saga_ep must be contiguous from 1, got {eps} "
+                f"({[x.stage_id for x in group]})"
+            )
+
     orphan = set(kf_by_stage) - seen
     if orphan:
         raise ValueError(f"keyframes.csv has unknown stage_id(s): {sorted(orphan)}")
 
     standard = [s for s in stages if s.tier == "STANDARD"]
     extreme = [s for s in stages if s.tier == "EXTREME"]
-    if len(standard) != 30:
-        raise ValueError(f"expected 30 standard stages, got {len(standard)}")
-    if len(extreme) != 15:
-        raise ValueError(f"expected 15 extreme stages, got {len(extreme)}")
+    if len(standard) < 30:
+        raise ValueError(f"expected at least 30 standard stages, got {len(standard)}")
+    if len(extreme) < 15:
+        raise ValueError(f"expected at least 15 extreme stages, got {len(extreme)}")
 
     if not stages:
         raise ValueError("No stages loaded from content/")
@@ -583,6 +608,7 @@ def main() -> None:
                     stage.pivot_timing,
                     stage.macro_shape,
                     stage.base_price,
+                    stage.saga_ep,
                     sec,
                     f"{p:.2f}",
                 ]
@@ -619,6 +645,7 @@ def main() -> None:
                 "pivot_timing",
                 "macro_shape",
                 "base_price",
+                "saga_ep",
                 "second",
                 "price_ratio",
             ]

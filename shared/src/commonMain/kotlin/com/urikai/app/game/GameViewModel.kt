@@ -146,12 +146,40 @@ class GameViewModel(
 
     private val _adsRemoved = MutableStateFlow(settingsRepository.isAdsRemoved())
     val adsRemoved: StateFlow<Boolean> = _adsRemoved.asStateFlow()
+    /** Web では false（広告・リワード導線なし）。 */
+    val enableAdFeatures: Boolean get() = services.enableAdFeatures
+
+    private val _removeAdsPriceLabel = MutableStateFlow(services.monetization.removeAdsPriceLabel())
+    val removeAdsPriceLabel: StateFlow<String> = _removeAdsPriceLabel.asStateFlow()
 
     private val _sumikaLevel = MutableStateFlow(lifetimePnlRepository.getSumikaLevel())
     val sumikaLevel: StateFlow<Int> = _sumikaLevel.asStateFlow()
 
     private val _sumikaPendingYen = MutableStateFlow(lifetimePnlRepository.getSumikaPendingYen())
     val sumikaPendingYen: StateFlow<Long> = _sumikaPendingYen.asStateFlow()
+
+    private val _sumikaUpgradeDiscountStacks =
+        MutableStateFlow(lifetimePnlRepository.getSumikaUpgradeDiscountStacks())
+    val sumikaUpgradeDiscountStacks: StateFlow<Int> = _sumikaUpgradeDiscountStacks.asStateFlow()
+
+    private val _sumikaDiscountUsesLeft =
+        MutableStateFlow(lifetimePnlRepository.sumikaDiscountUsesLeftToday())
+    val sumikaDiscountUsesLeft: StateFlow<Int> = _sumikaDiscountUsesLeft.asStateFlow()
+
+    private val _sumikaPayDoubled =
+        MutableStateFlow(lifetimePnlRepository.isSumikaPayDoubled())
+    val sumikaPayDoubled: StateFlow<Boolean> = _sumikaPayDoubled.asStateFlow()
+
+    private val _sumikaDoubleUsesLeft =
+        MutableStateFlow(lifetimePnlRepository.sumikaDoubleUsesLeftToday())
+    val sumikaDoubleUsesLeft: StateFlow<Int> = _sumikaDoubleUsesLeft.asStateFlow()
+
+    private val _sumikaRewardBusy = MutableStateFlow(false)
+    val sumikaRewardBusy: StateFlow<Boolean> = _sumikaRewardBusy.asStateFlow()
+
+    /** 半額適用直前の値段カウントダウン（広告クローズ後〜反映まで）。 */
+    private val _sumikaCostReveal = MutableStateFlow<SumikaCostReveal?>(null)
+    val sumikaCostReveal: StateFlow<SumikaCostReveal?> = _sumikaCostReveal.asStateFlow()
 
     private val _sumikaUnlockedGrade = MutableStateFlow(lifetimePnlRepository.getSumikaUnlockedGrade())
     val sumikaUnlockedGrade: StateFlow<Int> = _sumikaUnlockedGrade.asStateFlow()
@@ -181,9 +209,17 @@ class GameViewModel(
     private val _pendingRelics = MutableStateFlow(lifetimePnlRepository.getPendingRelics())
     val pendingRelics: StateFlow<List<RelicId>> = _pendingRelics.asStateFlow()
 
-    /** 今回の出金で新たに受取待ちになったレリック（RESULT誘導ポップ用）。 */
-    private val _newlyPendingRelics = MutableStateFlow<List<RelicId>>(emptyList())
+    /** 今回の出金で新たに受取待ちになったレリック（ホーム受取通知。永続復元あり）。 */
+    private val _newlyPendingRelics =
+        MutableStateFlow(lifetimePnlRepository.getNewlyPendingToast())
     val newlyPendingRelics: StateFlow<List<RelicId>> = _newlyPendingRelics.asStateFlow()
+
+    /**
+     * カイ引っ越しと同着でほしぐさ導入が来たとき、出金回数ゲートで抑止中か。
+     * true のあいだは [sumikaPendingGrade] があってもグレード導入セリフを出さない。
+     */
+    private val _sumikaGradeIntroHeld = MutableStateFlow(false)
+    val sumikaGradeIntroHeld: StateFlow<Boolean> = _sumikaGradeIntroHeld.asStateFlow()
 
     private val _resultIntroFinished = MutableStateFlow(false)
     val resultIntroFinished: StateFlow<Boolean> = _resultIntroFinished.asStateFlow()
@@ -237,6 +273,30 @@ class GameViewModel(
     private val _showStampBackTutorial = MutableStateFlow(false)
     val showStampBackTutorial: StateFlow<Boolean> = _showStampBackTutorial.asStateFlow()
 
+    /** 初回出金後・カイ引っ越し導入。 */
+    private val _showKaiHomeIntro = MutableStateFlow(false)
+    val showKaiHomeIntro: StateFlow<Boolean> = _showKaiHomeIntro.asStateFlow()
+
+    /** すみかシート初回オープン時の3枚ガイド。 */
+    private val _showSumikaSheetTutorial = MutableStateFlow(false)
+    val showSumikaSheetTutorial: StateFlow<Boolean> = _showSumikaSheetTutorial.asStateFlow()
+
+    /** カイ住み開始後の START バン演出中。 */
+    private val _showStartBang = MutableStateFlow(false)
+    val showStartBang: StateFlow<Boolean> = _showStartBang.asStateFlow()
+
+    /** ホーム→プレイのエンカウントワイプ中（まだ prepare 前／暗転中）。 */
+    private val _showStartEncounterWipe = MutableStateFlow(false)
+    val showStartEncounterWipe: StateFlow<Boolean> = _showStartEncounterWipe.asStateFlow()
+
+    /**
+     * イントロ中の「現在点」横位置（0〜NOW_X）。null なら通常の NOW_X_FRACTION。
+     */
+    private val _startIntroNowXFraction = MutableStateFlow<Float?>(null)
+    val startIntroNowXFraction: StateFlow<Float?> = _startIntroNowXFraction.asStateFlow()
+
+    private var startIntroSweepJob: Job? = null
+
     private val _notebookUnlocked = MutableStateFlow(settingsRepository.getUnlockedNotebookIds())
     val notebookUnlocked: StateFlow<Set<NotebookEntryId>> = _notebookUnlocked.asStateFlow()
 
@@ -271,6 +331,8 @@ class GameViewModel(
         evaluateSilentNotebookUnlocks()
         syncBgmAmbient()
         refreshSumikaPending()
+        // リザルト中断→コールドスタート時: ホーム向けガイド／通知を復旧
+        resumeHomeGuidesAfterColdStart()
         // 再インストール時など、Play 側の購入状態を静かに反映
         restorePurchases()
     }
@@ -280,10 +342,37 @@ class GameViewModel(
         lifetimePnlRepository.evaluateSumikaGradeRewards()
         _sumikaLevel.value = lifetimePnlRepository.getSumikaLevel()
         _sumikaPendingYen.value = lifetimePnlRepository.getSumikaPendingYen()
+        _sumikaUpgradeDiscountStacks.value = lifetimePnlRepository.getSumikaUpgradeDiscountStacks()
+        _sumikaDiscountUsesLeft.value = lifetimePnlRepository.sumikaDiscountUsesLeftToday()
+        _sumikaPayDoubled.value = lifetimePnlRepository.isSumikaPayDoubled()
+        _sumikaDoubleUsesLeft.value = lifetimePnlRepository.sumikaDoubleUsesLeftToday()
         _sumikaUnlockedGrade.value = lifetimePnlRepository.getSumikaUnlockedGrade()
         _sumikaPendingGrade.value = lifetimePnlRepository.getSumikaPendingGrade()
         _sumikaGradeIntroDone.value = lifetimePnlRepository.isSumikaGradeIntroDone()
         _kaiAllowanceYen.value = lifetimePnlRepository.kaiAllowanceAmountOrZero()
+        refreshSumikaGradeIntroHeld()
+    }
+
+    private fun refreshSumikaGradeIntroHeld() {
+        val min = settingsRepository.sumikaGradeIntroMinCashOut()
+        _sumikaGradeIntroHeld.value = min > 0 && _cashOutCount.value < min
+    }
+
+    /** 出金反映済みだがホーム戻り前に落ちたケース向け。 */
+    private fun resumeHomeGuidesAfterColdStart() {
+        if (_uiState.value.gameState != GameState.START) return
+        maybeOfferKaiHomeIntro()
+        maybeOfferMissedScrapbookTutorial()
+    }
+
+    private fun maybeOfferMissedScrapbookTutorial() {
+        if (settingsRepository.hasSeenScrapbookTutorial()) return
+        if (_showScrapbookTutorial.value) return
+        if (!scrapbookRepository.hasAnyUnlocked()) return
+        // カイ引っ越し未視聴なら先にそちら（重ねない）
+        if (!settingsRepository.hasSeenKaiHomeIntro(_cashOutCount.value)) return
+        if (_showKaiHomeIntro.value) return
+        _showScrapbookTutorial.value = true
     }
 
     private fun startSumikaPassiveTicker() {
@@ -395,6 +484,18 @@ class GameViewModel(
         refreshNotebookState()
     }
 
+    fun onSumikaSheetOpened() {
+        if (_uiState.value.gameState != GameState.START) return
+        if (settingsRepository.hasSeenSumikaSheetTutorial()) return
+        _showSumikaSheetTutorial.value = true
+    }
+
+    fun dismissSumikaSheetTutorial() {
+        if (!_showSumikaSheetTutorial.value) return
+        settingsRepository.setSumikaSheetTutorialSeen()
+        _showSumikaSheetTutorial.value = false
+    }
+
     /** 出金・コンボ到達などに応じてサイレント項目を解禁。 */
     private fun evaluateSilentNotebookUnlocks() {
         val plays = _cashOutCount.value
@@ -500,7 +601,6 @@ class GameViewModel(
                         claimResultPayout()
                     } else {
                         if (!_resultIntroFinished.value) return
-                        if (_newlyPendingRelics.value.isNotEmpty()) return
                         soundPlayer.playUiConfirm()
                         leaveResultToHome()
                     }
@@ -533,6 +633,7 @@ class GameViewModel(
             _uiState.value.gameState == GameState.FINISHING
         ) return
         if (isResultPresentationBlocking()) return
+        _removeAdsPriceLabel.value = services.monetization.removeAdsPriceLabel()
         _appLayer.value = AppLayer.OPTION
         syncBgmAmbient()
     }
@@ -544,7 +645,12 @@ class GameViewModel(
             _showInvestOpenTutorial.value ||
             _showInvestCloseTip.value ||
             _showScrapbookTutorial.value ||
-            _showStampBackTutorial.value
+            _showStampBackTutorial.value ||
+            _showKaiHomeIntro.value ||
+            _showSumikaSheetTutorial.value ||
+            _showStartBang.value ||
+            _showStartEncounterWipe.value ||
+            _startIntroNowXFraction.value != null
 
     fun closeOption() {
         _appLayer.value = AppLayer.PLAY
@@ -570,7 +676,87 @@ class GameViewModel(
         _showLifeTutorial.value = false
         _lifeMechanicsActive.value = true
         refreshNotebookState()
+        // 既にプレイ画面。3戦目相当（出金≥2）のみ点イントロ→START。
+        if (_cashOutCount.value >= 2) {
+            startNowSweepThenBang()
+        } else {
+            beginSessionClock()
+        }
+    }
+
+    fun dismissKaiHomeIntro() {
+        if (!_showKaiHomeIntro.value) return
+        settingsRepository.setKaiHomeIntroSeen()
+        _showKaiHomeIntro.value = false
+        maybeOfferMissedScrapbookTutorial()
+    }
+
+    fun onStartBangFinished() {
+        if (!_showStartBang.value) return
+        _showStartBang.value = false
+        _startIntroNowXFraction.value = null
         beginSessionClock()
+    }
+
+    /**
+     * 黒が閉じきった：セッション準備。
+     * 点スイープはフェードアウト開始と同時に走らせ、晴れ終わり＝定位置にする。
+     */
+    fun onStartEncounterCovered() {
+        if (!_showStartEncounterWipe.value) return
+        prepareSession()
+        _chartFrame.update { it.copy(isRunning = false) }
+        _startIntroNowXFraction.value = START_INTRO_NOW_X_FROM
+        // スイープは hold 明け＝フェードアウト開始に合わせる（onStartEncounterOpenStarted）
+    }
+
+    /** フェードアウト開始の拍で呼ぶ。点を定位置へ動かし始める。 */
+    fun onStartEncounterOpenStarted() {
+        if (!_showStartEncounterWipe.value) return
+        startNowSweep(showBangWhenDone = false)
+    }
+
+    /**
+     * 黒が晴れ終わった：定位置を確定して START。
+     * （点はフェード中に左→定位置へ動いて見えている）
+     */
+    fun onStartEncounterRevealed() {
+        if (!_showStartEncounterWipe.value) return
+        _showStartEncounterWipe.value = false
+        startIntroSweepJob?.cancel()
+        startIntroSweepJob = null
+        _startIntroNowXFraction.value = NOW_X_FRACTION
+        _showStartBang.value = true
+    }
+
+    /** チュート後などワイプ無しで点→START するとき。 */
+    private fun startNowSweepThenBang() {
+        startNowSweep(showBangWhenDone = true)
+    }
+
+    private fun startNowSweep(showBangWhenDone: Boolean) {
+        _chartFrame.update { it.copy(isRunning = false) }
+        _startIntroNowXFraction.value = START_INTRO_NOW_X_FROM
+        startIntroSweepJob?.cancel()
+        startIntroSweepJob = viewModelScope.launch {
+            val from = START_INTRO_NOW_X_FROM
+            val to = NOW_X_FRACTION
+            val durationMs = START_INTRO_SWEEP_MS
+            val t0 = currentTimeMillis()
+            while (isActive) {
+                val u = ((currentTimeMillis() - t0).toFloat() / durationMs).coerceIn(0f, 1f)
+                // 開き中に見える区間はほぼ等速に近く（途中から覗く感じ）
+                val e = if (showBangWhenDone) u * u * (3f - 2f * u) else u
+                _startIntroNowXFraction.value = from + (to - from) * e
+                if (u >= 1f) break
+                delay(FRAME_DELAY_MS)
+            }
+            if (!isActive) return@launch
+            _startIntroNowXFraction.value = to
+            if (showBangWhenDone) {
+                _showStartBang.value = true
+            }
+        }
     }
 
     fun onResultIntroFinished() {
@@ -581,14 +767,19 @@ class GameViewModel(
 
     fun dismissRelicRewardToast() {
         _newlyPendingRelics.value = emptyList()
+        lifetimePnlRepository.clearNewlyPendingToast()
     }
 
-    /** 出金〜リザルト導入（＋未消化の新規レリック誘導）中は画面遷移させない。 */
+    /**
+     * 出金〜リザルト導入・レリック誘導・図鑑ガイド中は画面遷移させない。
+     * （初クリアニュース本体は UI 側 resultPresentationOpen でもロックする）
+     */
     private fun isResultPresentationBlocking(): Boolean {
+        if (_showScrapbookTutorial.value) return true
         if (_uiState.value.gameState != GameState.RESULT) return false
         if (!_chartFrame.value.resultPayoutClaimed) return false
         if (!_resultIntroFinished.value) return true
-        if (_newlyPendingRelics.value.isNotEmpty()) return true
+        // 受取通知はホーム戻り後に出すので、ここではブロックしない
         return false
     }
 
@@ -1003,17 +1194,29 @@ class GameViewModel(
 
     private fun startGame() {
         if (stages.isEmpty() || _chartsLoadError.value != null) return
-        prepareSession()
         when {
             !settingsRepository.hasSeenFirstPlayTutorial() -> {
+                prepareSession()
                 _chartFrame.update { it.copy(isRunning = false) }
                 _showFirstPlayTutorial.value = true
             }
             !settingsRepository.hasSeenLifeTutorial() -> {
+                prepareSession()
                 _chartFrame.update { it.copy(isRunning = false) }
                 _showLifeTutorial.value = true
             }
-            else -> beginSessionClock()
+            // 3戦目以降（出金≥2）: ワイプ→点イントロ→START→本編
+            // 2戦目は LIFE ガイドと競合するためスキップ
+            _cashOutCount.value >= 2 -> {
+                startIntroSweepJob?.cancel()
+                _showStartBang.value = false
+                _startIntroNowXFraction.value = null
+                _showStartEncounterWipe.value = true
+            }
+            else -> {
+                prepareSession()
+                beginSessionClock()
+            }
         }
     }
 
@@ -1181,6 +1384,9 @@ class GameViewModel(
     private fun placeOrder() {
         val state = _uiState.value
         if (state.gameState != GameState.PLAYING) return
+        if (!_chartFrame.value.isRunning) return
+        if (_startIntroNowXFraction.value != null) return
+        if (_showStartBang.value) return
         if (_chartFrame.value.retireLocked) return
         if (state.isOrderProcessing) return
         val now = currentTimeMillis()
@@ -1488,7 +1694,17 @@ class GameViewModel(
         _cashOutCount.value = persist.cashOutCount
         _bestCombo.value = persist.bestCombo
         _pendingRelics.value = persist.pendingRelics
-        _newlyPendingRelics.value = persist.newlyPending
+        // ホーム通知用に蓄積（1戦目分を2戦目クリア後まで残す）。キル耐性のため永続化。
+        if (persist.newlyPending.isNotEmpty()) {
+            val next =
+                (_newlyPendingRelics.value + persist.newlyPending).distinct()
+            _newlyPendingRelics.value = next
+            lifetimePnlRepository.setNewlyPendingToast(next)
+        }
+        // 広告頻度は出金確定時点で進める（リザルト離脱前キルでスキップさせない）
+        if (!_adsRemoved.value) {
+            settingsRepository.bumpAdEligibleCashOut()
+        }
         _resultIntroFinished.value = false
         refreshRelicState()
         _chartFrame.update { it.copy(resultPayoutClaimed = true) }
@@ -1507,6 +1723,7 @@ class GameViewModel(
                 _sumikaLevel.value = result.level
                 _balance.value = result.balance
                 _peakBalance.value = result.peakBalance
+                _sumikaUpgradeDiscountStacks.value = 0
                 _sumikaUnlockedGrade.value = lifetimePnlRepository.getSumikaUnlockedGrade()
                 _sumikaPendingGrade.value = lifetimePnlRepository.getSumikaPendingGrade()
                 _sumikaGradeIntroDone.value = lifetimePnlRepository.isSumikaGradeIntroDone()
@@ -1521,6 +1738,90 @@ class GameViewModel(
         }
     }
 
+    /** レベルアップ半額（リワード。広告除去時は視聴スキップ）。成功後〜1秒カウントダウンしてから反映。 */
+    fun requestSumikaUpgradeDiscount() {
+        if (!services.enableAdFeatures) return
+        if (_uiState.value.gameState != GameState.START) return
+        if (_sumikaRewardBusy.value) return
+        if (_sumikaCostReveal.value != null) return
+        val snap = lifetimePnlRepository.sumikaSnapshot()
+        if (!snap.canOfferUpgradeDiscount) return
+        _sumikaRewardBusy.value = true
+        services.monetization.showRewarded(adsRemoved = _adsRemoved.value) { ok ->
+            viewModelScope.launch {
+                try {
+                    if (!ok) {
+                        soundPlayer.playUiSelect()
+                        return@launch
+                    }
+                    val before = lifetimePnlRepository.sumikaSnapshot()
+                    if (!before.canOfferUpgradeDiscount) {
+                        soundPlayer.playUiSelect()
+                        return@launch
+                    }
+                    val from = before.nextCost
+                    val to = Sumika.discountedCost(
+                        before.nextCostBase,
+                        before.upgradeDiscountStacks + 1,
+                    )
+                    _sumikaCostReveal.value = SumikaCostReveal(fromCost = from, toCost = to)
+                    delay(1_100L)
+                    if (lifetimePnlRepository.tryApplyUpgradeDiscount()) {
+                        refreshSumikaPending()
+                        soundPlayer.playUiConfirm()
+                        soundPlayer.playBuffPop()
+                    } else {
+                        soundPlayer.playUiSelect()
+                    }
+                } finally {
+                    _sumikaCostReveal.value = null
+                    _sumikaRewardBusy.value = false
+                }
+            }
+        }
+    }
+
+    /** お給料タップ時に通常／2倍の選択 UI を出すか。 */
+    fun shouldOfferSumikaPayDoubleChoice(): Boolean {
+        if (!services.enableAdFeatures) return false
+        val snap = lifetimePnlRepository.sumikaSnapshot()
+        return lifetimePnlRepository.shouldOfferPayDoubleChoice(
+            pendingYen = snap.pendingYen,
+            canOffer = snap.canOfferPayDouble,
+        )
+    }
+
+    fun markSumikaPayDoubleChoiceShown() {
+        lifetimePnlRepository.markPayDoubleChoiceShown()
+    }
+
+    /**
+     * 広告で2倍にしたうえで即受け取り（残高カウントアップまで一連）。
+     * 広告除去時は視聴スキップ。
+     */
+    fun requestSumikaPayDoubleAndCollect() {
+        if (!services.enableAdFeatures) return
+        if (_uiState.value.gameState != GameState.START) return
+        if (_sumikaRewardBusy.value) return
+        val snap = lifetimePnlRepository.sumikaSnapshot()
+        if (!snap.canOfferPayDouble) return
+        _sumikaRewardBusy.value = true
+        services.monetization.showRewarded(adsRemoved = _adsRemoved.value) { ok ->
+            viewModelScope.launch {
+                try {
+                    if (ok && lifetimePnlRepository.tryDoubleSumikaPay()) {
+                        refreshSumikaPending()
+                        collectSumikaPay()
+                    } else {
+                        soundPlayer.playUiSelect()
+                    }
+                } finally {
+                    _sumikaRewardBusy.value = false
+                }
+            }
+        }
+    }
+
     fun collectSumikaPay() {
         if (_uiState.value.gameState != GameState.START) return
         val from = _balance.value
@@ -1529,6 +1830,7 @@ class GameViewModel(
         _balance.value = result.balance
         _peakBalance.value = result.peakBalance
         _sumikaPendingYen.value = 0L
+        _sumikaPayDoubled.value = false
         _kaiAllowanceYen.value = lifetimePnlRepository.kaiAllowanceAmountOrZero()
         _balanceHistory.value = lifetimePnlRepository.getBalanceHistory()
         _sessionPnlHistory.value = lifetimePnlRepository.getSessionPnlHistory()
@@ -1536,7 +1838,9 @@ class GameViewModel(
             _pendingRelics.value = result.pendingRelics
         }
         if (result.newlyPending.isNotEmpty()) {
-            _newlyPendingRelics.value = result.newlyPending
+            val next = (_newlyPendingRelics.value + result.newlyPending).distinct()
+            _newlyPendingRelics.value = next
+            lifetimePnlRepository.setNewlyPendingToast(next)
         }
         refreshRelicState()
         soundPlayer.playUiConfirm()
@@ -1557,7 +1861,9 @@ class GameViewModel(
             _pendingRelics.value = result.pendingRelics
         }
         if (result.newlyPending.isNotEmpty()) {
-            _newlyPendingRelics.value = result.newlyPending
+            val next = (_newlyPendingRelics.value + result.newlyPending).distinct()
+            _newlyPendingRelics.value = next
+            lifetimePnlRepository.setNewlyPendingToast(next)
         }
         refreshRelicState()
         soundPlayer.playUiConfirm()
@@ -1567,17 +1873,21 @@ class GameViewModel(
     fun markSumikaGradeIntroDone() {
         if (_sumikaPendingGrade.value <= 0) return
         lifetimePnlRepository.markSumikaGradeIntroDone()
+        settingsRepository.clearSumikaGradeIntroDefer()
         _sumikaGradeIntroDone.value = true
+        _sumikaGradeIntroHeld.value = false
     }
 
     fun claimSumikaGradeReward() {
         if (_uiState.value.gameState != GameState.START) return
         if (!_sumikaGradeIntroDone.value) return
         val result = lifetimePnlRepository.claimSumikaGradeReward() ?: return
+        settingsRepository.clearSumikaGradeIntroDefer()
         _sumikaLevel.value = result.level
         _sumikaUnlockedGrade.value = result.unlockedGrade
         _sumikaPendingGrade.value = 0
         _sumikaGradeIntroDone.value = false
+        _sumikaGradeIntroHeld.value = false
         _sumikaClaimCelebrationGrade.value = result.grade
         soundPlayer.playUiConfirm()
         hapticPlayer.tickPayoutClaim(big = true)
@@ -1828,12 +2138,9 @@ class GameViewModel(
     private fun leaveResultToHome() {
         if (leavingResultToHome) return
         leavingResultToHome = true
-        val removed = _adsRemoved.value
-        val eligible = if (!removed) {
-            settingsRepository.bumpAdEligibleCashOut()
-        } else {
-            0
-        }
+        val removed = _adsRemoved.value || !services.enableAdFeatures
+        // bump は claimResultPayout 済み。ここでは判定のみ。
+        val eligible = if (!removed) settingsRepository.getAdEligibleCashOuts() else 0
         // 3出金に1回。初回出金では出さない。
         val shouldOfferAd = !removed && eligible >= 3 && eligible % 3 == 0
         if (!shouldOfferAd) {
@@ -1848,6 +2155,7 @@ class GameViewModel(
     }
 
     fun purchaseRemoveAds() {
+        if (!services.enableAdFeatures) return
         if (_adsRemoved.value) return
         services.monetization.purchaseRemoveAds { purchased ->
             if (purchased) {
@@ -1881,6 +2189,32 @@ class GameViewModel(
         soundPlayer.playUiSelect()
     }
 
+    /** Debug: すみかグレードを即切替（外観／内観確認用）。 */
+    fun debugForceSumikaGrade(grade: Int) {
+        if (!services.isDebugBuild) return
+        lifetimePnlRepository.debugForceSumikaGrade(grade)
+        refreshSumikaPending()
+        soundPlayer.playUiSelect()
+    }
+
+    /**
+     * Debug: 進捗ストアを全消去してプロセス再起動。
+     * チュートリアル〜カイ引っ越し〜すみか〜リワード広告の通し確認用。
+     */
+    fun debugWipeAllProgressAndRestart() {
+        if (!services.isDebugBuild) return
+        // apply() は非同期のため、exit 前にディスクへ届かないことがある → commit 必須
+        listOf(
+            "urikai_settings",
+            "urikai_scrapbook",
+            "urikai_lifetime_pnl",
+        ).forEach { name ->
+            services.openStore(name).edit().clear().commit()
+        }
+        com.urikai.app.ui.homeKaiWipeMemory()
+        services.restartApp()
+    }
+
     private fun resetToStart() {
         cancelJobs()
         cash = INITIAL_ASSET
@@ -1892,17 +2226,39 @@ class GameViewModel(
         sessionMaxHealth = MAX_HEALTH
         sessionHealth = MAX_HEALTH
         isRetiredRun = false
+        _showStartBang.value = false
+        _showStartEncounterWipe.value = false
+        _startIntroNowXFraction.value = null
+        startIntroSweepJob?.cancel()
+        startIntroSweepJob = null
         _startSmallText.value = StartScreenCopy.launchTutorial(_displayLanguage.value, orderLagMs())
         _uiState.value = GameUiState()
         _chartFrame.value = ChartFrame()
         _resultIntroFinished.value = false
-        _newlyPendingRelics.value = emptyList()
+        // newlyPendingRelics はホームで受取通知を出すためここでは消さない
         stakeBalance = _balance.value
         accrueDailyPlan()
         refreshSumikaPending()
         onPlayBuffUnlockedVisible()
         evaluateSilentNotebookUnlocks()
+        maybeOfferKaiHomeIntro()
         syncBgmAmbient()
+    }
+
+    /**
+     * 初回出金後、カイがホームに住み着く導入を出す。
+     * 同時にほしぐさ（g1）受け取り可能なら、導入セリフは+1プレイ後のホームまで延期する。
+     */
+    private fun maybeOfferKaiHomeIntro() {
+        if (_showKaiHomeIntro.value) return
+        if (settingsRepository.hasSeenKaiHomeIntro(_cashOutCount.value)) return
+        if (_cashOutCount.value < 1) return
+        _showKaiHomeIntro.value = true
+        val pendingGrade = _sumikaPendingGrade.value
+        if (pendingGrade > 0 && !_sumikaGradeIntroDone.value) {
+            settingsRepository.deferSumikaGradeIntroUntilCashOut(_cashOutCount.value + 1)
+            refreshSumikaGradeIntroHeld()
+        }
     }
 
     private fun refreshStartSmallTextForCurrentState() {
@@ -1976,6 +2332,16 @@ class GameViewModel(
         const val MAX_START_OFFSET_INCLUSIVE = 10
         const val Y_ZOOM_ANIM_MS = 200
         const val NOW_X_FRACTION = 0.78f
+        /** START イントロ: 現在点の開始横位置（左端寄り）。 */
+        const val START_INTRO_NOW_X_FROM = 0.06f
+        /** アイリス閉じ。 */
+        const val START_IRIS_CLOSE_MS = 280L
+        /** 全閉の短い間。 */
+        const val START_IRIS_HOLD_MS = 40L
+        /** アイリス開き。開き始め＝点スイープ開始、開き終わり＝定位置＝START。 */
+        const val START_IRIS_OPEN_MS = 720L
+        /** 点スイープ尺＝OPEN。 */
+        const val START_INTRO_SWEEP_MS = START_IRIS_OPEN_MS
         const val Y_PAD_RATIO = 0.10f
         const val Y_PAD_MIN_RATIO = 1.0f
         const val INTEREST_TICK_VISIBLE_MS = 900L

@@ -296,6 +296,14 @@ def light_noise(series: list[tuple[int, float]], seed: int, amp: float = 0.12) -
     return out
 
 
+def stage_idx(stage_id: str) -> int:
+    return int(stage_id[1:])
+
+
+def is_extreme_stage(stage_id: str) -> bool:
+    return stage_id.startswith("e") and len(stage_id) == 3 and stage_id[1:].isdigit()
+
+
 def load_meta() -> list[StageMeta]:
     rows: list[StageMeta] = []
     with META_PATH.open(encoding="utf-8-sig", newline="") as f:
@@ -312,21 +320,14 @@ def load_meta() -> list[StageMeta]:
                     seed=int(row["seed"]),
                 )
             )
-    standard = [r for r in rows if not r.stage_id.startswith("e")]
-    extreme = [r for r in rows if r.stage_id.startswith("e")]
-    if len(standard) != 30:
-        raise ValueError(f"expected 30 standard stages in {META_PATH}, got {len(standard)}")
+    # standard = non-extreme ids; extreme = e01.. Counts grow with sequels.
+    standard = [r for r in rows if not is_extreme_stage(r.stage_id)]
+    extreme = [r for r in rows if is_extreme_stage(r.stage_id)]
     if len(extreme) != 15:
         raise ValueError(f"expected 15 extreme stages in {META_PATH}, got {len(extreme)}")
+    if len(standard) < 30:
+        raise ValueError(f"expected >=30 standard stages in {META_PATH}, got {len(standard)}")
     return rows
-
-
-def stage_idx(stage_id: str) -> int:
-    return int(stage_id[1:])
-
-
-def is_extreme_stage(stage_id: str) -> bool:
-    return stage_id.startswith("e") and len(stage_id) == 3 and stage_id[1:].isdigit()
 
 
 def pivot_band(timing: str) -> tuple[int, int, int]:

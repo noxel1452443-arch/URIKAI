@@ -1,12 +1,12 @@
 package com.urikai.app.game
 
 /**
- * リザルト資産行の吹き出し（STAR / BEST のどちらか1つ）。
+ * リザルト資産行の吹き出し（次の★まで）。
  * RETIRE・マイナス（★1床未満）・OVER は出さない。
+ * 銘柄ベスト比較は出さない（目標額の予告感を避ける）。
  */
 sealed class ResultChaseHint {
     data class StarGap(val nextStars: Int, val yenLeft: Int) : ResultChaseHint()
-    data class BestGap(val yenLeft: Int) : ResultChaseHint()
 }
 
 object ResultChaseHints {
@@ -15,7 +15,7 @@ object ResultChaseHints {
         finalAsset: Int,
         theoreticalMax: Int,
         isRetired: Boolean,
-        priorBestAsset: Int?,
+        @Suppress("UNUSED_PARAMETER") priorBestAsset: Int?,
     ): ResultChaseHint? {
         if (isRetired) return null
         if (finalAsset < SyncRating.STAR2_FLOOR_ASSET) return null
@@ -28,12 +28,6 @@ object ResultChaseHints {
             if (left >= 1) {
                 return ResultChaseHint.StarGap(nextStars = stars + 1, yenLeft = left)
             }
-        }
-
-        val best = priorBestAsset ?: return null
-        val bestLeft = best - finalAsset
-        if (bestLeft >= 1) {
-            return ResultChaseHint.BestGap(yenLeft = bestLeft)
         }
         return null
     }

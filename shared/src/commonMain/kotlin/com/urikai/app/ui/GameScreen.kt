@@ -18,6 +18,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -165,9 +166,14 @@ fun GameScreen(
     showLifeTutorial: Boolean = false,
     showInvestOpenTutorial: Boolean = false,
     showInvestCloseTip: Boolean = false,
+    showSumikaSheetTutorial: Boolean = false,
     showScrapbookTutorial: Boolean = false,
     showStampCornerHint: Boolean = false,
     showStampBackTutorial: Boolean = false,
+    showKaiHomeIntro: Boolean = false,
+    showStartBang: Boolean = false,
+    showStartEncounterWipe: Boolean = false,
+    startIntroNowXFraction: Float? = null,
     lifeMechanicsActive: Boolean = true,
     notebookUnlocked: Set<NotebookEntryId> = emptySet(),
     notebookRead: Set<NotebookEntryId> = emptySet(),
@@ -176,9 +182,16 @@ fun GameScreen(
     onDismissLifeTutorial: () -> Unit = {},
     onDismissInvestOpenTutorial: () -> Unit = {},
     onDismissInvestCloseTip: () -> Unit = {},
+    onSumikaSheetOpened: () -> Unit = {},
+    onDismissSumikaSheetTutorial: () -> Unit = {},
     onDismissScrapbookTutorial: () -> Unit = {},
     onDismissStampCornerHint: () -> Unit = {},
     onDismissStampBackTutorial: () -> Unit = {},
+    onDismissKaiHomeIntro: () -> Unit = {},
+    onStartBangFinished: () -> Unit = {},
+    onStartEncounterCovered: () -> Unit = {},
+    onStartEncounterOpenStarted: () -> Unit = {},
+    onStartEncounterRevealed: () -> Unit = {},
     onBalanceOpened: () -> Unit = {},
     onBalanceClosed: () -> Unit = {},
     onFirstClearNewsDismissed: () -> Unit = {},
@@ -201,15 +214,20 @@ fun GameScreen(
     onBgmLevelChange: (AudioLevel) -> Unit,
     onHapticEnabledChange: (Boolean) -> Unit,
     adsRemoved: Boolean = false,
+    removeAdsPriceLabel: String = "¥290",
     onPurchaseRemoveAds: () -> Unit = {},
     onRestorePurchases: () -> Unit = {},
+    onOpenStoreListing: () -> Unit = {},
     onDebugSetAdsRemoved: (Boolean) -> Unit = {},
     onDebugResetSumika: () -> Unit = {},
+    onDebugForceSumikaGrade: (Int) -> Unit = {},
+    onDebugWipeAllProgress: () -> Unit = {},
     sumikaLevel: Int = 0,
     sumikaPendingYen: Long = 0L,
     sumikaUnlockedGrade: Int = 0,
     sumikaPendingGrade: Int = 0,
     sumikaGradeIntroDone: Boolean = false,
+    sumikaGradeIntroHeld: Boolean = false,
     sumikaClaimCelebrationGrade: Int = 0,
     onMarkSumikaGradeIntroDone: () -> Unit = {},
     onClaimSumikaGrade: () -> Unit = {},
@@ -220,6 +238,16 @@ fun GameScreen(
     onCollectSumikaPay: () -> Unit = {},
     onCollectKaiAllowance: () -> Unit = {},
     onRefreshSumika: () -> Unit = {},
+    sumikaUpgradeDiscountStacks: Int = 0,
+    sumikaDiscountUsesLeft: Int = 3,
+    sumikaPayDoubled: Boolean = false,
+    sumikaDoubleUsesLeft: Int = 3,
+    sumikaRewardBusy: Boolean = false,
+    sumikaCostReveal: com.urikai.app.game.SumikaCostReveal? = null,
+    onRequestSumikaUpgradeDiscount: () -> Unit = {},
+    shouldOfferSumikaPayDoubleChoice: () -> Boolean = { false },
+    onMarkSumikaPayDoubleChoiceShown: () -> Unit = {},
+    onCollectSumikaPayDoubledViaAd: () -> Unit = {},
     onClearBalanceCountFrom: () -> Unit = {},
     onScrapbookSortChange: (ScrapbookSort) -> Unit,
     onShare: () -> Unit,
@@ -294,9 +322,14 @@ fun GameScreen(
             showLifeTutorial = showLifeTutorial,
             showInvestOpenTutorial = showInvestOpenTutorial,
             showInvestCloseTip = showInvestCloseTip,
+            showSumikaSheetTutorial = showSumikaSheetTutorial,
             showScrapbookTutorial = showScrapbookTutorial,
             showStampCornerHint = showStampCornerHint,
             showStampBackTutorial = showStampBackTutorial,
+            showKaiHomeIntro = showKaiHomeIntro,
+            showStartBang = showStartBang,
+            showStartEncounterWipe = showStartEncounterWipe,
+            startIntroNowXFraction = startIntroNowXFraction,
             lifeMechanicsActive = lifeMechanicsActive,
             notebookUnlocked = notebookUnlocked,
             notebookRead = notebookRead,
@@ -305,9 +338,16 @@ fun GameScreen(
             onDismissLifeTutorial = onDismissLifeTutorial,
             onDismissInvestOpenTutorial = onDismissInvestOpenTutorial,
             onDismissInvestCloseTip = onDismissInvestCloseTip,
+            onSumikaSheetOpened = onSumikaSheetOpened,
+            onDismissSumikaSheetTutorial = onDismissSumikaSheetTutorial,
             onDismissScrapbookTutorial = onDismissScrapbookTutorial,
             onDismissStampCornerHint = onDismissStampCornerHint,
             onDismissStampBackTutorial = onDismissStampBackTutorial,
+            onDismissKaiHomeIntro = onDismissKaiHomeIntro,
+            onStartBangFinished = onStartBangFinished,
+            onStartEncounterCovered = onStartEncounterCovered,
+            onStartEncounterOpenStarted = onStartEncounterOpenStarted,
+            onStartEncounterRevealed = onStartEncounterRevealed,
             onBalanceOpened = onBalanceOpened,
             onBalanceClosed = onBalanceClosed,
             onFirstClearNewsDismissed = onFirstClearNewsDismissed,
@@ -330,15 +370,20 @@ fun GameScreen(
             onBgmLevelChange = onBgmLevelChange,
             onHapticEnabledChange = onHapticEnabledChange,
             adsRemoved = adsRemoved,
+            removeAdsPriceLabel = removeAdsPriceLabel,
             onPurchaseRemoveAds = onPurchaseRemoveAds,
             onRestorePurchases = onRestorePurchases,
+            onOpenStoreListing = onOpenStoreListing,
             onDebugSetAdsRemoved = onDebugSetAdsRemoved,
             onDebugResetSumika = onDebugResetSumika,
+            onDebugForceSumikaGrade = onDebugForceSumikaGrade,
+            onDebugWipeAllProgress = onDebugWipeAllProgress,
             sumikaLevel = sumikaLevel,
             sumikaPendingYen = sumikaPendingYen,
             sumikaUnlockedGrade = sumikaUnlockedGrade,
             sumikaPendingGrade = sumikaPendingGrade,
             sumikaGradeIntroDone = sumikaGradeIntroDone,
+            sumikaGradeIntroHeld = sumikaGradeIntroHeld,
             sumikaClaimCelebrationGrade = sumikaClaimCelebrationGrade,
             onMarkSumikaGradeIntroDone = onMarkSumikaGradeIntroDone,
             onClaimSumikaGrade = onClaimSumikaGrade,
@@ -349,6 +394,16 @@ fun GameScreen(
             onCollectSumikaPay = onCollectSumikaPay,
             onCollectKaiAllowance = onCollectKaiAllowance,
             onRefreshSumika = onRefreshSumika,
+            sumikaUpgradeDiscountStacks = sumikaUpgradeDiscountStacks,
+            sumikaDiscountUsesLeft = sumikaDiscountUsesLeft,
+            sumikaPayDoubled = sumikaPayDoubled,
+            sumikaDoubleUsesLeft = sumikaDoubleUsesLeft,
+            sumikaRewardBusy = sumikaRewardBusy,
+            sumikaCostReveal = sumikaCostReveal,
+            onRequestSumikaUpgradeDiscount = onRequestSumikaUpgradeDiscount,
+            shouldOfferSumikaPayDoubleChoice = shouldOfferSumikaPayDoubleChoice,
+            onMarkSumikaPayDoubleChoiceShown = onMarkSumikaPayDoubleChoiceShown,
+            onCollectSumikaPayDoubledViaAd = onCollectSumikaPayDoubledViaAd,
             onClearBalanceCountFrom = onClearBalanceCountFrom,
             onScrapbookSortChange = onScrapbookSortChange,
             onShare = onShare,
@@ -397,46 +452,58 @@ private fun GameScreenContent(
     hapticEnabled: Boolean,
     scrapbookSort: ScrapbookSort,
     startSmallText: String,
-    balance: Long = 10_000L,
-    sessionPnlHistory: List<com.urikai.app.data.SessionPnlHistoryEntry> = emptyList(),
-    balanceHistory: List<com.urikai.app.data.BalancePoint> = emptyList(),
-    peakBalance: Long = 10_000L,
-    investPlan: com.urikai.app.game.InvestPlan = com.urikai.app.game.InvestPlan.DEFAULT,
-    onSelectInvestPlan: (com.urikai.app.game.InvestPlan) -> Unit = {},
-    awayReport: com.urikai.app.data.DailyAccrualResult? = null,
-    onDismissAwayReport: () -> Unit = {},
-    cashOutCount: Int = 0,
-    bestCombo: Int = 0,
-    pendingRelics: List<RelicId> = emptyList(),
-    newlyPendingRelics: List<RelicId> = emptyList(),
-    claimedRelics: List<RelicId> = emptyList(),
-    relicEffects: RelicEffects = RelicEffects(),
-    showFirstPlayTutorial: Boolean = false,
-    showLifeTutorial: Boolean = false,
-    showInvestOpenTutorial: Boolean = false,
-    showInvestCloseTip: Boolean = false,
-    showScrapbookTutorial: Boolean = false,
-    showStampCornerHint: Boolean = false,
-    showStampBackTutorial: Boolean = false,
-    lifeMechanicsActive: Boolean = true,
-    notebookUnlocked: Set<NotebookEntryId> = emptySet(),
-    notebookRead: Set<NotebookEntryId> = emptySet(),
-    notebookHasUnread: Boolean = false,
-    onMarkNotebookRead: (NotebookEntryId) -> Unit = {},
-    onDismissLifeTutorial: () -> Unit = {},
-    onDismissInvestOpenTutorial: () -> Unit = {},
-    onDismissInvestCloseTip: () -> Unit = {},
-    onDismissScrapbookTutorial: () -> Unit = {},
-    onDismissStampCornerHint: () -> Unit = {},
-    onDismissStampBackTutorial: () -> Unit = {},
-    onBalanceOpened: () -> Unit = {},
-    onBalanceClosed: () -> Unit = {},
-    onFirstClearNewsDismissed: () -> Unit = {},
-    onStampBackOpened: () -> Unit = {},
+    balance: Long,
+    sessionPnlHistory: List<com.urikai.app.data.SessionPnlHistoryEntry>,
+    balanceHistory: List<com.urikai.app.data.BalancePoint>,
+    peakBalance: Long,
+    investPlan: com.urikai.app.game.InvestPlan,
+    onSelectInvestPlan: (com.urikai.app.game.InvestPlan) -> Unit,
+    awayReport: com.urikai.app.data.DailyAccrualResult?,
+    onDismissAwayReport: () -> Unit,
+    cashOutCount: Int,
+    bestCombo: Int,
+    pendingRelics: List<RelicId>,
+    newlyPendingRelics: List<RelicId>,
+    claimedRelics: List<RelicId>,
+    relicEffects: RelicEffects,
+    showFirstPlayTutorial: Boolean,
+    showLifeTutorial: Boolean,
+    showInvestOpenTutorial: Boolean,
+    showInvestCloseTip: Boolean,
+    showSumikaSheetTutorial: Boolean,
+    showScrapbookTutorial: Boolean,
+    showStampCornerHint: Boolean,
+    showStampBackTutorial: Boolean,
+    showKaiHomeIntro: Boolean,
+    showStartBang: Boolean,
+    showStartEncounterWipe: Boolean,
+    startIntroNowXFraction: Float?,
+    lifeMechanicsActive: Boolean,
+    notebookUnlocked: Set<NotebookEntryId>,
+    notebookRead: Set<NotebookEntryId>,
+    notebookHasUnread: Boolean,
+    onMarkNotebookRead: (NotebookEntryId) -> Unit,
+    onDismissLifeTutorial: () -> Unit,
+    onDismissInvestOpenTutorial: () -> Unit,
+    onDismissInvestCloseTip: () -> Unit,
+    onSumikaSheetOpened: () -> Unit,
+    onDismissSumikaSheetTutorial: () -> Unit,
+    onDismissScrapbookTutorial: () -> Unit,
+    onDismissStampCornerHint: () -> Unit,
+    onDismissStampBackTutorial: () -> Unit,
+    onDismissKaiHomeIntro: () -> Unit,
+    onStartBangFinished: () -> Unit,
+    onStartEncounterCovered: () -> Unit,
+    onStartEncounterOpenStarted: () -> Unit,
+    onStartEncounterRevealed: () -> Unit,
+    onBalanceOpened: () -> Unit,
+    onBalanceClosed: () -> Unit,
+    onFirstClearNewsDismissed: () -> Unit,
+    onStampBackOpened: () -> Unit,
     showContentDisclaimer: Boolean,
     chartsLoadError: String?,
     onDismissContentDisclaimer: () -> Unit,
-    onDismissRelicRewardToast: () -> Unit = {},
+    onDismissRelicRewardToast: () -> Unit,
     onPrimaryButtonClick: () -> Unit,
     onOpenScrapbook: () -> Unit,
     onOpenOption: () -> Unit,
@@ -450,52 +517,67 @@ private fun GameScreenContent(
     onSeLevelChange: (AudioLevel) -> Unit,
     onBgmLevelChange: (AudioLevel) -> Unit,
     onHapticEnabledChange: (Boolean) -> Unit,
-    adsRemoved: Boolean = false,
-    onPurchaseRemoveAds: () -> Unit = {},
-    onRestorePurchases: () -> Unit = {},
-    onDebugSetAdsRemoved: (Boolean) -> Unit = {},
-    onDebugResetSumika: () -> Unit = {},
-    sumikaLevel: Int = 0,
-    sumikaPendingYen: Long = 0L,
-    sumikaUnlockedGrade: Int = 0,
-    sumikaPendingGrade: Int = 0,
-    sumikaGradeIntroDone: Boolean = false,
-    sumikaClaimCelebrationGrade: Int = 0,
-    onMarkSumikaGradeIntroDone: () -> Unit = {},
-    onClaimSumikaGrade: () -> Unit = {},
-    onDismissSumikaClaimCelebration: () -> Unit = {},
-    balanceCountFrom: Long? = null,
-    kaiAllowanceYen: Long = 0L,
-    onUpgradeSumika: () -> Unit = {},
-    onCollectSumikaPay: () -> Unit = {},
-    onCollectKaiAllowance: () -> Unit = {},
-    onRefreshSumika: () -> Unit = {},
-    onClearBalanceCountFrom: () -> Unit = {},
+    adsRemoved: Boolean,
+    removeAdsPriceLabel: String,
+    onPurchaseRemoveAds: () -> Unit,
+    onRestorePurchases: () -> Unit,
+    onOpenStoreListing: () -> Unit,
+    onDebugSetAdsRemoved: (Boolean) -> Unit,
+    onDebugResetSumika: () -> Unit,
+    onDebugForceSumikaGrade: (Int) -> Unit,
+    onDebugWipeAllProgress: () -> Unit,
+    sumikaLevel: Int,
+    sumikaPendingYen: Long,
+    sumikaUnlockedGrade: Int,
+    sumikaPendingGrade: Int,
+    sumikaGradeIntroDone: Boolean,
+    sumikaGradeIntroHeld: Boolean,
+    sumikaClaimCelebrationGrade: Int,
+    onMarkSumikaGradeIntroDone: () -> Unit,
+    onClaimSumikaGrade: () -> Unit,
+    onDismissSumikaClaimCelebration: () -> Unit,
+    balanceCountFrom: Long?,
+    kaiAllowanceYen: Long,
+    onUpgradeSumika: () -> Unit,
+    onCollectSumikaPay: () -> Unit,
+    onCollectKaiAllowance: () -> Unit,
+    onRefreshSumika: () -> Unit,
+    sumikaUpgradeDiscountStacks: Int,
+    sumikaDiscountUsesLeft: Int,
+    sumikaPayDoubled: Boolean,
+    sumikaDoubleUsesLeft: Int,
+    sumikaRewardBusy: Boolean,
+    sumikaCostReveal: com.urikai.app.game.SumikaCostReveal?,
+    onRequestSumikaUpgradeDiscount: () -> Unit,
+    shouldOfferSumikaPayDoubleChoice: () -> Boolean,
+    onMarkSumikaPayDoubleChoiceShown: () -> Unit,
+    onCollectSumikaPayDoubledViaAd: () -> Unit,
+    onClearBalanceCountFrom: () -> Unit,
     onScrapbookSortChange: (ScrapbookSort) -> Unit,
     onShare: () -> Unit,
-    onShuffleStartTip: () -> Unit = {},
-    onClaimRelic: (RelicId) -> Boolean = { false },
-    onToggleRelicVisual: (RelicId) -> Unit = {},
-    onToggleFxRelic: (RelicId) -> Unit = {},
-    onCycleRelicStage: (RelicUpgradeGroup) -> Unit = {},
-    onCyclePlayBuff: (com.urikai.app.game.PlayBuffSlot) -> Unit = {},
-    relicStagePrefs: Map<RelicUpgradeGroup, RelicId> = emptyMap(),
-    disabledUpgradeGroups: Set<RelicUpgradeGroup> = emptySet(),
-    disabledRelics: Set<RelicId> = emptySet(),
-    onDismissFirstPlayTutorial: () -> Unit = {},
-    onResultIntroFinished: () -> Unit = {},
-    onRequestAssetRank: () -> com.urikai.app.data.AssetRankBoard? = { null },
-    devRelicLab: Map<RelicId, Boolean>? = null,
-    onEnableDevRelicLab: () -> Unit = {},
-    onDisableDevRelicLab: () -> Unit = {},
-    onSetDevRelicEnabled: (RelicId, Boolean) -> Unit = { _, _ -> },
-    onPayoutCountTick: (Float) -> Unit = {},
-    onPayoutClang: (Boolean) -> Unit = {},
-    onResultPanelIn: () -> Unit = {},
-    onResultType: () -> Unit = {},
-    onResultStar: (index: Int, total: Int) -> Unit = { _, _ -> },
-    onResultStamp: () -> Unit = {},
-    modifier: Modifier = Modifier
+    onShuffleStartTip: () -> Unit,
+    onClaimRelic: (RelicId) -> Boolean,
+    onToggleRelicVisual: (RelicId) -> Unit,
+    onToggleFxRelic: (RelicId) -> Unit,
+    onCycleRelicStage: (RelicUpgradeGroup) -> Unit,
+    onCyclePlayBuff: (com.urikai.app.game.PlayBuffSlot) -> Unit,
+    relicStagePrefs: Map<RelicUpgradeGroup, RelicId>,
+    disabledUpgradeGroups: Set<RelicUpgradeGroup>,
+    disabledRelics: Set<RelicId>,
+    onDismissFirstPlayTutorial: () -> Unit,
+    onResultIntroFinished: () -> Unit,
+    onRequestAssetRank: () -> com.urikai.app.data.AssetRankBoard?,
+    devRelicLab: Map<RelicId, Boolean>?,
+    onEnableDevRelicLab: () -> Unit,
+    onDisableDevRelicLab: () -> Unit,
+    onSetDevRelicEnabled: (RelicId, Boolean) -> Unit,
+    onPayoutCountTick: (Float) -> Unit,
+    onPayoutClang: (Boolean) -> Unit,
+    onResultPanelIn: () -> Unit,
+    onResultType: () -> Unit,
+    onResultStar: (index: Int, total: Int) -> Unit,
+    onResultStamp: () -> Unit,
+    modifier: Modifier
 ) {
     var resultChartPeek by remember { mutableStateOf(false) }
     var bootScan by remember { mutableStateOf(true) }
@@ -531,9 +613,12 @@ private fun GameScreenContent(
     val resultNewsEntry = chartFrame.resultInfo
         ?.takeIf { it.isFirstClear && !it.isRetired }
         ?.let { info -> scrapbookEntries.firstOrNull { it.stageId == info.stageId && it.unlocked } }
+    // リザルト導入→レリック誘導のあと、初クリアニュース／図鑑ガイド
     val showResultNews = uiState.gameState == GameState.RESULT &&
         chartFrame.resultPayoutClaimed &&
         payoutAnimDone &&
+        resultIntroDone &&
+        newlyPendingRelics.isEmpty() &&
         !resultNewsDone &&
         resultNewsEntry != null
     LaunchedEffect(titleSecretInvert) {
@@ -561,22 +646,40 @@ private fun GameScreenContent(
             showTutorialGuide = false
         }
     }
-    val showRelicRewardToast =
-        uiState.gameState == GameState.RESULT &&
-            chartFrame.resultPayoutClaimed &&
-            payoutAnimDone &&
-            resultIntroDone &&
-            newlyPendingRelics.isNotEmpty()
+    // 1プレイ開始時のみカイ位置を次回ホームで振り直す（シート開閉では維持）
+    LaunchedEffect(uiState.gameState) {
+        if (uiState.gameState == GameState.PLAYING) {
+            homeKaiMarkReshuffle()
+        }
+    }
     val showSumikaGradeIntro =
         uiState.gameState == GameState.START &&
             sumikaPendingGrade > 0 &&
             !sumikaGradeIntroDone &&
+            !sumikaGradeIntroHeld &&
             !showFirstPlayTutorial &&
             !showLifeTutorial &&
             !showInvestOpenTutorial &&
             !showInvestCloseTip &&
+            !showSumikaSheetTutorial &&
             !showScrapbookTutorial &&
-            !showStampBackTutorial
+            !showStampBackTutorial &&
+            !showKaiHomeIntro
+    // 受取通知はリザルトではなくホーム戻り後。2戦目クリア以降（出金≥2）のみ。
+    // 引っ越し／すみか導入のあとに出す。
+    val showRelicRewardToast =
+        uiState.gameState == GameState.START &&
+            newlyPendingRelics.isNotEmpty() &&
+            cashOutCount >= 2 &&
+            !showFirstPlayTutorial &&
+            !showLifeTutorial &&
+            !showInvestOpenTutorial &&
+            !showInvestCloseTip &&
+            !showSumikaSheetTutorial &&
+            !showScrapbookTutorial &&
+            !showStampBackTutorial &&
+            !showKaiHomeIntro &&
+            !showSumikaGradeIntro
     val sumikaGradeClaimReady =
         uiState.gameState == GameState.START &&
             sumikaPendingGrade > 0 &&
@@ -586,21 +689,32 @@ private fun GameScreenContent(
             showLifeTutorial ||
             showInvestOpenTutorial ||
             showInvestCloseTip ||
+            showSumikaSheetTutorial ||
             showScrapbookTutorial ||
             showStampBackTutorial ||
+            showKaiHomeIntro ||
+            showRelicRewardToast ||
+            showStartBang ||
+            showStartEncounterWipe ||
+            startIntroNowXFraction != null ||
             showSumikaGradeIntro ||
             sumikaClaimCelebrationGrade > 0
     val startModalOpen =
         claimRelicTarget != null ||
             showStyleLook ||
+            showSumika ||
             showSessionPnlHistory ||
             showTutorialGuide ||
             showContentDisclaimer ||
-            showStampCornerHint
+            showStampCornerHint ||
+            showSumikaSheetTutorial
     val resultPresentationOpen =
         uiState.gameState == GameState.RESULT &&
             chartFrame.resultPayoutClaimed &&
-            (!payoutAnimDone || !resultIntroDone || showRelicRewardToast)
+            (!payoutAnimDone ||
+                !resultIntroDone ||
+                showResultNews ||
+                showScrapbookTutorial)
     val modalNavLocked =
         forceSpeechOpen ||
             startModalOpen ||
@@ -695,10 +809,14 @@ private fun GameScreenContent(
                             onBgmLevelChange = onBgmLevelChange,
                             onHapticEnabledChange = onHapticEnabledChange,
                             adsRemoved = adsRemoved,
+                            removeAdsPriceLabel = removeAdsPriceLabel,
                             onPurchaseRemoveAds = onPurchaseRemoveAds,
                             onRestorePurchases = onRestorePurchases,
+                            onOpenStoreListing = onOpenStoreListing,
                             onDebugSetAdsRemoved = onDebugSetAdsRemoved,
                             onDebugResetSumika = onDebugResetSumika,
+                            onDebugForceSumikaGrade = onDebugForceSumikaGrade,
+                            onDebugWipeAllProgress = onDebugWipeAllProgress,
                             devRelicLab = devRelicLab,
                             onEnableDevRelicLab = onEnableDevRelicLab,
                             onDisableDevRelicLab = onDisableDevRelicLab,
@@ -716,209 +834,95 @@ private fun GameScreenContent(
                             )
                         }
                         uiState.gameState == GameState.START -> {
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                Column(
-                                    modifier = Modifier.align(Alignment.Center),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    StartAttractPanel(
-                                        smallText = startSmallText,
-                                        onFlingShuffle = onShuffleStartTip,
-                                        secretInvert = titleSecretInvert,
-                                        onSecretInvert = { titleSecretInvert = true },
-                                        claimed = claimedRelics,
-                                        stagePrefs = relicStagePrefs,
-                                        disabledGroups = disabledUpgradeGroups,
-                                        disabledRelics = disabledRelics,
-                                        onCyclePlayBuff = onCyclePlayBuff,
-                                        onStampBackOpened = onStampBackOpened
-                                    )
-                                    LifetimeLedgerStrip(
-                                        balance = balance,
-                                        balanceCountFrom = balanceCountFrom,
-                                        onBalanceCountFinished = onClearBalanceCountFrom,
-                                        onCountTick = onPayoutCountTick,
-                                        investPlan = investPlan,
-                                        onOpen = {
-                                            showSessionPnlHistory = true
-                                            onBalanceOpened()
-                                        }
-                                    )
-                                }
-                                // 強制ガイド／ノート表示中はホーム常駐カイを隠す（二重表示を防ぐ）
-                                if (!forceSpeechOpen && !showTutorialGuide && !showSumika) {
-                                    HomeKaiResident(
-                                        notebookHasUnread = notebookUnlocked.any {
-                                            it !in notebookRead
-                                        },
-                                        balance = balance,
-                                        peakBalance = peakBalance,
-                                        playCount = cashOutCount,
-                                        bestCombo = bestCombo,
-                                        allowanceYen = kaiAllowanceYen,
-                                        onCollectAllowance = onCollectKaiAllowance,
-                                        modifier = Modifier.fillMaxSize()
-                                    )
-                                }
-                                if (showStampCornerHint) {
-                                    StampCornerHintBubble(
-                                        onDismiss = onDismissStampCornerHint,
-                                        modifier = Modifier
-                                            .align(Alignment.Center)
-                                            .padding(top = 200.dp)
-                                    )
-                                }
-                                StyleEntryButton(
-                                    unlocked = claimedRelics.any {
-                                        it.placement() == UnlockPlacement.LOOK
-                                    },
-                                    onClick = { showStyleLook = true },
-                                    modifier = Modifier
-                                        .align(Alignment.BottomStart)
-                                        .padding(start = 8.dp, bottom = 8.dp)
-                                )
-                                if (sumikaGradeClaimReady) {
-                                    SumikaGradeRewardChip(
-                                        grade = sumikaPendingGrade,
-                                        onClaim = onClaimSumikaGrade,
-                                        modifier = Modifier
-                                            .align(Alignment.BottomCenter)
-                                            .padding(bottom = 8.dp)
-                                    )
-                                } else if (sumikaLevel > 0 && sumikaPendingGrade <= 0) {
-                                    SumikaHomeSpot(
-                                        level = sumikaLevel,
-                                        pendingYen = sumikaPendingYen,
-                                        onOpenSheet = {
-                                            onRefreshSumika()
-                                            showSumika = true
-                                        },
-                                        onCollect = onCollectSumikaPay,
-                                        modifier = Modifier
-                                            .align(Alignment.BottomCenter)
-                                            .padding(bottom = 8.dp)
-                                    )
-                                }
-                                RelicGiftBadge(
-                                    pendingCount = pendingRelics.size,
-                                    onClick = {
-                                        claimCelebrating = false
-                                        claimRelicTarget = pendingRelics.firstOrNull()
-                                    },
-                                    modifier = Modifier
-                                        .align(Alignment.BottomEnd)
-                                        .padding(end = 8.dp, bottom = 8.dp)
-                                )
-                                if (showSessionPnlHistory) {
-                                    BalanceHistoryOverlay(
-                                        balance = balance,
-                                        peakBalance = peakBalance,
-                                        investPlan = investPlan,
-                                        onSelectInvestPlan = onSelectInvestPlan,
-                                        history = balanceHistory,
-                                        entries = sessionPnlHistory,
-                                        playCount = cashOutCount,
-                                        claimedUnlocks = claimedRelics,
-                                        pendingUnlocks = pendingRelics,
-                                        planYieldMult = relicEffects.planYieldMult,
-                                        maxAwayDays = relicEffects.maxAwayDays,
-                                        onDismiss = {
-                                            showSessionPnlHistory = false
-                                            onBalanceClosed()
-                                        },
-                                        modifier = Modifier.fillMaxSize()
-                                    )
-                                }
-                                if (showTutorialGuide) {
-                                    NotebookOverlay(
-                                        unlocked = NotebookDisplayOrder.filter { it in notebookUnlocked },
-                                        read = notebookRead,
-                                        onMarkRead = onMarkNotebookRead,
-                                        onDismiss = { showTutorialGuide = false },
-                                        modifier = Modifier.fillMaxSize()
-                                    )
-                                }
-                                if (showInvestOpenTutorial) {
-                                    InvestOpenTutorialOverlay(
-                                        onDismiss = onDismissInvestOpenTutorial,
-                                        modifier = Modifier.fillMaxSize()
-                                    )
-                                }
-                                if (showInvestCloseTip) {
-                                    InvestCloseTipOverlay(
-                                        onDismiss = onDismissInvestCloseTip,
-                                        modifier = Modifier.fillMaxSize()
-                                    )
-                                }
-                                if (showStampBackTutorial) {
-                                    StampBackTutorialOverlay(
-                                        onDismiss = onDismissStampBackTutorial,
-                                        modifier = Modifier.fillMaxSize()
-                                    )
-                                }
-                                if (showContentDisclaimer) {
-                                    ContentDisclaimerOverlay(
-                                        onDismiss = onDismissContentDisclaimer,
-                                        modifier = Modifier.fillMaxSize()
-                                    )
-                                }
-                                if (awayReport != null && !showContentDisclaimer) {
-                                    AwayReportOverlay(
-                                        report = awayReport,
-                                        onDismiss = onDismissAwayReport,
-                                        modifier = Modifier.fillMaxSize()
-                                    )
-                                }
-                                val claiming = claimRelicTarget
-                                if (claiming != null) {
-                                    RelicClaimOverlay(
-                                        relic = claiming,
-                                        celebrating = claimCelebrating,
-                                        onReceive = {
-                                            if (onClaimRelic(claiming)) {
-                                                claimCelebrating = true
-                                            }
-                                        },
-                                        onDismiss = {
-                                            if (claimCelebrating) {
-                                                claimCelebrating = false
-                                                claimRelicTarget = pendingRelics.firstOrNull()
-                                            } else {
-                                                claimRelicTarget = null
-                                            }
-                                        },
-                                        modifier = Modifier.fillMaxSize()
-                                    )
-                                }
-                                if (showStyleLook) {
-                                    StyleLookOverlay(
-                                        claimed = claimedRelics,
-                                        lcdTheme = lcdTheme,
-                                        chartLineStyle = chartLineStyle,
-                                        disabledRelics = disabledRelics,
-                                        onToggleVisual = onToggleRelicVisual,
-                                        onToggleFx = onToggleFxRelic,
-                                        onDismiss = { showStyleLook = false },
-                                        modifier = Modifier.fillMaxSize()
-                                    )
-                                }
-                                if (showSumika) {
-                                    SumikaSheet(
-                                        snapshot = com.urikai.app.game.SumikaSnapshot(
-                                            level = sumikaLevel,
-                                            pendingYen = sumikaPendingYen,
-                                            balance = balance,
-                                            cashOutCount = cashOutCount,
-                                            unlockedGrade = sumikaUnlockedGrade,
-                                            pendingGrade = sumikaPendingGrade,
-                                        ),
-                                        onUpgrade = onUpgradeSumika,
-                                        onDismiss = { showSumika = false },
-                                        modifier = Modifier.fillMaxSize()
-                                    )
-                                }
-                            }
+                            HomeStartScene(
+                                startSmallText = startSmallText,
+                                onShuffleStartTip = onShuffleStartTip,
+                                titleSecretInvert = titleSecretInvert,
+                                onTitleSecretInvert = { titleSecretInvert = true },
+                                claimedRelics = claimedRelics,
+                                pendingRelics = pendingRelics,
+                                relicStagePrefs = relicStagePrefs,
+                                disabledUpgradeGroups = disabledUpgradeGroups,
+                                disabledRelics = disabledRelics,
+                                onCyclePlayBuff = onCyclePlayBuff,
+                                onStampBackOpened = onStampBackOpened,
+                                balance = balance,
+                                peakBalance = peakBalance,
+                                balanceCountFrom = balanceCountFrom,
+                                onClearBalanceCountFrom = onClearBalanceCountFrom,
+                                onPayoutCountTick = onPayoutCountTick,
+                                investPlan = investPlan,
+                                onSelectInvestPlan = onSelectInvestPlan,
+                                onBalanceOpened = onBalanceOpened,
+                                onBalanceClosed = onBalanceClosed,
+                                balanceHistory = balanceHistory,
+                                sessionPnlHistory = sessionPnlHistory,
+                                cashOutCount = cashOutCount,
+                                bestCombo = bestCombo,
+                                relicEffects = relicEffects,
+                                showStampCornerHint = showStampCornerHint,
+                                onDismissStampCornerHint = onDismissStampCornerHint,
+                                forceSpeechOpen = forceSpeechOpen,
+                                hideKaiForHomeIntro = showKaiHomeIntro,
+                                notebookUnlocked = notebookUnlocked,
+                                notebookRead = notebookRead,
+                                onMarkNotebookRead = onMarkNotebookRead,
+                                showInvestOpenTutorial = showInvestOpenTutorial,
+                                onDismissInvestOpenTutorial = onDismissInvestOpenTutorial,
+                                showInvestCloseTip = showInvestCloseTip,
+                                onDismissInvestCloseTip = onDismissInvestCloseTip,
+                                showSumikaSheetTutorial = showSumikaSheetTutorial,
+                                onSumikaSheetOpened = onSumikaSheetOpened,
+                                onDismissSumikaSheetTutorial = onDismissSumikaSheetTutorial,
+                                showStampBackTutorial = showStampBackTutorial,
+                                onDismissStampBackTutorial = onDismissStampBackTutorial,
+                                showContentDisclaimer = showContentDisclaimer,
+                                onDismissContentDisclaimer = onDismissContentDisclaimer,
+                                awayReport = awayReport,
+                                onDismissAwayReport = onDismissAwayReport,
+                                lcdTheme = lcdTheme,
+                                chartLineStyle = chartLineStyle,
+                                onToggleRelicVisual = onToggleRelicVisual,
+                                onToggleFxRelic = onToggleFxRelic,
+                                onClaimRelic = onClaimRelic,
+                                sumikaLevel = sumikaLevel,
+                                sumikaPendingYen = sumikaPendingYen,
+                                sumikaUnlockedGrade = sumikaUnlockedGrade,
+                                sumikaPendingGrade = sumikaPendingGrade,
+                                sumikaGradeClaimReady = sumikaGradeClaimReady,
+                                onClaimSumikaGrade = onClaimSumikaGrade,
+                                onUpgradeSumika = onUpgradeSumika,
+                                onCollectSumikaPay = onCollectSumikaPay,
+                                onRefreshSumika = onRefreshSumika,
+                                sumikaUpgradeDiscountStacks = sumikaUpgradeDiscountStacks,
+                                sumikaDiscountUsesLeft = sumikaDiscountUsesLeft,
+                                sumikaPayDoubled = sumikaPayDoubled,
+                                sumikaDoubleUsesLeft = sumikaDoubleUsesLeft,
+                                sumikaRewardBusy = sumikaRewardBusy,
+                                sumikaCostReveal = sumikaCostReveal,
+                                adsRemoved = adsRemoved,
+                                onRequestSumikaUpgradeDiscount = onRequestSumikaUpgradeDiscount,
+                                shouldOfferSumikaPayDoubleChoice = shouldOfferSumikaPayDoubleChoice,
+                                onMarkSumikaPayDoubleChoiceShown = onMarkSumikaPayDoubleChoiceShown,
+                                onCollectSumikaPayDoubledViaAd = onCollectSumikaPayDoubledViaAd,
+                                kaiAllowanceYen = kaiAllowanceYen,
+                                onCollectKaiAllowance = onCollectKaiAllowance,
+                                showSumika = showSumika,
+                                onShowSumikaChange = { open ->
+                                    showSumika = open
+                                    if (open) onSumikaSheetOpened()
+                                },
+                                showTutorialGuide = showTutorialGuide,
+                                onShowTutorialGuideChange = { showTutorialGuide = it },
+                                showStyleLook = showStyleLook,
+                                onShowStyleLookChange = { showStyleLook = it },
+                                showSessionPnlHistory = showSessionPnlHistory,
+                                onShowSessionPnlHistoryChange = { showSessionPnlHistory = it },
+                                claimRelicTarget = claimRelicTarget,
+                                onClaimRelicTargetChange = { claimRelicTarget = it },
+                                claimCelebrating = claimCelebrating,
+                                onClaimCelebratingChange = { claimCelebrating = it },
+                            )
                         }
                         else -> {
                             val isResult = uiState.gameState == GameState.RESULT
@@ -976,6 +980,7 @@ private fun GameScreenContent(
                                         frame = chartFrame,
                                         showFullSession = isResult,
                                         lagFxTier = relicEffects.lagFx,
+                                        nowXFractionOverride = startIntroNowXFraction,
                                         modifier = Modifier
                                             .fillMaxSize()
                                             .lcdBorder()
@@ -1059,6 +1064,12 @@ private fun GameScreenContent(
                                             modifier = Modifier.fillMaxSize()
                                         )
                                     }
+                                    if (showStartBang) {
+                                        StartBangOverlay(
+                                            onFinished = onStartBangFinished,
+                                            modifier = Modifier.fillMaxSize()
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -1076,7 +1087,7 @@ private fun GameScreenContent(
                 resultIntroDone = resultIntroDone,
                 blockStart = startModalOpen || forceSpeechOpen || balance <= 0L || awayReport != null,
                 blockPlaying = forceSpeechOpen || chartFrame.retireLocked,
-                blockResult = showRelicRewardToast || showResultNews || showScrapbookTutorial,
+                blockResult = showResultNews || showScrapbookTutorial,
                 onClick = onPrimaryButtonClick,
                 onStartLongPress = { titleSecretInvert = true },
                 modifier = Modifier
@@ -1102,7 +1113,6 @@ private fun GameScreenContent(
                     resultNewsDone = true
                     onFirstClearNewsDismissed()
                 },
-                newsLabel = UiStrings.resultNewsLabel(LocalDisplayLanguage.current),
                 modifier = Modifier.fillMaxSize()
             )
         }
@@ -1149,6 +1159,20 @@ private fun GameScreenContent(
         if (showScrapbookTutorial) {
             ScrapbookTutorialOverlay(
                 onDismiss = onDismissScrapbookTutorial,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+        if (showKaiHomeIntro) {
+            KaiHomeIntroOverlay(
+                onDismiss = onDismissKaiHomeIntro,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+        if (showStartEncounterWipe) {
+            StartEncounterOverlay(
+                onCovered = onStartEncounterCovered,
+                onOpenStarted = onStartEncounterOpenStarted,
+                onRevealed = onStartEncounterRevealed,
                 modifier = Modifier.fillMaxSize()
             )
         }
@@ -1232,7 +1256,7 @@ private fun ChartsLoadErrorPanel(
 }
 
 @Composable
-private fun ContentDisclaimerOverlay(
+internal fun ContentDisclaimerOverlay(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -1291,7 +1315,7 @@ private fun ContentDisclaimerOverlay(
 }
 
 @Composable
-private fun StartAttractPanel(
+internal fun StartAttractPanel(
     smallText: String,
     onFlingShuffle: () -> Unit,
     secretInvert: Boolean,
@@ -1438,7 +1462,7 @@ private fun StartAttractPanel(
 }
 
 @Composable
-private fun LifetimeLedgerStrip(
+internal fun LifetimeLedgerStrip(
     balance: Long,
     balanceCountFrom: Long? = null,
     onBalanceCountFinished: () -> Unit = {},
@@ -2034,29 +2058,10 @@ private fun ResultOverlay(
                 verticalArrangement = Arrangement.spacedBy(6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            if (result.isFirstClear && !result.isRetired) {
-                Text(
-                    text = UiStrings.newBadge(),
-                    color = Ink,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = PixelFont,
-                    letterSpacing = 1.sp,
-                    modifier = Modifier
-                        .padding(end = 8.dp)
-                        .alpha(newBadgeAlpha.value)
-                        .graphicsLayer {
-                            scaleX = newBadgeScale.value
-                            scaleY = newBadgeScale.value
-                        }
-                        .lcdBorder()
-                        .padding(horizontal = 5.dp, vertical = 2.dp)
-                )
-            }
             if (result.isRetired) {
                 Text(
                     text = typedName.ifEmpty { " " },
@@ -2067,42 +2072,57 @@ private fun ResultOverlay(
                     textAlign = TextAlign.Center
                 )
             } else {
-                // タイトル＝ニューステープ見た目＋「ニュース」合図でタップ可能と伝える
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    modifier = Modifier
-                        .uiClickable(
-                            kind = UiSoundKind.SELECT,
-                            enabled = introDone,
-                            onClick = onOpenScrapbookDetail
+                // 銘柄名テープ＝タップで図鑑詳細。NEW はこのテープ左上。
+                Box {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier
+                            .uiClickable(
+                                kind = UiSoundKind.SELECT,
+                                enabled = introDone,
+                                onClick = onOpenScrapbookDetail
+                            )
+                            .lcdBorder()
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = typedName.ifEmpty { " " },
+                            color = Ink,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = PixelFont,
+                            textAlign = TextAlign.Center
                         )
-                        .lcdBorder()
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        text = UiStrings.resultNewsOpenCue(lang),
-                        color = InkMuted,
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = PixelFont,
-                        letterSpacing = 1.sp
-                    )
-                    Text(
-                        text = typedName.ifEmpty { " " },
-                        color = Ink,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = PixelFont,
-                        textAlign = TextAlign.Center
-                    )
-                    Text(
-                        text = "›",
-                        color = InkMuted,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = PixelFont
-                    )
+                        Text(
+                            text = "›",
+                            color = InkMuted,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = PixelFont
+                        )
+                    }
+                    if (result.isFirstClear) {
+                        Text(
+                            text = UiStrings.newBadge(),
+                            color = LcdBackground,
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = PixelFont,
+                            letterSpacing = 1.sp,
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .offset(x = (-10).dp, y = (-9).dp)
+                                .alpha(newBadgeAlpha.value)
+                                .graphicsLayer {
+                                    rotationZ = -18f
+                                    scaleX = newBadgeScale.value
+                                    scaleY = newBadgeScale.value
+                                }
+                                .background(Ink)
+                                .padding(horizontal = 4.dp, vertical = 1.dp)
+                        )
+                    }
                 }
             }
         }

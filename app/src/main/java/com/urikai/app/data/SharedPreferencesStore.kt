@@ -24,6 +24,8 @@ class SharedPreferencesStore(context: Context, name: String) : KeyValueStore {
         override fun putString(key: String, value: String?) = apply { e.putString(key, value) }
         override fun putStringSet(key: String, value: Set<String>?) = apply { e.putStringSet(key, value) }
         override fun remove(key: String) = apply { e.remove(key) }
+        override fun clear() = apply { e.clear() }
         override fun apply() = e.apply()
+        override fun commit(): Boolean = e.commit()
     }
 }

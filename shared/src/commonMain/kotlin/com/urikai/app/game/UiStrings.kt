@@ -1,4 +1,4 @@
-package com.urikai.app.game
+﻿package com.urikai.app.game
 
 object UiStrings {
 
@@ -100,12 +100,6 @@ object UiStrings {
 
     fun bestLabel(lang: DisplayLanguage): String = "BEST"
 
-    /** 初回クリア直後の出来事カード（自動で図鑑に入る）。 */
-    fun resultNewsLabel(lang: DisplayLanguage): String = when (lang) {
-        DisplayLanguage.EN -> "NEWS"
-        DisplayLanguage.JP -> "ニュース"
-    }
-
     /** 自己ベスト更新スタンプ（リザルト星付近）。 */
     fun bestStamp(lang: DisplayLanguage): String = when (lang) {
         DisplayLanguage.EN -> "BEST!"
@@ -113,12 +107,6 @@ object UiStrings {
     }
 
     fun newBadge(): String = "NEW!"
-
-    /** 結果タイトルがニュース（図鑑詳細）を開けることの合図。 */
-    fun resultNewsOpenCue(lang: DisplayLanguage): String = when (lang) {
-        DisplayLanguage.EN -> "NEWS"
-        DisplayLanguage.JP -> "ニュース"
-    }
 
     fun sortByOrder(lang: DisplayLanguage): String = when (lang) {
         DisplayLanguage.EN -> "NO."
@@ -167,7 +155,180 @@ object UiStrings {
         "REMOVE" to "なしにする",
         "OWNED" to "購入済",
         "RESTORE" to "復元",
+        "SEC_DISPLAY" to "表示",
+        "SEC_AUDIO" to "音・触覚",
+        "SEC_ABOUT" to "ABOUT",
+        "SEC_SUPPORT" to "応援",
     )
+
+    fun settingsSectionDisplay(lang: DisplayLanguage): String = settingLabel("SEC_DISPLAY", lang)
+    fun settingsSectionAudio(lang: DisplayLanguage): String = settingLabel("SEC_AUDIO", lang)
+    fun settingsSectionAbout(lang: DisplayLanguage): String = settingLabel("SEC_ABOUT", lang)
+    fun settingsSectionSupport(lang: DisplayLanguage): String = settingLabel("SEC_SUPPORT", lang)
+
+    fun removeAdsCardTitle(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> "開発者を応援する"
+        DisplayLanguage.EN -> "Support the developer"
+    }
+
+    fun removeAdsCardBody(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP ->
+            "1児の父です。小さな子供でも、資本が増える感覚を体験できるようにと、作りました。楽しんで頂けれたらうれしいです。\n\nもし応援いただけるなら、お礼として永久広告オフ特典をお渡しいたします。"
+        DisplayLanguage.EN ->
+            "I'm a dad of one. I made this so even a little kid can feel capital grow. Hope you enjoy it.\n\nIf you'd like to support, permanent ad-off is my thank-you."
+    }
+
+    fun permanentAdsOffItemName(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> "永久広告オフ"
+        DisplayLanguage.EN -> "Permanent ad-off"
+    }
+
+    fun permanentAdsOffPerkResult(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> "リザルト後の広告オフ"
+        DisplayLanguage.EN -> "No ads after results"
+    }
+
+    fun permanentAdsOffPerkHalf(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> "すみかレベルアップを半額に"
+        DisplayLanguage.EN -> "Nest level-up half price"
+    }
+
+    fun permanentAdsOffPerkDouble(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> "お給料2倍"
+        DisplayLanguage.EN -> "Paycheck ×2"
+    }
+
+    fun removeAdsBuyWithPrice(priceLabel: String, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> "$priceLabel 購入"
+        DisplayLanguage.EN -> "Buy $priceLabel"
+    }
+
+    fun reviewSupportTitle(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> "レビューで応援する"
+        DisplayLanguage.EN -> "Support with a review"
+    }
+
+    fun reviewSupportBody(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP ->
+            "短い一言でも励みになります。星だけでも、つぎを作る燃料です。"
+        DisplayLanguage.EN ->
+            "Even a short note helps. Stars alone fuel the next build."
+    }
+
+    fun reviewSupportButton(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> "レビューへ"
+        DisplayLanguage.EN -> "Write a review"
+    }
+
+    fun sumikaPayChoiceTitle(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> "お給料の受け取り"
+        DisplayLanguage.EN -> "Collect paycheck"
+    }
+
+    fun sumikaPayCollectNormal(amount: Long, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> "¥%,d 受け取る".fmt(amount)
+        DisplayLanguage.EN -> "Collect ¥%,d".fmt(amount)
+    }
+
+    fun sumikaPayCollectDouble(
+        amount: Long,
+        adsRemoved: Boolean,
+        lang: DisplayLanguage,
+    ): String = when (lang) {
+        DisplayLanguage.JP -> if (adsRemoved) {
+            "¥%,d 受け取る".fmt(amount)
+        } else {
+            "広告で¥%,d 受け取る".fmt(amount)
+        }
+        DisplayLanguage.EN -> if (adsRemoved) {
+            "Collect ¥%,d".fmt(amount)
+        } else {
+            "Ad: collect ¥%,d".fmt(amount)
+        }
+    }
+
+    fun sumikaDiscountOffer(adsRemoved: Boolean, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> "半額にする"
+        DisplayLanguage.EN -> "Half price"
+    }
+
+    fun sumikaDiscountConfirmBody(adsRemoved: Boolean, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> if (adsRemoved) {
+            "レベルアップ費用を半額にする？"
+        } else {
+            "広告を見て、レベルアップ費用を半額にする？"
+        }
+        DisplayLanguage.EN -> if (adsRemoved) {
+            "Cut the level-up cost in half?"
+        } else {
+            "Watch an ad to cut the level-up cost in half?"
+        }
+    }
+
+    fun sumikaPayDoubleOffer(adsRemoved: Boolean, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> if (adsRemoved) "2倍" else "2倍"
+        DisplayLanguage.EN -> if (adsRemoved) "2×" else "2×"
+    }
+
+    fun sumikaPayDoubleConfirmBody(adsRemoved: Boolean, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> if (adsRemoved) {
+            "いまのお給料を2倍にする？"
+        } else {
+            "広告を見て、いまのお給料を2倍にする？"
+        }
+        DisplayLanguage.EN -> if (adsRemoved) {
+            "Double this paycheck?"
+        } else {
+            "Watch an ad to double this paycheck?"
+        }
+    }
+
+    fun sumikaRewardConfirmOk(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> "はい"
+        DisplayLanguage.EN -> "Yes"
+    }
+
+    fun sumikaRewardConfirmCancel(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> "いいえ"
+        DisplayLanguage.EN -> "No"
+    }
+
+    fun sumikaPayDoubledTag(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> "2倍！"
+        DisplayLanguage.EN -> "2×!"
+    }
+
+    fun sumikaUpgradePrefix(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> "レベルアップ"
+        DisplayLanguage.EN -> "Level up"
+    }
+
+    fun sumikaGradeUpPrefix(grade: Int, lang: DisplayLanguage): String {
+        val name = if (lang == DisplayLanguage.EN) {
+            Sumika.gradeNameEn(grade, asGradeIndex = true)
+        } else {
+            Sumika.gradeNameJp(grade, asGradeIndex = true)
+        }
+        return when (lang) {
+            DisplayLanguage.EN -> "To $name"
+            DisplayLanguage.JP -> "${name}にする"
+        }
+    }
+
+    fun removeAdsBuy(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> "購入"
+        DisplayLanguage.EN -> "Buy"
+    }
+
+    fun removeAdsOwned(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> "購入済み"
+        DisplayLanguage.EN -> "Owned"
+    }
+
+    fun removeAdsRestore(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> "復元"
+        DisplayLanguage.EN -> "Restore"
+    }
 
     fun creditsBody(lang: DisplayLanguage): String = when (lang) {
         DisplayLanguage.EN ->
@@ -751,6 +912,25 @@ object UiStrings {
         DisplayLanguage.JP -> "はじめる"
     }
 
+    /**
+     * 初回出金後・カイがホームに住み着く導入（3枚）。
+     * すみか（ほしぐさ）受け取りは別タイミングの [sumikaGradeIntroPage]（g1）。
+     */
+    fun kaiHomeIntroBody(page: Int, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> when (page) {
+            0 -> "Hey… from today, can I live here on your home?"
+            1 -> "While you play the chart, I'll wait here."
+            else -> "When you come back, tap me and we'll talk. Nice to meet you."
+        }
+        DisplayLanguage.JP -> when (page) {
+            0 -> "ねえ……きょうから、ここに住まわせてもらっていい？"
+            1 -> "きみがチャートしてるあいだ、ぼくはホームで待ってるよ。"
+            else -> "帰ってきたら声をかけて。これから、ここで暮らすね。"
+        }
+    }
+
+    fun kaiHomeIntroPageCount(): Int = 3
+
     fun notebookClose(lang: DisplayLanguage): String = when (lang) {
         DisplayLanguage.EN -> "CLOSE"
         DisplayLanguage.JP -> "とじる"
@@ -833,7 +1013,7 @@ object UiStrings {
     fun notebookPageCount(id: NotebookEntryId): Int = when (id) {
         NotebookEntryId.HOW_TO_PLAY -> 2
         NotebookEntryId.LIFE -> 2
-        NotebookEntryId.BALANCE -> 3
+        NotebookEntryId.BALANCE -> 4
         NotebookEntryId.STAMPS -> 2
         else -> 1
     }
@@ -863,19 +1043,21 @@ object UiStrings {
             DisplayLanguage.JP -> when (step) {
                 0 -> "あ、口座ね。\n口座残高画面の一番上に見える大きな数字が、残高だよ。"
                 1 -> "1回やるごとに増えたり減ったりする、その合計がここ。\nくわしいことは、また今度。"
-                else -> "あとひとつ。\n現実で1日進むごとに、残高は少し動くよ。\n変えたいときは、また口座からどうぞ。"
+                2 -> "あとひとつ。\n現実で1日進むごとに、残高は少し動くよ。"
+                else -> "残高の運用方針はいろいろさ。\n変えたいときは、また口座からどうぞ。"
             }
             DisplayLanguage.EN -> when (step) {
                 0 -> "Ah — the account.\nThe big number at the top of the balance screen is the balance."
                 1 -> "It goes up and down each round; the total lives here.\nDetails later."
-                else -> "One more thing.\nEach real-world day, the balance shifts a little.\nWant a change? Open the account again."
+                2 -> "One more thing.\nEach real-world day, the balance shifts a little."
+                else -> "There are a few ways to run the balance.\nWant a change? Open the account again."
             }
         }
         NotebookEntryId.SCRAPBOOK -> when (lang) {
             DisplayLanguage.JP ->
-                "クリアした銘柄は、図鑑に残るよ。\nまた読みたくなったら、ここへきてね。"
+                "クリアした銘柄は、図鑑に残るよ。\nまた読みたくなったら、図鑑を開いてね。"
             DisplayLanguage.EN ->
-                "Cleared names stay in the scrapbook.\nCome back here whenever you want a reread."
+                "Cleared names stay in the scrapbook.\nOpen the scrapbook whenever you want a reread."
         }
         NotebookEntryId.STAMPS -> when (lang) {
             DisplayLanguage.JP -> when (step) {
@@ -924,10 +1106,6 @@ object UiStrings {
                 "Drop the account too low and it's bankrupt.\nThere is a restart after.\nLike the news — endings aren't always quiet."
         }
     }
-
-    /** G5 閉じた直後の1枚（ノート3枚目と同じ文）。 */
-    fun investCloseTipBody(lang: DisplayLanguage): String =
-        notebookPage(NotebookEntryId.BALANCE, 2, lang)
 
     /** G8-1 ホーム一言（ノート非収録）。 */
     fun stampCornerHint(lang: DisplayLanguage): String = when (lang) {
@@ -1328,36 +1506,36 @@ object UiStrings {
         return when (lang) {
             DisplayLanguage.JP -> when (g) {
                 1 -> when (s) {
-                    0 -> "ねえ……ぼく、ずっと地面でねてたんだ。"
-                    1 -> "きみの口座が育ってきたから、わらのすを用意できたよ。"
-                    else -> "ホームの下で受け取ってね。ぼくの、はじめてのすみか。"
+                    0 -> "きみの口座、育ってきたね。ちょっと安心したよ。"
+                    1 -> "そろそろ、ちゃんと休める場所がほしいな。"
+                    else -> "新しいすみかを、ここに置かせてほしい。受け取ってね。"
                 }
                 2 -> when (s) {
-                    0 -> "わらのすもいいけど……もっとやわらかいのがいいな。"
-                    1 -> "ふかふかざぶとん、用意できたよ。沈むと気持ちいいんだ。"
+                    0 -> "ほしぐさもいいけど……しきぬのがいいな。"
+                    1 -> "あさのしきぬの。まくらも置いたよ。"
                     else -> "ホームの下で受け取ってね。"
                 }
                 3 -> when (s) {
-                    0 -> "むき出しで寝るの、そろそろ卒業したい。"
-                    1 -> "ちいさなドーム。正面の穴から、ひょっこり入れるよ。"
+                    0 -> "しきぬのもいいけど……もっとふかふかがいいな。"
+                    1 -> "ふかふかくッション。まくらを立てかけたよ。"
                     else -> "ホームの下で受け取ってね。"
                 }
                 4 -> when (s) {
-                    0 -> "ドームもいいけど……耳つきの小屋がいいな。"
-                    1 -> "みみや。片耳をひさしにして、入り口を守るよ。"
+                    0 -> "クッションもいいけど……耳つきのドームがいいな。"
+                    1 -> "うさぎドーム。両耳立ち。なかに入れるよ。"
                     else -> "ホームの下で受け取ってね。"
                 }
                 else -> when (s) {
-                    0 -> "最上のすみか……ヘッドセットハウスだよ。"
-                    1 -> "ここまで育ててくれて、ありがとう。"
+                    0 -> "最上のすみか……雪魔女の部屋だよ。"
+                    1 -> "帽子と、足元のすこしの雪。"
                     else -> "ホームの下で受け取ってね。ぼく、いちばんいい夢をみる。"
                 }
             }
             DisplayLanguage.EN -> when (g) {
                 1 -> when (s) {
-                    0 -> "Hey… I've been sleeping on the ground this whole time."
-                    1 -> "Your balance grew, so I got a straw nest ready."
-                    else -> "Receive it at the bottom of Home. My first nest."
+                    0 -> "Your account's grown. That eases my mind a little."
+                    1 -> "I want a proper place to rest, before long."
+                    else -> "Can I put a new nest here? Please receive it."
                 }
                 2 -> when (s) {
                     0 -> "Straw nest is fine, but… I want something softer."
@@ -1366,17 +1544,17 @@ object UiStrings {
                 }
                 3 -> when (s) {
                     0 -> "Sleeping in the open… time to graduate."
-                    1 -> "A little dome. I can peek in from the front hole."
+                    1 -> "A backrest nest. Feels safer with a soft back."
                     else -> "Receive it at the bottom of Home."
                 }
                 4 -> when (s) {
-                    0 -> "Dome is nice, but… I want an ear hut."
-                    1 -> "Ear hut. One floppy ear makes the awning."
+                    0 -> "Backrest is nice, but… I want an ear hut."
+                    1 -> "Ear hut. Two ears. I can go inside."
                     else -> "Receive it at the bottom of Home."
                 }
                 else -> when (s) {
-                    0 -> "The finest nest… a headset house."
-                    1 -> "Thanks for raising me this far."
+                    0 -> "The finest nest… a snow-hat hut."
+                    1 -> "Snow-rabbit hat. Winter is in the pattern."
                     else -> "Receive it at the bottom of Home. Best dreams ahead."
                 }
             }
@@ -1425,8 +1603,8 @@ object UiStrings {
     }
 
     fun sumikaStatTimeLabel(lang: DisplayLanguage): String = when (lang) {
-        DisplayLanguage.EN -> "Pay / 6 min"
-        DisplayLanguage.JP -> "お給料 / 6ふん"
+        DisplayLanguage.EN -> "Pay / 5 min"
+        DisplayLanguage.JP -> "お給料 / 5ふん"
     }
 
     fun sumikaUpgrade(cost: Long, lang: DisplayLanguage): String = when (lang) {
@@ -1464,6 +1642,40 @@ object UiStrings {
             "かわいそうだから、お小遣い分けてあげるよ…\n¥100。次の1プレイまでは、もう一回はあげられないよ。"
     }
 
+    /** すみかで寝ているカイを起こしたとき。 */
+    fun kaiSumikaWakeLine(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> listOf(
+            "…nnh. Five more minutes…",
+            "I was counting sheep. And yen.",
+            "Work already…? Fine… I'm up.",
+        ).random()
+        DisplayLanguage.JP -> listOf(
+            "……ん。あと5分……",
+            "ひつじと、円を数えてたの。",
+            "もう出勤時間……？ …わかった、おきる。",
+        ).random()
+    }
+
+    /** すみかに座っているカイをつついたとき（外観／のぞき穴共通）。 */
+    fun kaiSumikaSitTapLine(lang: DisplayLanguage, avoid: String? = null): String {
+        val pool = when (lang) {
+            DisplayLanguage.EN -> listOf(
+                "Comfy here.",
+                "Just taking a break.",
+                "Warm spot. Nice.",
+                "…hm? Still resting.",
+            )
+            DisplayLanguage.JP -> listOf(
+                "ここ、いい場所だよ。",
+                "ひと休みしてるの。",
+                "あたたかくて、いいね。",
+                "……ん？ まだ休んでる。",
+            )
+        }
+        val filtered = pool.filter { it != avoid }
+        return (filtered.ifEmpty { pool }).random()
+    }
+
     fun sumikaKaiBalanceLine(balance: Long, lang: DisplayLanguage): String = when (lang) {
         DisplayLanguage.EN -> "Balance is ¥%,d.\nNice nest, huh?".fmt(balance)
         DisplayLanguage.JP -> "いまの残高、¥%,d だよ。\nすみか、いいでしょ。".fmt(balance)
@@ -1476,12 +1688,27 @@ object UiStrings {
             "残高 ¥%,d だね。\nレベルアップは ¥%,d。\n無理すると、つぎの元手が細くなるよ。".fmt(balance, cost)
     }
 
-    fun sumikaKaiConfirmLine(before: Long, after: Long, lang: DisplayLanguage): String = when (lang) {
+    fun sumikaKaiConfirmLine(lang: DisplayLanguage): String = when (lang) {
         DisplayLanguage.EN ->
-            "¥%,d → ¥%,d.\nStill want to level up?".fmt(before, after)
+            "Leaving more balance makes wins pay more.\nStill want to level up?"
         DisplayLanguage.JP ->
-            "残高 ¥%,d → ¥%,d になるよ。\nそれでもあげる？".fmt(before, after)
+            "残高を多く残したほうが、勝った時の利益は大きいよ。\nそれでもあげる？"
     }
+
+    fun sumikaSheetTutorialPage(page: Int, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> when (page) {
+            0 -> "売り買いのトレードだけだと、元手が少ないうちは増えづらいよね"
+            1 -> "だからぼくは、きみがプレイしてる間、外でお仕事してくるよ。"
+            else -> "すみかの居心地が良ければ、いっぱい稼げると思うなあ"
+        }
+        DisplayLanguage.EN -> when (page) {
+            0 -> "Trading alone is slow when your stake is small."
+            1 -> "So while you play, I'll go work outside."
+            else -> "If the nest feels good, I think I can earn a lot."
+        }
+    }
+
+    fun sumikaSheetTutorialPageCount(): Int = 3
 
     /**
      * シートカイの間欠セリフ。
@@ -1496,7 +1723,7 @@ object UiStrings {
         lang: DisplayLanguage,
     ): List<String> {
         val g = grade.coerceIn(0, 5)
-        val perHour = (passivePerTick * 10L).coerceAtLeast(0L)
+        val perHour = (passivePerTick * Sumika.PASSIVE_TICKS_PER_HOUR).coerceAtLeast(0L)
         val lines = mutableListOf<String>()
         if (upgradeCost != null && balance < upgradeCost * 3L) {
             lines += sumikaKaiLowStakeLine(balance, upgradeCost, lang)
@@ -1518,28 +1745,28 @@ object UiStrings {
                 lines += "プレイが多いほど、お給料もたまるよ"
                 when (g) {
                     1 -> {
-                        lines += "わらのす……ぺたんだけど、ぼくの場所だよ"
+                        lines += "ほしぐさ……ぺたんだけど、ぼくの場所だよ"
                         lines += "地面より、ぜんぜんあったかい"
                         lines += "くさのにおい、ちょっと好き"
                     }
                     2 -> {
-                        lines += "ふかふか……沈むと気持ちいい"
-                        lines += "わらのすより、やわらかいね"
-                        lines += "このざぶとん、おしりに合うんだ"
+                        lines += "しきぬの……まくらがあると安心"
+                        lines += "ほしぐさより、きちんとしてるね"
+                        lines += "あさのにおい、ちょっと好き"
                     }
                     3 -> {
-                        lines += "ドームの中、くらいくて落ち着くよ"
-                        lines += "正面の穴から、ひょっこり出てくるね"
-                        lines += "ちいさなへや、ひとりじめ"
+                        lines += "ふかふかくッション……沈むと気持ちいい"
+                        lines += "立てかけまくら、セットだね"
+                        lines += "このクッション、おしりに合うんだ"
                     }
                     4 -> {
-                        lines += "片耳ひさし……日よけになるんだ"
-                        lines += "みみやの中、まくらがふかふか"
+                        lines += "うさぎドーム……なかに入れるんだ"
+                        lines += "両耳立ち、かっこいい？"
                         lines += "耳があると、なんだか落ち着くね"
                     }
                     5 -> {
-                        lines += "ヘッドセットハウス……贅沢、かな？"
-                        lines += "いちばん奥で、いい夢みるよ"
+                        lines += "雪魔女の部屋……贅沢、かな？"
+                        lines += "足元の雪、ちょっと冷たい"
                         lines += "最上のすみかで、きみの口座も見守るね"
                     }
                 }
@@ -1570,18 +1797,18 @@ object UiStrings {
                         lines += "This cushion fits my seat."
                     }
                     3 -> {
-                        lines += "Inside the dome feels calm."
-                        lines += "I peek out from the front hole."
-                        lines += "A tiny room, all mine."
+                        lines += "Backrest… my back feels safe."
+                        lines += "Calmer than the cushion."
+                        lines += "Still outdoors, but a good roost."
                     }
                     4 -> {
-                        lines += "Floppy ear awning… shade!"
+                        lines += "Two ears… I can go inside!"
                         lines += "Pillow in the ear hut is fluffy."
                         lines += "Ears make it feel calm."
                     }
                     5 -> {
-                        lines += "Headset house… a little fancy?"
-                        lines += "Best dreams in the deepest nook."
+                        lines += "Snow-hat hut… a little fancy?"
+                        lines += "Winter lives in the hat pattern."
                         lines += "From the finest nest,\nI'll watch your balance."
                     }
                 }
@@ -1610,4 +1837,3 @@ object UiStrings {
         DisplayLanguage.JP -> "やめる"
     }
 }
-

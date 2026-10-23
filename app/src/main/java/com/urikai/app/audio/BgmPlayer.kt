@@ -10,8 +10,8 @@ import com.urikai.app.platform.BgmController
 import kotlin.random.Random
 
 /**
- * アンビエントBGM。プレイ中以外・BGM音量ON・フォアグラウンド時のみ。
- * 曲末フェード → 約10秒ギャップ → ランダム次曲（直近の連続回避）。
+ * アンビエントBGM。BGM音量ON・フォアグラウンド・許可時。
+ * プレイ中も流す（ViewModel側で音量ダック）。曲末フェード → ギャップ → 次曲。
  */
 class BgmPlayer(context: Context) : BgmController {
 
@@ -247,7 +247,8 @@ class BgmPlayer(context: Context) : BgmController {
         private const val FADE_MS = 1800L
         private const val FADE_STEP_MS = 50L
         private const val FADE_STEPS = FADE_MS / FADE_STEP_MS
-        private const val GAP_MS = 10_000L
-        private const val RESUME_GAP_MS = 800L
+        /** 曲間を短めにして「途切れて寂しい」感を減らす */
+        private const val GAP_MS = 4_500L
+        private const val RESUME_GAP_MS = 500L
     }
 }

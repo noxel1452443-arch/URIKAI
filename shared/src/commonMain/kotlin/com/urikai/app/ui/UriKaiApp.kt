@@ -19,6 +19,7 @@ import com.urikai.app.game.GameViewModel
 import com.urikai.app.game.UiStrings
 import com.urikai.app.platform.PlatformServices
 import com.urikai.app.res.Res
+import com.urikai.app.ui.theme.LocalEnableAdFeatures
 import com.urikai.app.ui.theme.LocalIsDebugBuild
 import com.urikai.app.ui.theme.UriKaiTheme
 import com.urikai.app.ui.theme.installPixelFont
@@ -47,16 +48,32 @@ fun UriKaiApp(services: PlatformServices) {
         onStopOrDispose { viewModel.setAppForeground(false) }
     }
 
-    CompositionLocalProvider(LocalIsDebugBuild provides services.isDebugBuild) {
-        UriKaiRoot(viewModel) {
-            val text = viewModel.buildShareText() ?: return@UriKaiRoot
-            services.shareText(text, UiStrings.shareChooserTitle(viewModel.displayLanguage.value))
-        }
+    CompositionLocalProvider(
+        LocalIsDebugBuild provides services.isDebugBuild,
+        LocalEnableAdFeatures provides services.enableAdFeatures,
+    ) {
+        UriKaiRoot(
+            viewModel = viewModel,
+            onShare = {
+                val text = viewModel.buildShareText()
+                if (text != null) {
+                    services.shareText(
+                        text,
+                        UiStrings.shareChooserTitle(viewModel.displayLanguage.value),
+                    )
+                }
+            },
+            onOpenStoreListing = services.openStoreListing,
+        )
     }
 }
 
 @Composable
-private fun UriKaiRoot(viewModel: GameViewModel, onShare: () -> Unit) {
+private fun UriKaiRoot(
+    viewModel: GameViewModel,
+    onShare: () -> Unit,
+    onOpenStoreListing: () -> Unit,
+) {
     val lcdTheme by viewModel.lcdTheme.collectAsStateWithLifecycle()
     val displayLanguage by viewModel.displayLanguage.collectAsStateWithLifecycle()
     val chartLineStyle by viewModel.chartLineStyle.collectAsStateWithLifecycle()
@@ -98,9 +115,14 @@ private fun UriKaiRoot(viewModel: GameViewModel, onShare: () -> Unit) {
         val showLifeTutorial by viewModel.showLifeTutorial.collectAsStateWithLifecycle()
         val showInvestOpenTutorial by viewModel.showInvestOpenTutorial.collectAsStateWithLifecycle()
         val showInvestCloseTip by viewModel.showInvestCloseTip.collectAsStateWithLifecycle()
+        val showSumikaSheetTutorial by viewModel.showSumikaSheetTutorial.collectAsStateWithLifecycle()
         val showScrapbookTutorial by viewModel.showScrapbookTutorial.collectAsStateWithLifecycle()
         val showStampCornerHint by viewModel.showStampCornerHint.collectAsStateWithLifecycle()
         val showStampBackTutorial by viewModel.showStampBackTutorial.collectAsStateWithLifecycle()
+        val showKaiHomeIntro by viewModel.showKaiHomeIntro.collectAsStateWithLifecycle()
+        val showStartBang by viewModel.showStartBang.collectAsStateWithLifecycle()
+        val showStartEncounterWipe by viewModel.showStartEncounterWipe.collectAsStateWithLifecycle()
+        val startIntroNowXFraction by viewModel.startIntroNowXFraction.collectAsStateWithLifecycle()
         val lifeMechanicsActive by viewModel.lifeMechanicsActive.collectAsStateWithLifecycle()
         val notebookUnlocked by viewModel.notebookUnlocked.collectAsStateWithLifecycle()
         val notebookRead by viewModel.notebookRead.collectAsStateWithLifecycle()
@@ -110,11 +132,19 @@ private fun UriKaiRoot(viewModel: GameViewModel, onShare: () -> Unit) {
         val bgmLevel by viewModel.bgmLevel.collectAsStateWithLifecycle()
         val hapticEnabled by viewModel.hapticEnabled.collectAsStateWithLifecycle()
         val adsRemoved by viewModel.adsRemoved.collectAsStateWithLifecycle()
+        val removeAdsPriceLabel by viewModel.removeAdsPriceLabel.collectAsStateWithLifecycle()
         val sumikaLevel by viewModel.sumikaLevel.collectAsStateWithLifecycle()
         val sumikaPendingYen by viewModel.sumikaPendingYen.collectAsStateWithLifecycle()
+        val sumikaUpgradeDiscountStacks by viewModel.sumikaUpgradeDiscountStacks.collectAsStateWithLifecycle()
+        val sumikaDiscountUsesLeft by viewModel.sumikaDiscountUsesLeft.collectAsStateWithLifecycle()
+        val sumikaPayDoubled by viewModel.sumikaPayDoubled.collectAsStateWithLifecycle()
+        val sumikaDoubleUsesLeft by viewModel.sumikaDoubleUsesLeft.collectAsStateWithLifecycle()
+        val sumikaRewardBusy by viewModel.sumikaRewardBusy.collectAsStateWithLifecycle()
+        val sumikaCostReveal by viewModel.sumikaCostReveal.collectAsStateWithLifecycle()
         val sumikaUnlockedGrade by viewModel.sumikaUnlockedGrade.collectAsStateWithLifecycle()
         val sumikaPendingGrade by viewModel.sumikaPendingGrade.collectAsStateWithLifecycle()
         val sumikaGradeIntroDone by viewModel.sumikaGradeIntroDone.collectAsStateWithLifecycle()
+        val sumikaGradeIntroHeld by viewModel.sumikaGradeIntroHeld.collectAsStateWithLifecycle()
         val sumikaClaimCelebrationGrade by viewModel.sumikaClaimCelebrationGrade.collectAsStateWithLifecycle()
         val balanceCountFrom by viewModel.balanceCountFrom.collectAsStateWithLifecycle()
         val kaiAllowanceYen by viewModel.kaiAllowanceYen.collectAsStateWithLifecycle()
@@ -156,9 +186,14 @@ private fun UriKaiRoot(viewModel: GameViewModel, onShare: () -> Unit) {
             showLifeTutorial = showLifeTutorial,
             showInvestOpenTutorial = showInvestOpenTutorial,
             showInvestCloseTip = showInvestCloseTip,
+            showSumikaSheetTutorial = showSumikaSheetTutorial,
             showScrapbookTutorial = showScrapbookTutorial,
             showStampCornerHint = showStampCornerHint,
             showStampBackTutorial = showStampBackTutorial,
+            showKaiHomeIntro = showKaiHomeIntro,
+            showStartBang = showStartBang,
+            showStartEncounterWipe = showStartEncounterWipe,
+            startIntroNowXFraction = startIntroNowXFraction,
             lifeMechanicsActive = lifeMechanicsActive,
             notebookUnlocked = notebookUnlocked,
             notebookRead = notebookRead,
@@ -167,9 +202,16 @@ private fun UriKaiRoot(viewModel: GameViewModel, onShare: () -> Unit) {
             onDismissLifeTutorial = viewModel::dismissLifeTutorial,
             onDismissInvestOpenTutorial = viewModel::dismissInvestOpenTutorial,
             onDismissInvestCloseTip = viewModel::dismissInvestCloseTip,
+            onSumikaSheetOpened = viewModel::onSumikaSheetOpened,
+            onDismissSumikaSheetTutorial = viewModel::dismissSumikaSheetTutorial,
             onDismissScrapbookTutorial = viewModel::dismissScrapbookTutorial,
             onDismissStampCornerHint = viewModel::dismissStampCornerHint,
             onDismissStampBackTutorial = viewModel::dismissStampBackTutorial,
+            onDismissKaiHomeIntro = viewModel::dismissKaiHomeIntro,
+            onStartBangFinished = viewModel::onStartBangFinished,
+            onStartEncounterCovered = viewModel::onStartEncounterCovered,
+            onStartEncounterOpenStarted = viewModel::onStartEncounterOpenStarted,
+            onStartEncounterRevealed = viewModel::onStartEncounterRevealed,
             onBalanceOpened = viewModel::onBalanceOpened,
             onBalanceClosed = viewModel::onBalanceClosed,
             onFirstClearNewsDismissed = viewModel::onFirstClearNewsDismissed,
@@ -192,15 +234,20 @@ private fun UriKaiRoot(viewModel: GameViewModel, onShare: () -> Unit) {
             onBgmLevelChange = viewModel::setBgmLevel,
             onHapticEnabledChange = viewModel::setHapticEnabled,
             adsRemoved = adsRemoved,
+            removeAdsPriceLabel = removeAdsPriceLabel,
             onPurchaseRemoveAds = viewModel::purchaseRemoveAds,
             onRestorePurchases = viewModel::restorePurchases,
+            onOpenStoreListing = onOpenStoreListing,
             onDebugSetAdsRemoved = viewModel::debugSetAdsRemoved,
             onDebugResetSumika = viewModel::debugResetSumika,
+            onDebugForceSumikaGrade = viewModel::debugForceSumikaGrade,
+            onDebugWipeAllProgress = viewModel::debugWipeAllProgressAndRestart,
             sumikaLevel = sumikaLevel,
             sumikaPendingYen = sumikaPendingYen,
             sumikaUnlockedGrade = sumikaUnlockedGrade,
             sumikaPendingGrade = sumikaPendingGrade,
             sumikaGradeIntroDone = sumikaGradeIntroDone,
+            sumikaGradeIntroHeld = sumikaGradeIntroHeld,
             sumikaClaimCelebrationGrade = sumikaClaimCelebrationGrade,
             onMarkSumikaGradeIntroDone = viewModel::markSumikaGradeIntroDone,
             onClaimSumikaGrade = viewModel::claimSumikaGradeReward,
@@ -211,6 +258,16 @@ private fun UriKaiRoot(viewModel: GameViewModel, onShare: () -> Unit) {
             onCollectSumikaPay = viewModel::collectSumikaPay,
             onCollectKaiAllowance = viewModel::collectKaiAllowance,
             onRefreshSumika = viewModel::refreshSumikaUi,
+            sumikaUpgradeDiscountStacks = sumikaUpgradeDiscountStacks,
+            sumikaDiscountUsesLeft = sumikaDiscountUsesLeft,
+            sumikaPayDoubled = sumikaPayDoubled,
+            sumikaDoubleUsesLeft = sumikaDoubleUsesLeft,
+            sumikaRewardBusy = sumikaRewardBusy,
+            sumikaCostReveal = sumikaCostReveal,
+            onRequestSumikaUpgradeDiscount = viewModel::requestSumikaUpgradeDiscount,
+            shouldOfferSumikaPayDoubleChoice = viewModel::shouldOfferSumikaPayDoubleChoice,
+            onMarkSumikaPayDoubleChoiceShown = viewModel::markSumikaPayDoubleChoiceShown,
+            onCollectSumikaPayDoubledViaAd = viewModel::requestSumikaPayDoubleAndCollect,
             onClearBalanceCountFrom = viewModel::clearBalanceCountFrom,
             onScrapbookSortChange = viewModel::setScrapbookSort,
             onShare = onShare,

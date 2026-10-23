@@ -33,6 +33,8 @@ data class StageChart(
     val macroShape: String,
     /** 開始時点の見せ株価（円） */
     val basePrice: Int,
+    /** 同一銘柄（物語）内の話数。1始まり */
+    val sagaEp: Int = 1,
     val priceRatios: FloatArray
 ) {
 

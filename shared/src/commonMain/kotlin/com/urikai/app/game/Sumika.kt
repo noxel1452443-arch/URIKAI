@@ -12,9 +12,12 @@ import kotlin.math.pow
  */
 object Sumika {
     const val MAX_LEVEL = 99
-    const val PASSIVE_INTERVAL_MS = 6L * 60L * 1000L
-    /** 草のしき布を報酬として出せる最高残高。 */
-    const val FIRST_GRADE_PEAK_BALANCE = 12_000L
+    /** パッシブお給料の刻み（5分）。 */ 
+    const val PASSIVE_INTERVAL_MS = 5L * 60L * 1000L
+    /** 1時間あたりのパッシブ回数（60/5）。時給セリフ用。 */
+    const val PASSIVE_TICKS_PER_HOUR = 12L
+    /** ほしぐさ（g1）を報酬として出せる最高残高。 */
+    const val FIRST_GRADE_PEAK_BALANCE = 11_000L
 
     /** grade 1..5 の開始 Lv（グレードアップ先）。 */
     private val GRADE_START = intArrayOf(0, 1, 10, 25, 45, 70)
@@ -34,11 +37,11 @@ object Sumika {
         val g = if (asGradeIndex) gradeOrLevel else gradeIndex(gradeOrLevel)
         return when (g) {
             0 -> "なし"
-            1 -> "わらのす"
-            2 -> "ふかふかざぶとん"
-            3 -> "ちいさなドーム"
-            4 -> "みみや"
-            else -> "ヘッドセットハウス"
+            1 -> "ほしぐさのねどこ"
+            2 -> "あさのしきぬの"
+            3 -> "ふかふかくッション"
+            4 -> "うさぎドーム"
+            else -> "雪魔女の部屋"
         }
     }
 
@@ -46,12 +49,18 @@ object Sumika {
         val g = if (asGradeIndex) gradeOrLevel else gradeIndex(gradeOrLevel)
         return when (g) {
             0 -> "None"
-            1 -> "Straw nest"
-            2 -> "Plush cushion"
-            3 -> "Little dome"
-            4 -> "Ear hut"
-            else -> "Headset house"
+            1 -> "Hay bed"
+            2 -> "Hemp mat"
+            3 -> "Fluffy cushion"
+            4 -> "Bunny dome"
+            else -> "Snow witch room"
         }
+    }
+
+    /** inside／enter があるのは g4 以降。 */
+    fun supportsInside(gradeOrLevel: Int, asGradeIndex: Boolean = false): Boolean {
+        val g = if (asGradeIndex) gradeOrLevel else gradeIndex(gradeOrLevel)
+        return g >= 4
     }
 
     fun maxLevelForUnlockedGrade(unlockedGrade: Int): Int =
@@ -88,15 +97,38 @@ object Sumika {
         return next
     }
 
-    fun canNormalLevelUp(level: Int, unlockedGrade: Int, balance: Long): Boolean {
+    fun canNormalLevelUp(
+        level: Int,
+        unlockedGrade: Int,
+        balance: Long,
+        discountStacks: Int = 0,
+    ): Boolean {
         val next = nextNormalLevel(level, unlockedGrade) ?: return false
-        return balance >= costToReach(next)
+        return balance >= discountedCost(costToReach(next), discountStacks)
     }
 
-    fun canGradeUp(level: Int, unlockedGrade: Int, balance: Long): Boolean {
+    fun canGradeUp(
+        level: Int,
+        unlockedGrade: Int,
+        balance: Long,
+        discountStacks: Int = 0,
+    ): Boolean {
         val next = nextGradeUpLevel(level, unlockedGrade) ?: return false
-        return balance >= costToReach(next)
+        return balance >= discountedCost(costToReach(next), discountStacks)
     }
+
+    /** 半額スタック適用後の費用。0円にはしない。 */
+    fun discountedCost(base: Long, stacks: Int): Long {
+        if (base <= 0L) return 0L
+        var cost = base
+        repeat(stacks.coerceAtLeast(0)) {
+            cost = (cost / 2L).coerceAtLeast(1L)
+        }
+        return cost
+    }
+
+    /** 1日あたりの半額／給料2倍の利用上限。 */
+    const val REWARD_DAILY_CAP = 3
 
     fun payPerPlay(level: Int): Long {
         if (level <= 0) return 0L
@@ -117,20 +149,29 @@ object Sumika {
         return 300L
     }
 
-    fun passivePerTick(level: Int): Long = payPerPlay(level) / 10L
+    /**
+     * 5分ごとのお給料。
+     * 「旧・6分額（play/10）の半分」＝ play/20。
+     * 例: Lv45 play=¥1000 → 5分ごと ¥50。
+     */
+    fun passivePerTick(level: Int): Long = payPerPlay(level) / 20L
 
-    fun pendingCap(level: Int): Long = payPerPlay(level) * 3L
+    /** 未受取上限。プレイ給料の 2 倍。 */
+    fun pendingCap(level: Int): Long = payPerPlay(level) * 2L
+
+    /** 時給目安（5分額 × 12）。 */
+    fun passivePerHour(level: Int): Long = passivePerTick(level) * PASSIVE_TICKS_PER_HOUR
 
     fun costToReach(level: Int): Long {
         if (level <= 0) return 0L
-        if (level == 1) return 600L
+        if (level == 1) return 1_200L
         when (level) {
-            10 -> return 3_500L
-            25 -> return 8_000L
-            45 -> return 16_000L
-            70 -> return 32_000L
+            10 -> return 7_000L
+            25 -> return 16_000L
+            45 -> return 32_000L
+            70 -> return 64_000L
         }
-        return floor(350.0 * 1.055.pow((level - 2).toDouble())).toLong().coerceAtLeast(350L)
+        return floor(700.0 * 1.055.pow((level - 2).toDouble())).toLong().coerceAtLeast(700L)
     }
 
     /** 既存セーブの Lv から、解放済みグレードを推定。 */
@@ -138,37 +179,37 @@ object Sumika {
 
     fun flavorJp(level: Int): String = when (gradeIndex(level)) {
         0 -> "まだ場所がない。"
-        1 -> "わらを編んだす。仮のねぐら。"
-        2 -> "ふかふかのざぶとん。沈むと気持ちいい。"
-        3 -> "ちいさなペットドーム。穴からひょっこり。"
-        4 -> "片耳をひさしにした、みみや。"
-        else -> "ヘッドセットハウス。通信の本拠。"
+        1 -> "ほしぐさのねどこ。仮のねぐら。"
+        2 -> "あさのしきぬの。まくら付き。"
+        3 -> "ふかふかくッション。まくらを立てかけた。"
+        4 -> "両耳立ちの、うさぎドーム。"
+        else -> "雪魔女の部屋。片耳倒しの帽子すみか。"
     }
 
     fun flavorEn(level: Int): String = when (gradeIndex(level)) {
         0 -> "No nest yet."
-        1 -> "A straw nest. Temporary roost."
-        2 -> "A plush cushion. Nice to sink into."
-        3 -> "A little pet dome. Peek from the hole."
-        4 -> "An ear hut with one floppy awning ear."
-        else -> "Headset house. Home base of signals."
+        1 -> "A hay bed. Temporary roost."
+        2 -> "A hemp mat with a thin white pillow."
+        3 -> "A fluffy cushion with a matching propped pillow."
+        4 -> "A bunny dome with both ears up."
+        else -> "Snow witch room. One floppy ear, snow at the feet."
     }
 
     fun gradeRewardFlavorJp(grade: Int): String = when (grade) {
-        1 -> "わらのすを手に入れた。カイのすみかが始まる。"
-        2 -> "ふかふかざぶとん。やわらかいねぐら。"
-        3 -> "ちいさなドーム。中に入れるすみか。"
-        4 -> "みみや。耳がひさしになった小屋。"
-        5 -> "ヘッドセットハウス。最上のすみか。"
+        1 -> "ほしぐさのねどこを手に入れた。カイのすみかが始まる。"
+        2 -> "あさのしきぬの。白いまくら付き。"
+        3 -> "ふかふかくッション。立てかけまくら。"
+        4 -> "うさぎドーム。なかに入れる。"
+        5 -> "雪魔女の部屋。最上のすみか。"
         else -> ""
     }
 
     fun gradeRewardFlavorEn(grade: Int): String = when (grade) {
-        1 -> "Straw nest unlocked. Kai's nest begins."
-        2 -> "Plush cushion. A softer roost."
-        3 -> "Little dome. A nest you can enter."
-        4 -> "Ear hut. Ears become the awning."
-        5 -> "Headset house. The finest nest."
+        1 -> "Hay bed unlocked. Kai's nest begins."
+        2 -> "Hemp mat with a white pillow."
+        3 -> "Fluffy cushion with a matching pillow."
+        4 -> "Bunny dome. A nest you can enter."
+        5 -> "Snow witch room. The finest nest."
         else -> ""
     }
 }
@@ -197,6 +238,12 @@ data class SumikaGradeClaimResult(
     val unlockedGrade: Int,
 )
 
+/** 半額適用直前の値段カウントダウン演出。 */
+data class SumikaCostReveal(
+    val fromCost: Long,
+    val toCost: Long,
+)
+
 data class SumikaSnapshot(
     val level: Int,
     val pendingYen: Long,
@@ -204,19 +251,32 @@ data class SumikaSnapshot(
     val cashOutCount: Int,
     val unlockedGrade: Int,
     val pendingGrade: Int,
+    val upgradeDiscountStacks: Int = 0,
+    val discountUsesLeftToday: Int = Sumika.REWARD_DAILY_CAP,
+    val payDoubled: Boolean = false,
+    val doubleUsesLeftToday: Int = Sumika.REWARD_DAILY_CAP,
 ) {
     val payPerPlay: Long get() = Sumika.payPerPlay(level)
     val passivePerTick: Long get() = Sumika.passivePerTick(level)
     val cap: Long get() = Sumika.pendingCap(level)
     val nextNormalLevel: Int? get() = Sumika.nextNormalLevel(level, unlockedGrade)
     val nextGradeUpLevel: Int? get() = Sumika.nextGradeUpLevel(level, unlockedGrade)
-    val nextCost: Long
+    val nextCostBase: Long
         get() {
             val n = nextNormalLevel ?: nextGradeUpLevel ?: return 0L
             return Sumika.costToReach(n)
         }
-    val canNormalLevelUp: Boolean get() = Sumika.canNormalLevelUp(level, unlockedGrade, balance)
-    val canGradeUp: Boolean get() = Sumika.canGradeUp(level, unlockedGrade, balance)
+    val nextCost: Long get() = Sumika.discountedCost(nextCostBase, upgradeDiscountStacks)
+    val canNormalLevelUp: Boolean
+        get() = Sumika.canNormalLevelUp(level, unlockedGrade, balance, upgradeDiscountStacks)
+    val canGradeUp: Boolean
+        get() = Sumika.canGradeUp(level, unlockedGrade, balance, upgradeDiscountStacks)
+    val canOfferUpgradeDiscount: Boolean
+        get() = (nextNormalLevel != null || nextGradeUpLevel != null) &&
+            discountUsesLeftToday > 0 &&
+            nextCostBase > 1L
+    val canOfferPayDouble: Boolean
+        get() = pendingYen > 0L && !payDoubled && doubleUsesLeftToday > 0
     val atGradeCap: Boolean
         get() = level > 0 && nextNormalLevel == null && nextGradeUpLevel == null
     val gradeNameJp: String get() = Sumika.gradeNameJp(level)

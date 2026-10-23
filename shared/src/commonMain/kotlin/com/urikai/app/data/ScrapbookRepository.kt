@@ -11,16 +11,37 @@ class ScrapbookRepository(openStore: (String) -> KeyValueStore) {
 
     private val prefs = openStore(PREFS_NAME)
 
+    fun isUnlocked(stageId: String): Boolean =
+        prefs.getBoolean(unlockKey(stageId), false)
+
+    fun unlockedStageIds(stages: List<StageChart>): Set<String> =
+        stages.map { it.stageId }.filter { isUnlocked(it) }.toSet()
+
     fun buildEntries(stages: List<StageChart>, lang: DisplayLanguage): List<ScrapbookEntry> {
+        val unlockedIds = unlockedStageIds(stages)
+        val totalsByInstrument = stages.groupingBy { it.instrumentName }.eachCount()
+        val prevByStage = stages.associate { stage ->
+            val prev = stages.find {
+                it.instrumentName == stage.instrumentName && it.sagaEp == stage.sagaEp - 1
+            }
+            stage.stageId to prev?.stageId
+        }
         return stages.map { stage ->
             val bestAssetRaw = prefs.getInt(bestAssetKey(stage.stageId), -1)
-            val unlocked = prefs.getBoolean(unlockKey(stage.stageId), false)
+            val unlocked = stage.stageId in unlockedIds
+            val prevId = prevByStage[stage.stageId]
+            val awaitingPrevious = !unlocked && stage.sagaEp > 1 &&
+                (prevId == null || prevId !in unlockedIds)
             ScrapbookEntry(
                 stageId = stage.stageId,
                 brandName = stage.brandName(lang),
                 calendarStart = stage.calendarStart(lang),
                 calendarEnd = stage.calendarEnd(lang),
                 instrumentName = stage.instrumentName(lang),
+                instrumentKey = stage.instrumentName,
+                sagaEp = stage.sagaEp,
+                sagaTotal = totalsByInstrument[stage.instrumentName] ?: 1,
+                awaitingPrevious = awaitingPrevious,
                 scenarioType = stage.scenarioType,
                 historyComment = stage.historyComment(lang),
                 macroShape = stage.macroShape,
@@ -52,6 +73,7 @@ class ScrapbookRepository(openStore: (String) -> KeyValueStore) {
 
         prefs.edit()
             .putBoolean(unlockKey(stageId), true)
+            .putBoolean(KEY_HAD_ANY_UNLOCK, true)
             .apply {
                 if (isNewBest) putInt(bestAssetKey(stageId), finalAsset)
             }
@@ -63,11 +85,15 @@ class ScrapbookRepository(openStore: (String) -> KeyValueStore) {
         )
     }
 
+    /** 1銘柄でもクリア解放済みか（コールドスタート時の図鑑ガイド復旧用）。 */
+    fun hasAnyUnlocked(): Boolean = prefs.getBoolean(KEY_HAD_ANY_UNLOCK, false)
+
     private fun unlockKey(stageId: String) = "unlock_$stageId"
     private fun bestAssetKey(stageId: String) = "best_asset_$stageId"
 
     companion object {
         private const val PREFS_NAME = "urikai_scrapbook"
+        private const val KEY_HAD_ANY_UNLOCK = "had_any_unlock"
     }
 }
 

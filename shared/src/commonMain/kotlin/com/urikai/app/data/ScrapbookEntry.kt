@@ -9,6 +9,12 @@ data class ScrapbookEntry(
     val calendarStart: String,
     val calendarEnd: String,
     val instrumentName: String,
+    /** 物語グループ用の固定キー（JP銘柄名） */
+    val instrumentKey: String = "",
+    val sagaEp: Int = 1,
+    val sagaTotal: Int = 1,
+    /** 前話が未解放でこの話がロックされている（一覧の説明用） */
+    val awaitingPrevious: Boolean = false,
     val scenarioType: String,
     /** 教訓（物語の締めのひとこと） */
     val historyComment: String,

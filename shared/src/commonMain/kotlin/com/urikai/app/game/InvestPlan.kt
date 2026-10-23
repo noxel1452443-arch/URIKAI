@@ -18,8 +18,8 @@ enum class InvestPlan(
     DEPOSIT("銀行預金", "Bank Deposit", 0.3f, 0f, 0L),
     BALANCED("バランス投信", "Balanced Fund", 0.5f, 2f, 0L),
     GROWTH("グロース株ファンド", "Growth Fund", 0.8f, 6f, 0L),
-    EMERGING("新興国ファンド", "Emerging Fund", 1.0f, 9f, 20_000L),
-    ACORN("ドングリコイン積立", "Acorn Coin Plan", 2.0f, 14f, 50_000L);
+    EMERGING("新興国ファンド", "Emerging Fund", 1.0f, 9f, 36_000L),
+    ACORN("ドングリコイン積立", "Acorn Coin Plan", 2.0f, 14f, 90_000L);
 
     val isGuaranteed: Boolean get() = dailyVolPercent <= 0f
 

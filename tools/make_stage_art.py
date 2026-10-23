@@ -1,7 +1,7 @@
 """
 元絵（生成画像など）を図鑑用の液晶ドット絵に変換する。
 
-出力: app/src/main/res/drawable-nodpi/stage_<stage_id>.png
+出力: shared/.../composeResources/drawable/stage_<stage_id>.png
   - 160x120 ドット（4:3）
   - 背景は透明、インクは濃淡3段階のアルファ（色はアプリ側でテーマのインク色に着色）
   - プレビュー: app/build/art_preview/stage_<stage_id>.png（緑液晶で合成、4倍）
@@ -18,7 +18,9 @@ from pathlib import Path
 from PIL import Image, ImageOps
 
 ROOT = Path(__file__).resolve().parents[1]
-OUT_DIR = ROOT / "app" / "src" / "main" / "res" / "drawable-nodpi"
+OUT_DIR = (
+    ROOT / "shared" / "src" / "commonMain" / "composeResources" / "drawable"
+)
 PREVIEW_DIR = ROOT / "app" / "build" / "art_preview"
 
 WIDTH, HEIGHT = 160, 120

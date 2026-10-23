@@ -42,7 +42,7 @@ kotlin {
 
 android {
     namespace = "com.urikai.shared"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 26

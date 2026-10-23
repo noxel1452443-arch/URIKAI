@@ -73,6 +73,8 @@ fun PriceChart(
     showTradeReview: Boolean = false,
     focusTarget: TimingFocus? = null,
     lagFxTier: LagFxTier = LagFxTier.NONE,
+    /** START イントロ用。null なら通常の NOW_X_FRACTION。 */
+    nowXFractionOverride: Float? = null,
 ) {
     if (frame.priceRatios.isEmpty()) return
     val colors = lcdColors()
@@ -102,7 +104,11 @@ fun PriceChart(
         max(elapsedSec, 0.001f)
     }
     val plotStart = windowStart
-    val nowXFraction = if (showFullSession) 1f else GameViewModel.NOW_X_FRACTION
+    val nowXFraction = when {
+        showFullSession -> 1f
+        nowXFractionOverride != null -> nowXFractionOverride.coerceIn(0.02f, 1f)
+        else -> GameViewModel.NOW_X_FRACTION
+    }
 
     var targetMin = Float.POSITIVE_INFINITY
     var targetMax = Float.NEGATIVE_INFINITY
@@ -292,8 +298,24 @@ fun PriceChart(
             frame.priceRatios,
             frame.startOffsetSeconds + elapsedSec
         )
-        val now = Offset(xOf(elapsedSec), yOf(nowRatio))
+        // イントロ中は elapsed=0 のため xOf(0)=常に0 になり、nowXFraction が効かない。
+        // オーバーライド時は「現在点の画面X」を直接 fraction で決める。
+        val nowX = if (nowXFractionOverride != null) {
+            snap(w * nowXFraction)
+        } else {
+            xOf(elapsedSec)
+        }
+        val now = Offset(nowX, yOf(nowRatio))
         val pointSize = 10f
+        // イントロ: 左から定位置へ向かう軌道が分かるよう、短い水平トレースを引く
+        if (nowXFractionOverride != null && nowX > 2f) {
+            drawLine(
+                color = ink.copy(alpha = 0.35f),
+                start = Offset(0f, now.y),
+                end = Offset(now.x, now.y),
+                strokeWidth = 2f
+            )
+        }
 
         if (frame.hasStock) {
             drawRect(

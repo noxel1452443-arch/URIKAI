@@ -16,68 +16,111 @@
     }
     h1 { font-size: 1.5rem; margin-bottom: 0.25rem; }
     h2 { font-size: 1.15rem; margin-top: 2rem; }
+    h3 { font-size: 1.05rem; margin-top: 1.25rem; }
     .meta { color: #666; font-size: 0.95rem; margin-bottom: 1.5rem; }
     a { color: inherit; }
     hr { border: none; border-top: 1px solid #ccc; margin: 2rem 0; }
+    ul { padding-left: 1.25rem; }
   </style>
 </head>
 <body>
   <h1>Privacy Policy — URIKAI</h1>
   <p class="meta">
-    Last updated: 2026-08-02<br />
+    Last updated: 2026-10-23<br />
     Contact: <a href="mailto:noxel.1452443@gmail.com">noxel.1452443@gmail.com</a>
   </p>
 
   <h2>Japanese / 日本語</h2>
-  <h3>収集するデータ</h3>
-  <p>URIKAI（以下「本アプリ」）は、<strong>個人を特定できる情報を収集・送信しません。</strong></p>
-  <p>本アプリが端末内にのみ保存するもの:</p>
+
+  <h3>はじめに</h3>
+  <p>URIKAI（以下「本アプリ」）は、60秒のタイミングゲームです。本ポリシーは、本アプリおよび Google Play 上の関連サービスにおけるデータの取り扱いを説明します。</p>
+
+  <h3>端末内にだけ保存するデータ</h3>
+  <p>本アプリは、次の情報を<strong>端末内</strong>（SharedPreferences 等）に保存します。これらはゲーム進行・設定のためのものであり、当社の独自サーバへ送信することを目的としません。</p>
   <ul>
-    <li>図鑑の解放状況・自己ベスト（到達率／最終資産）</li>
-    <li>通算損益・出金回数・報酬（レリック）の受取／適用状態・ボーナス関連フラグ</li>
-    <li>直近の資産・セッション損益の履歴（端末内の表示用）</li>
-    <li>表示言語・HUD・液晶テーマ・チャート線種・走査線／コントラスト／音量／触覚などの設定</li>
-    <li>初回チュートリアル・免責オーバーレイの既読フラグ</li>
+    <li>図鑑の解放状況・自己ベスト</li>
+    <li>口座残高・通算損益・出金回数・運用方針・カイの寝床などメタ進行</li>
+    <li>レリック（報酬）の受取／適用状態</li>
+    <li>表示言語・HUD・液晶テーマ・音量・触覚などの設定</li>
+    <li>チュートリアル・免責・広告除去フラグなどの既読／購入状態</li>
+  </ul>
+  <p>アプリのアンインストール、または端末のアプリデータ削除で消去できます。</p>
+
+  <h3>広告・課金（Google サービス）</h3>
+  <p>本アプリは Google Play 経由で、次を提供する場合があります。</p>
+  <ul>
+    <li><strong>広告</strong>（Google AdMob）— 例: プレイ終了後のインタースティシャル、任意のリワード広告</li>
+    <li><strong>買い切り型のアプリ内課金</strong>（Google Play の課金システム）— 例: 広告の非表示</li>
   </ul>
   <p>
-    これらは端末の SharedPreferences に保存され、<strong>外部サーバーへ送信されません。</strong>
-    インターネット通信、広告 SDK、解析 SDK、アカウントログインはありません。
-    アプリをアンインストール（または端末のアプリデータを削除）すると消えます。
+    これらの機能が有効なビルドでは、広告・課金の配信・不正防止・測定のために
+    <strong>Google の SDK がネットワーク通信を行い、デバイス情報や広告識別子などを Google のポリシーに従って処理</strong>することがあります。詳細は
+    <a href="https://policies.google.com/privacy">Google プライバシーポリシー</a> および
+    <a href="https://support.google.com/admob/answer/6128543">AdMob ヘルプ</a> を参照してください。
   </p>
+  <p>広告除去を購入した場合、その購入状態は Google Play の購入情報および端末内フラグで管理されます。</p>
+  <p>開発・テスト段階では広告 SDK を接続していないビルドもあります。ストアに公開する本番ビルドの挙動は、接続後の本ポリシーに従います。</p>
+
+  <h3>解析</h3>
+  <p>クラッシュ報告や利用状況の把握のため、Firebase 等の解析ツールを段階的に導入する場合があります。導入時は本ポリシーを更新します。</p>
+
   <h3>権限</h3>
   <ul>
     <li><strong>振動（VIBRATE）</strong>: ゲーム内の触覚フィードバック用。設定でオフにできます。</li>
+    <li>広告・課金・解析を有効にしたビルドでは、それら SDK が必要とするネットワーク通信が発生します。</li>
   </ul>
+
   <h3>子どものプライバシー</h3>
-  <p>本アプリは子どもからデータを収集することを目的としていません。</p>
+  <p>本アプリは子どもからデータを収集することを目的としていません。また、子ども向けアプリとしての設計ではありません。</p>
+
   <h3>変更</h3>
-  <p>本ポリシーを変更する場合は、このページを更新します。</p>
+  <p>本ポリシーを変更する場合は、このページの「Last updated」を更新します。</p>
 
   <hr />
 
   <h2>English</h2>
-  <h3>Data we collect</h3>
-  <p>URIKAI does <strong>not collect or transmit personally identifiable information</strong>.</p>
-  <p>Stored only on the device:</p>
+
+  <h3>Introduction</h3>
+  <p>URIKAI (“the App”) is a 60-second timing game. This policy describes how data is handled in the App and related Google Play services.</p>
+
+  <h3>Data stored only on device</h3>
+  <p>The App stores the following <strong>on the device</strong> (e.g. SharedPreferences) for progress and settings. We do not operate a first-party server whose purpose is to collect this data:</p>
   <ul>
-    <li>Scrapbook unlocks and personal bests (sync rate / final asset)</li>
-    <li>Lifetime P/L, cash-out count, relic claim/apply state, bonus-related flags</li>
-    <li>Recent asset / session P/L history (on-device display only)</li>
-    <li>Settings (language, HUD, LCD theme, chart line, scanlines / contrast, sound, haptic)</li>
-    <li>First-run tutorial and content-disclaimer “seen” flags</li>
+    <li>Scrapbook unlocks and personal bests</li>
+    <li>Account balance, lifetime P/L, cash-out count, invest plan, Kai’s bed, and similar meta progress</li>
+    <li>Relic claim / apply state</li>
+    <li>Settings (language, HUD, LCD theme, audio, haptics, etc.)</li>
+    <li>Tutorial / disclaimer / ads-removed flags</li>
+  </ul>
+  <p>Uninstalling the App or clearing app data removes this information.</p>
+
+  <h3>Ads and in-app purchases (Google services)</h3>
+  <p>The App may offer, via Google Play:</p>
+  <ul>
+    <li><strong>Ads</strong> (Google AdMob) — e.g. interstitial after a run, optional rewarded ads</li>
+    <li><strong>One-time in-app purchases</strong> (Google Play Billing) — e.g. remove ads</li>
   </ul>
   <p>
-    Data stays in on-device SharedPreferences and is <strong>not sent to any server</strong>.
-    No internet permission, ads, analytics SDKs, or accounts.
-    Uninstalling the app (or clearing app data) removes it.
+    When these features are enabled, Google’s SDKs may use network communication and process device information and advertising identifiers under Google’s policies. See
+    <a href="https://policies.google.com/privacy">Google Privacy Policy</a> and
+    <a href="https://support.google.com/admob/answer/6128543">AdMob help</a>.
   </p>
+  <p>If you purchase ad removal, that state is managed via Google Play purchase records and an on-device flag.</p>
+  <p>Some development builds may ship without ad SDKs. Production builds on Play follow this policy once connected.</p>
+
+  <h3>Analytics</h3>
+  <p>We may gradually add crash / usage analytics (e.g. Firebase). This page will be updated when that happens.</p>
+
   <h3>Permissions</h3>
   <ul>
     <li><strong>VIBRATE</strong>: optional in-game haptic feedback (can be disabled in settings).</li>
+    <li>Builds with ads, billing, or analytics perform network communication required by those SDKs.</li>
   </ul>
+
   <h3>Children’s privacy</h3>
-  <p>We do not knowingly collect data from children.</p>
+  <p>We do not knowingly collect data from children. The App is not designed as a children’s product.</p>
+
   <h3>Changes</h3>
-  <p>We will update this page if the policy changes.</p>
+  <p>We will update the “Last updated” date on this page when the policy changes.</p>
 </body>
 </html>

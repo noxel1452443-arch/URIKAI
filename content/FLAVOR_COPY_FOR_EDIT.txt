@@ -1,0 +1,1435 @@
+URIKAI チャート出来事テキスト一覧（推敲用）
+出典: content/stages_meta.csv
+編集対象JP: brand_name / instrument_name / anchor_when / flavor_text / history_comment / anchor_label
+英語も併記。推敲後は stages_meta.csv に戻し、py -3 tools/generate_charts_csv.py を実行。
+========================================================================
+
+### [01] v01  saga_ep=1  tier=-
+period: 食品 / Food
+instrument: にゃんフーズHD / Nyan Foods HD
+
+【見出し brand_name】
+ネコ缶、全品回収で大パニック
+Cat food recall sparks panic
+
+【出来事（転換点） anchor_when】
+社長が泣きながら試食
+CEO tastes it in tears
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+新味「まぐろ風いちご」に全国のネコがそっぽを向いた。全品回収の会見で社長が一缶を食べてみせると、好感度だけが先に戻った。
+Cats nationwide refused the new 'tuna-strawberry' flavor. At the recall press conference the CEO ate a can on camera—and goodwill came back first.
+
+【波のコツ（短いラベル） anchor_label】
+底から戻って高値へ
+Bottom, then back to new highs
+
+【締めのひとこと（予備・画面非表示） history_comment】
+みんなが逃げたあとに、戻りは始まる。
+The comeback starts after everyone runs.
+
+------------------------------------------------------------------------
+
+### [02] v02  saga_ep=1  tier=-
+period: 食品 / Food
+instrument: ぬか福本舗 / Nukafuku Honpo
+
+【見出し brand_name】
+老舗ぬか床、まさかの営業停止…からの？
+Old pickle shop shuts down… or does it?
+
+【出来事（転換点） anchor_when】
+店主が営業再開を発表
+Shop reopens
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+創業200年のぬか床が「元気がない」と店を閉じた。三日三晩かき混ぜると、ぬか床は閉店前より元気になった。
+The 200-year-old pickle bed looked 'tired,' so the shop closed. After three days of nonstop stirring, it was livelier than before.
+
+【波のコツ（短いラベル） anchor_label】
+怖い売りのあと買い戻し
+Fear selling, then buybacks
+
+【締めのひとこと（予備・画面非表示） history_comment】
+怖くて売られたあとほど、戻りは速い。
+The scarier the selloff, the faster the comeback.
+
+------------------------------------------------------------------------
+
+### [03] v03  saga_ep=1  tier=-
+period: コイン / Coins
+instrument: ACORN/JPY / ACORN/JPY
+
+【見出し brand_name】
+ドングリコイン、冬の売りから春の買い
+Acorn Coin: winter sell, spring buy
+
+【出来事（転換点） anchor_when】
+春にリスが買い戻す
+Spring buyback by squirrels
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+真冬、森のリスはエサ代のためドングリコインを売り続け、値段は二度底を打った。春になって余ったドングリを換金し、同じコインを買い戻した。
+In midwinter, squirrels sold Acorn Coin for food money and the price bottomed twice. In spring they cashed leftover acorns and bought the same coin back.
+
+【波のコツ（短いラベル） anchor_label】
+2回目の底から上昇
+Up from the second bottom
+
+【締めのひとこと（予備・画面非表示） history_comment】
+売ったあとに買うなら、季節の区切りを見る。
+If they sell then buy, watch the season change.
+
+------------------------------------------------------------------------
+
+### [04] v04  saga_ep=1  tier=-
+period: 旅行 / Travel
+instrument: 南海アイランド観光 / Nankai Island Tours
+
+【見出し brand_name】
+火山島リゾート、噴火で全便欠航
+Volcano erupts, all flights canceled
+
+【出来事（転換点） anchor_when】
+島の溶岩ピザが話題に
+Lava pizza goes viral
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+売りは「火山が見える露天風呂」。その火山が噴火し、飛行機は全便欠航になった。島の人が溶岩で焼いたピザが話題になると、客はじわじわ戻ってきた。
+Its selling point: a bath with a volcano view. Then the volcano erupted and every flight was canceled. When islanders' lava-baked pizza went viral, guests slowly returned.
+
+【波のコツ（短いラベル） anchor_label】
+急落のあと、じわじわ回復
+Crash, then a slow recovery
+
+【締めのひとこと（予備・画面非表示） history_comment】
+大ショックのあとは、ゆっくり戻ることが多い。
+After a big shock, recovery often comes slowly.
+
+------------------------------------------------------------------------
+
+### [05] v05  saga_ep=1  tier=-
+period: 飲食 / Restaurants
+instrument: 銀河麺業 / Galaxy Noodle Co.
+
+【見出し brand_name】
+宇宙ラーメン、無重力で麺が飛び散る
+Space ramen: noodles float everywhere
+
+【出来事（転換点） anchor_when】
+ゼリー状の改良版が登場
+Jelly ramen launched
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+宇宙ステーション初のラーメン店。スープは浮き、麺は飛んだ。改良版はゼリー状。「ラーメンじゃない」と一度は言われたが、みんな食べた。
+The first ramen shop on a space station. Broth floated, noodles flew. The jelly version drew 'that's not ramen'—then everyone ate it anyway.
+
+【波のコツ（短いラベル） anchor_label】
+戻ったあと、もう一度ゆさぶり
+Rebound, then one more shake
+
+【締めのひとこと（予備・画面非表示） history_comment】
+二度目のゆさぶりで、手放す人が多い。
+Many let go on the second shake.
+
+------------------------------------------------------------------------
+
+### [06] v06  saga_ep=1  tier=-
+period: 家電 / Gadgets
+instrument: クルクル電機 / Kurukuru Electric
+
+【見出し brand_name】
+ロボ掃除機、ネコに負ける
+Robot vacuum loses to a cat
+
+【出来事（転換点） anchor_when】
+「ネコ乗せモード」追加
+'Cat ride mode' added
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+新型ロボ掃除機、ネコに上に乗られて一歩も動けず。開発は「ネコ乗せモード」を追加した。予想外に売れ、公園の散歩道が渋滞した。
+The new robot vacuum froze under any cat. The team added 'cat ride mode.' It sold so well that park paths clogged with riding cats.
+
+【波のコツ（短いラベル） anchor_label】
+底から回復
+Recovery from the bottom
+
+【締めのひとこと（予備・画面非表示） history_comment】
+負けた話も、工夫ひとつでひっくり返る。
+One clever fix can turn a loss around.
+
+------------------------------------------------------------------------
+
+### [07] v07  saga_ep=1  tier=-
+period: ゲーム / Games
+instrument: ガラポン・エンタ / Garapon Ent.
+
+【見出し brand_name】
+ガチャの確率、表記ミスが発覚
+Gacha odds typo exposed
+
+【出来事（転換点） anchor_when】
+おわびの無料ガチャ配布
+Free apology pulls
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+当たり確率を「0.3%」と書くはずが「3%」と書いていた。謝るたびに売られたが、おわびの無料ガチャを配ると前より人が増えた。
+Jackpot odds should have said 0.3%. They said 3%. Every apology brought selling—until free apology pulls brought more players than before.
+
+【波のコツ（短いラベル） anchor_label】
+おわびで急反発
+Sharp rebound on the apology
+
+【締めのひとこと（予備・画面非表示） history_comment】
+下げが長いほど、反発は鋭い。
+The longer the slide, the sharper the rebound.
+
+------------------------------------------------------------------------
+
+### [08] v08  saga_ep=1  tier=-
+period: 食品 / Food
+instrument: こたつ冷凍食品 / Kotatsu Frozen Foods
+
+【見出し brand_name】
+冷凍ミカン、在庫があふれる
+Frozen mandarin stock overflows
+
+【出来事（転換点） anchor_when】
+町で冷凍ミカン祭り
+Frozen mandarin festival
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+豊作で冷凍庫が足りず、倉庫のドアが内側から開いた。値段はほぼタダ。町の「冷凍ミカン祭り」で山は一夜で消えた。
+Too big a harvest, not enough freezers—the warehouse door burst open and prices hit near zero. A town festival cleared the mountain overnight.
+
+【波のコツ（短いラベル） anchor_label】
+安値から戻る
+Bounce from the lows
+
+【締めのひとこと（予備・画面非表示） history_comment】
+ありえない安値は、長く続かない。
+Absurd lows don't last.
+
+------------------------------------------------------------------------
+
+### [09] v09  saga_ep=1  tier=-
+period: 家電 / Gadgets
+instrument: 街角ベンディング / Machikado Vending
+
+【見出し brand_name】
+全国の自販機、一斉に停止
+Every vending machine stops at once
+
+【出来事（転換点） anchor_when】
+自販機が全国で復旧
+Machines back online
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+全国の自販機が「おつりを考え中」のまま止まった。原因は、1台のボタンを全部押した小学生。復旧すると、止まっていた売上もまとめて戻った。
+Vending machines nationwide froze on 'calculating change'—one kid had mashed every button on one unit. When they restarted, the lost sales came back at once.
+
+【波のコツ（短いラベル） anchor_label】
+止まったあと買い戻し
+After the halt, buybacks
+
+【締めのひとこと（予備・画面非表示） history_comment】
+止まったものが動き出す瞬間に、値段は戻る。
+Prices come back the moment things restart.
+
+------------------------------------------------------------------------
+
+### [10] v10  saga_ep=1  tier=-
+period: 金融 / Finance
+instrument: ポケットFG / Pocket Financial Group
+
+【見出し brand_name】
+銀行アプリ、ログインできなくなる
+Bank app login goes down
+
+【出来事（転換点） anchor_when】
+アプリがまたログイン不能
+App locks out again
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+「パスワードを忘れた」を押すと、銀行のほうがパスワードを忘れた。直った直後にもう一度止まり、復旧のお知らせは紙の手紙で届いた。
+Pressing 'forgot password' made the bank forget it instead. Right after the fix it went down again. The 'all fixed' notice arrived by paper letter.
+
+【波のコツ（短いラベル） anchor_label】
+終盤に急落、すぐ戻る
+Late drop, quick recovery
+
+【締めのひとこと（予備・画面非表示） history_comment】
+終盤の急落は、慌てた人から損をする。
+In a late drop, the first to panic lose most.
+
+------------------------------------------------------------------------
+
+### [11] z01  saga_ep=1  tier=-
+period: 食品 / Food
+instrument: ホットスナック工業 / Hot Snack Industries
+
+【見出し brand_name】
+激辛ポテト、辛すぎて賛否両論
+Extreme hot chips split the internet
+
+【出来事（転換点） anchor_when】
+「辛さ控えめ版」発売
+'Mild' version launched
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+「辛さ100倍」ポテト。半分は泣いて諦め、半分は泣きながらおかわりした。控えめ版は両方から怒られ、会社はすぐ元の辛さに戻した。
+'100x spicy' chips: half quit crying, half cried and asked for seconds. A milder bag angered both sides, so the company restored the original heat.
+
+【波のコツ（短いラベル） anchor_label】
+高いところから急落、すぐ戻る
+Sharp drop from the high, quick return
+
+【締めのひとこと（予備・画面非表示） history_comment】
+急な上げは、急な下げとセットになりやすい。
+A sudden jump often comes with a sudden drop.
+
+------------------------------------------------------------------------
+
+### [12] z02  saga_ep=1  tier=-
+period: 旅行 / Travel
+instrument: ぬくぬく温泉郷 / Nukunuku Onsen Resorts
+
+【見出し brand_name】
+カピバラ温泉、入浴料で大もめ
+Capybara spa fights over bath fees
+
+【出来事（転換点） anchor_when】
+温泉が値上げを撤回
+Bath fee hike canceled
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+温泉が入浴料を上げると、カピバラたちが「なら出演料を払え」と湯船から出なくなった。値上げは取りやめになったが、話し合いは今も湯の中だ。
+When the spa raised bath fees, the capybaras refused to leave the water: 'Then pay us an appearance fee.' The hike was canceled; talks continue in the hot water.
+
+【波のコツ（短いラベル） anchor_label】
+行ったり来たり
+Back and forth
+
+【締めのひとこと（予備・画面非表示） history_comment】
+行ったり来たりの相場は、上で売って下で買う。
+In a back-and-forth market, sell high and buy low.
+
+------------------------------------------------------------------------
+
+### [13] z03  saga_ep=1  tier=-
+period: テック / Tech
+instrument: そらよみテック / Sorayomi Tech
+
+【見出し brand_name】
+天気予報AI、当たり外れが激しい
+Weather AI: hit or wildly miss
+
+【出来事（転換点） anchor_when】
+AIの予報が大外れ
+AI forecast flops
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+的中率はちょうど50%。大当たりの翌日に大外れ。「晴れ」と「雨」を交互に言っているだけだと、まだ誰も気づいていない。
+Accuracy: exactly 50%. A big hit, then a big miss the next day. Nobody has noticed it just alternates 'sunny' and 'rain.'
+
+【波のコツ（短いラベル） anchor_label】
+急に上げて、また下がる
+Sudden jump, then down again
+
+【締めのひとこと（予備・画面非表示） history_comment】
+大当たりの直後こそ、外れに注意。
+Right after a big hit, watch for the miss.
+
+------------------------------------------------------------------------
+
+### [14] z04  saga_ep=1  tier=-
+period: 芸能 / Entertainment
+instrument: ネオライブ・プロ / NeoLive Pro
+
+【見出し brand_name】
+人気Vtuber、意味深なひと言
+Top VTuber posts something cryptic
+
+【出来事（転換点） anchor_when】
+発表はただの新衣装
+Big news: a new outfit
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+配信の最後に「大事なお知らせがあります…来週」。ファンの考察は一週間で300本を超えた。発表はただの新衣装だったが、みんな喜んだ。
+End of stream: 'Big news… next week.' Fans posted 300 theories in a week. It was just a new outfit, and everyone still loved it.
+
+【波のコツ（短いラベル） anchor_label】
+発表のあと上昇
+Up after the reveal
+
+【締めのひとこと（予備・画面非表示） history_comment】
+静かな待ち時間のあとに、大きく動く。
+Big moves come after quiet waiting.
+
+------------------------------------------------------------------------
+
+### [15] z05  saga_ep=1  tier=-
+period: ゲーム / Games
+instrument: ミステリア・ゲームス / Mysteria Games
+
+【見出し brand_name】
+新作ゲーム、配信者のひと言で上下
+New game whipsaws on a streamer's word
+
+【出来事（転換点） anchor_when】
+別の配信者が新作を酷評
+Another streamer pans it
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+中身ほぼ非公開の新作。体験版を遊んだ大物が「神ゲー」と言った翌日、別の配信者が「クソゲー」と言った。
+A barely revealed new game. A star streamer called the demo a masterpiece. The next day another called it trash.
+
+【波のコツ（短いラベル） anchor_label】
+絶賛のあと急落
+Praise, then a plunge
+
+【締めのひとこと（予備・画面非表示） history_comment】
+絶賛の声がいちばん大きいときが、てっぺん。
+The loudest praise marks the top.
+
+------------------------------------------------------------------------
+
+### [16] z06  saga_ep=1  tier=-
+period: 物流 / Delivery
+instrument: 南極ロジスティクス / Antarctic Logistics
+
+【見出し brand_name】
+ペンギン郵便、配達ルートで大混乱
+Penguin Post route chaos
+
+【出来事（転換点） anchor_when】
+滑って届けるルートに決定
+Ice-slide route chosen
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+最短ルートか、氷の上を滑るルートか。投票で滑るルートに決まり、手紙は速く、少し濡れて届くようになった。
+Shortest route, or slide across the ice? The vote picked sliding. Letters now arrive faster—and a little wet.
+
+【波のコツ（短いラベル） anchor_label】
+いったん下げて戻る
+Dips, then comes back
+
+【締めのひとこと（予備・画面非表示） history_comment】
+騒ぎで下げても、中身が変わらなければ戻る。
+If nothing really changed, the dip comes back.
+
+------------------------------------------------------------------------
+
+### [17] z07  saga_ep=1  tier=-
+period: 乗り物 / Vehicles
+instrument: スカイペダル工業 / SkyPedal Works
+
+【見出し brand_name】
+空飛ぶ自転車、試乗会で墜落？
+Flying bike crashes at test ride?
+
+【出来事（転換点） anchor_when】
+2回目の試乗も池にドボン
+Into the pond again
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+1回目の試乗会、3メートル浮いて2秒後に池へ。それでも「次こそ」と期待が集まった2回目、5メートル浮いて3秒後に池へ。
+First test ride: up 3 meters, into the pond in 2 seconds. Hopes still rose for round two: up 5 meters, into the pond in 3.
+
+【波のコツ（短いラベル） anchor_label】
+期待のあとガッカリ
+Hope, then letdown
+
+【締めのひとこと（予備・画面非表示） history_comment】
+期待で上がった分は、ガッカリで戻る。
+What hope lifts, disappointment takes back.
+
+------------------------------------------------------------------------
+
+### [18] z08  saga_ep=1  tier=-
+period: 飲食 / Restaurants
+instrument: まるたこフーズ / Marutako Foods
+
+【見出し brand_name】
+たこ焼き、値上げする？しない？
+Takoyaki: price hike or not?
+
+【出来事（転換点） anchor_when】
+たこ焼きのタコを小さく
+Smaller octopus bits
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+「値上げします」「やっぱりしません」「タコを小さくします」。発表のたびに、客はたこ焼きを割って中を確かめた。
+'Prices up.' 'Never mind.' 'Smaller octopus instead.' After each update, customers split their takoyaki open to check.
+
+【波のコツ（短いラベル） anchor_label】
+底から少しずつ回復
+Slow recovery from the bottom
+
+【締めのひとこと（予備・画面非表示） history_comment】
+地味な節約は、じわじわ効いてくる。
+Quiet cost-cutting pays off slowly.
+
+------------------------------------------------------------------------
+
+### [19] z09  saga_ep=1  tier=-
+period: 金融 / Finance
+instrument: てるてる損保HD / Teruteru Insurance HD
+
+【見出し brand_name】
+屋外イベント保険、立て直しの中身
+Outdoor event insurance: rescue details
+
+【出来事（転換点） anchor_when】
+補償半額と判明
+Half payout revealed
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+「雨でも安心」で売れた屋外イベント保険。立て直し策の発表では、雨の日の保険金が半額になると分かった。期待で上がっていた株が急落した。
+Outdoor event cover sold as 'safe even in rain.' The rescue plan cut rainy-day payouts in half. The stock, pumped on hope, plunged on the details.
+
+【波のコツ（短いラベル） anchor_label】
+期待のあと急落
+Hope, then a plunge
+
+【締めのひとこと（予備・画面非表示） history_comment】
+立て直しの中身が出た瞬間が、天井になりやすい。
+The top often arrives when rescue details land.
+
+------------------------------------------------------------------------
+
+### [20] z10  saga_ep=1  tier=-
+period: ペット / Pets
+instrument: ことりペット商会 / Kotori Pet Co.
+
+【見出し brand_name】
+迷子のインコ、SNSで目撃情報
+Lost parrot spotted on social media
+
+【出来事（転換点） anchor_when】
+目撃情報が見間違いと判明
+Sighting was wrong
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+社長のインコが逃げた。SNSに「見た」と出るたびに株が上がり、「別人でした」と訂正が出るたびに下がった。中身のない噂でも、株は動いた。
+The CEO's parrot escaped. Every 'I saw it' post lifted the stock; every 'wrong bird' correction dropped it. Empty rumors still moved the price.
+
+【波のコツ（短いラベル） anchor_label】
+うわさで上がり、うわさで下がる
+Up on rumor, down on rumor
+
+【締めのひとこと（予備・画面非表示） history_comment】
+うわさで上がったものは、うわさで下がる。
+What rises on rumor falls on rumor.
+
+------------------------------------------------------------------------
+
+### [21] b01  saga_ep=1  tier=-
+period: 飲食 / Restaurants
+instrument: 黄金堂 / Ogondo
+
+【見出し brand_name】
+金のたい焼き、行列3時間
+Golden taiyaki: 3-hour lines
+
+【出来事（転換点） anchor_when】
+たい焼きの行列がピークに
+Line hits its peak
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+金箔を巻いただけのたい焼きに3時間の行列。並んだ人の多くは自分の写真だけ撮って帰り、写真が広がると誰も並ばなくなった。
+Gold-leaf taiyaki drew a 3-hour line. Most people only photographed themselves in it—once the photos spread, the line vanished.
+
+【波のコツ（短いラベル） anchor_label】
+てっぺんから下がり始め
+Slide from the top
+
+【締めのひとこと（予備・画面非表示） history_comment】
+みんなが並び始めたら、そろそろ終わり。
+When everyone's in line, the end is near.
+
+------------------------------------------------------------------------
+
+### [22] b02  saga_ep=1  tier=-
+period: テック / Tech
+instrument: ポチッとコマース / Pochitto Commerce
+
+【見出し brand_name】
+10分配送、売れるほど大赤字
+10-minute delivery: more sales, more losses
+
+【出来事（転換点） anchor_when】
+決算で赤字が発覚
+Loss revealed on earnings
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+なんでも10分で届く通販。利用者と株価は伸びていたが、決算で「1件届けるたびに赤字」と分かった。伸びるほど損する話に、株は急落した。
+Anything in 10 minutes. Users and the stock grew—until earnings showed each delivery lost money. Growth that deepens losses crashed the shares.
+
+【波のコツ（短いラベル） anchor_label】
+てっぺんから急落
+Crash from the top
+
+【締めのひとこと（予備・画面非表示） history_comment】
+売上が増えるほど赤字なら、伸びは危険信号。
+If more sales mean more losses, growth is a warning.
+
+------------------------------------------------------------------------
+
+### [23] b03  saga_ep=2  tier=-
+period: コイン / Coins
+instrument: ACORN/JPY / ACORN/JPY
+
+【見出し brand_name】
+ドングリコイン、次の冬のご祝儀相場
+Acorn Coin's next-winter frenzy
+
+【出来事（転換点） anchor_when】
+リスが巣ごもり開始
+Squirrels start hibernating
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+翌年の冬の入り口。リスが冬ごもり前にコインを買い集め、人間もまねて高値がついた。巣にこもると買う人が消え、お祭りは終わった。
+Early the next winter, squirrels hoarded coin before hibernating and humans copied them. Once they holed up, buyers vanished and the party ended.
+
+【波のコツ（短いラベル） anchor_label】
+お祭りのあと下落
+Down after the party
+
+【締めのひとこと（予備・画面非表示） history_comment】
+買う側がいなくなった瞬間が、天井。
+The top is when the buyers disappear.
+
+------------------------------------------------------------------------
+
+### [24] b04  saga_ep=1  tier=-
+period: 食品 / Food
+instrument: もちもち製菓 / Mochimochi Confectionery
+
+【見出し brand_name】
+人気グミ、品切れ連発
+Hit gummies keep selling out
+
+【出来事（転換点） anchor_when】
+グミ工場を3つ増設
+Three new factories
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+かむと「キュッ」と鳴るグミが品切れ続き。工場を3つ増やした月に、みんなその音に飽きた。
+Gummies that squeak when you chew kept selling out. The month they built three new factories, everyone got tired of the squeak.
+
+【波のコツ（短いラベル） anchor_label】
+人気が落ち着く
+Hype cools
+
+【締めのひとこと（予備・画面非表示） history_comment】
+人気に合わせて広げたころには、熱が冷めている。
+By the time you expand for the hype, it has cooled.
+
+------------------------------------------------------------------------
+
+### [25] b05  saga_ep=1  tier=-
+period: 農業 / Farming
+instrument: みどり果樹園HD / Midori Orchards HD
+
+【見出し brand_name】
+メロン1玉100万円
+One melon: 1 million yen
+
+【出来事（転換点） anchor_when】
+メロンが100万円で落札
+Melon sells for ¥1M
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+初競りで1玉100万円。落札した社長は、切ってみたら普通のメロンの味だったと正直に話した。
+First auction of the year: one melon, 1 million yen. The winning bidder admitted it tasted like a normal melon.
+
+【波のコツ（短いラベル） anchor_label】
+最高値から反転
+Turns at the record
+
+【締めのひとこと（予備・画面非表示） history_comment】
+最高値で買った人だけが、普通の味に気づく。
+Whoever pays the record price finds it's ordinary.
+
+------------------------------------------------------------------------
+
+### [26] b06  saga_ep=1  tier=-
+period: 飲食 / Restaurants
+instrument: ぷるん洋菓子店 / Purun Patisserie
+
+【見出し brand_name】
+バズったプリン屋、行列が消えた日
+Viral pudding shop: the day the line vanished
+
+【出来事（転換点） anchor_when】
+隣に競合の固い店
+Firmer rival opens next door
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+SNSで「固すぎてうまい」とバズったプリン屋。翌週、競合がすぐ隣にもっと固いプリン屋を出し、行列はそちらへ移った。
+A pudding shop went viral for being 'so firm it's great.' Next week a rival opened next door even firmer, and the line moved there.
+
+【波のコツ（短いラベル） anchor_label】
+人気のピークから下落
+Down from peak popularity
+
+【締めのひとこと（予備・画面非表示） history_comment】
+行列は、もっと新しい行列に負ける。
+A line loses to a newer line.
+
+------------------------------------------------------------------------
+
+### [27] b07  saga_ep=1  tier=-
+period: 飲食 / Restaurants
+instrument: もっちりドリンク / Mocchiri Drinks
+
+【見出し brand_name】
+借金でタピオカ店を出しまくる
+Tapioca shops opened on borrowed money
+
+【出来事（転換点） anchor_when】
+全店に閉店の貼り紙
+Closing notes on every shop
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+目標は「全部の駅に1店舗」。借金で店を増やし続けたある朝、全店のシャッターに同じ貼り紙が出た。
+The goal: one shop at every station, all on borrowed money. One morning, every shutter had the same notice taped to it.
+
+【波のコツ（短いラベル） anchor_label】
+最後にもう一段下げ
+One more leg down at the end
+
+【締めのひとこと（予備・画面非表示） history_comment】
+借金で広げた店は、そろって閉まる。
+Shops built on debt close together.
+
+------------------------------------------------------------------------
+
+### [28] b08  saga_ep=1  tier=-
+period: 住宅 / Housing
+instrument: まるやねハウス / Maruyane Homes
+
+【見出し brand_name】
+ドーム住宅、噂で値上がりが止まる
+Dome homes: rumor-driven rise stalls
+
+【出来事（転換点） anchor_when】
+ローン審査が厳格化
+Mortgage rules tighten
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+「丸い家は運気が上がる」という噂で、ドーム住宅の売値が毎月上がった。銀行のローン審査が厳しくなると買い手が減り、値上がりは止まった。
+A rumor that round homes bring luck pushed dome-home asking prices up each month. When banks tightened mortgages, buyers thinned and the rise stopped.
+
+【波のコツ（短いラベル） anchor_label】
+みんなが疑い始める
+Doubt creeps in
+
+【締めのひとこと（予備・画面非表示） history_comment】
+噂で上がった値段は、お金の蛇口が閉まると止まる。
+Prices lifted by rumor stall when the money tap closes.
+
+------------------------------------------------------------------------
+
+### [29] b09  saga_ep=1  tier=-
+period: 乗り物 / Vehicles
+instrument: シュッと交通 / Shutto Mobility
+
+【見出し brand_name】
+キックボード社、人気ランキング1位に
+KickScoot hits #1 in rankings
+
+【出来事（転換点） anchor_when】
+人気ランキングで1位に
+Ranked #1
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+ランキング1位の記念に、全社員でキックボード通勤を始めた。翌日、半分が筋肉痛で休んだ。
+To celebrate hitting #1, the whole company commuted by kickboard. The next day, half called in sore.
+
+【波のコツ（短いラベル） anchor_label】
+急に上がって失速
+Spike, then stall
+
+【締めのひとこと（予備・画面非表示） history_comment】
+お祝いムードの直後が、いちばん高い。
+Right after the celebration is the highest point.
+
+------------------------------------------------------------------------
+
+### [30] b10  saga_ep=1  tier=-
+period: 食品 / Food
+instrument: すこやか茶舗 / Sukoyaka Tea House
+
+【見出し brand_name】
+健康茶、効果に疑問の声
+Health tea's benefits questioned
+
+【出来事（転換点） anchor_when】
+専門家「ほぼ麦茶です」
+Expert: 'It's barley tea'
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+「飲むと10歳若返る」健康茶。専門家が中身を調べたら、ほぼ麦茶だった。
+Health tea that 'makes you 10 years younger.' Experts tested it. It was mostly barley tea.
+
+【波のコツ（短いラベル） anchor_label】
+期待のあと下落
+Hope, then a slide
+
+【締めのひとこと（予備・画面非表示） history_comment】
+中身を調べられると、話題は冷める。
+Once people check the facts, the hype cools.
+
+------------------------------------------------------------------------
+
+### [31] e01  saga_ep=2  tier=EXTREME
+period: ゲーム / Games
+instrument: ミステリア・ゲームス / Mysteria Games
+
+【見出し brand_name】
+新作ゲーム、2周目で大崩れ
+New game collapses on round two
+
+【出来事（転換点） anchor_when】
+公式「逆立ちはバグです」
+Dev: 'Handstands are a bug'
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+2周目では全キャラが逆立ちで歩く。「深い」派と「バグ」派が騒いだ末、公式が「バグです」と発表した。
+In New Game+, every character walks on their hands. Deep vs bug arguments ended when the developer said: 'It's a bug.'
+
+【波のコツ（短いラベル） anchor_label】
+乱高下のあと大崩れ
+Whipsaw, then collapse
+
+【締めのひとこと（予備・画面非表示） history_comment】
+盛り上がりが長いほど、崩れも大きい。
+The longer the frenzy, the bigger the collapse.
+
+------------------------------------------------------------------------
+
+### [32] e02  saga_ep=2  tier=EXTREME
+period: 金融 / Finance
+instrument: てるてる損保HD / Teruteru Insurance HD
+
+【見出し brand_name】
+屋外イベント保険、半額でも払いきれず
+Outdoor insurance: half payout still breaks them
+
+【出来事（転換点） anchor_when】
+ゲリラ豪雨で請求殺到
+Storm claims flood in
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+半額でも契約は残っていた。予報外のゲリラ豪雨が続き請求が殺到し、会社はまた会見で頭を下げた。株は立て直し後の安値を更新した。
+Even at half payout, policies remained. Surprise storm claims piled up and the company apologized again. The stock made a new low after the 'rescue.'
+
+【波のコツ（短いラベル） anchor_label】
+立て直し後にまた下落
+Rescue, then a drop
+
+【締めのひとこと（予備・画面非表示） history_comment】
+一度失望したあとの追撃は、容赦ない。
+A second hit after disappointment is merciless.
+
+------------------------------------------------------------------------
+
+### [33] e03  saga_ep=1  tier=EXTREME
+period: 乗り物 / Vehicles
+instrument: ゆるり交通HD / Yururi Transit HD
+
+【見出し brand_name】
+のんびり鉄道、運賃3倍で客が消える
+Slow Railway triples fares, riders vanish
+
+【出来事（転換点） anchor_when】
+鉄道が運賃3倍を発表
+Fares tripled
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+時速20キロののんびり鉄道は、景色目当てで乗客がじわじわ増えていた。「来月から運賃3倍」の発表で、乗客も株も一気に逃げた。
+A 20 km/h railway grew riders for the scenery. The day they announced triple fares from next month, riders and investors fled at once.
+
+【波のコツ（短いラベル） anchor_label】
+上げのあと急転落
+Climb, then freefall
+
+【締めのひとこと（予備・画面非表示） history_comment】
+ゆっくり上がったものも、落ちるときは一瞬。
+What climbs slowly can fall in an instant.
+
+------------------------------------------------------------------------
+
+### [34] e04  saga_ep=1  tier=EXTREME
+period: 工業 / Industry
+instrument: しろくま製作所 / Shirokuma Works
+
+【見出し brand_name】
+雪だるま工場、真冬の逆襲
+Snowman factory strikes back in winter
+
+【出来事（転換点） anchor_when】
+季節外れの寒波が到来
+Surprise cold wave
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+暖冬で、倉庫の雪だるまが全部溶けかけていた。最後の週に寒波が来て、注文が一気に殺到した。
+A warm winter left the warehouse snowmen half-melted. Then a cold wave hit in the final week, and orders flooded in.
+
+【波のコツ（短いラベル） anchor_label】
+終盤に急上昇
+Late surge
+
+【締めのひとこと（予備・画面非表示） history_comment】
+季節はずれでも、最後に風向きが変わることがある。
+Even out of season, the wind can change at the end.
+
+------------------------------------------------------------------------
+
+### [35] e05  saga_ep=2  tier=EXTREME
+period: 食品 / Food
+instrument: こたつ冷凍食品 / Kotatsu Frozen Foods
+
+【見出し brand_name】
+冷凍ミカン、戻ったと思ったら…
+Frozen mandarins: back up… then not
+
+【出来事（転換点） anchor_when】
+裏山でミカンがまた豊作
+Another mandarin glut
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+在庫が減って値段が戻った翌年、また裏山が豊作になった。倉庫の前にミカンの箱が積み上がり、値段は再び崩れた。
+Prices recovered as stock cleared—then the hills had another bumper crop. Boxes stacked outside the warehouse again, and prices broke once more.
+
+【波のコツ（短いラベル） anchor_label】
+戻ったあと再び崩れる
+Bounce, then breaks again
+
+【締めのひとこと（予備・画面非表示） history_comment】
+戻ったあとに、同じ理由でまた崩れることがある。
+It can bounce, then break again for the same reason.
+
+------------------------------------------------------------------------
+
+### [36] e06  saga_ep=1  tier=EXTREME
+period: 工業 / Industry
+instrument: ギガント重工 / Gigant Heavy Industries
+
+【見出し brand_name】
+巨大ロボ工場、銀行が助け舟
+Bank rescues giant robot maker
+
+【出来事（転換点） anchor_when】
+銀行が工場に助け舟
+Bank bails out factory
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+試作ロボが工場から歩いて出ていき、戻ってこなかった。それでも銀行は「夢がある」と助け舟を出した。
+The prototype robot walked out of the factory and never came back. The bank stepped in anyway: 'There's still a dream here.'
+
+【波のコツ（短いラベル） anchor_label】
+助けが入って急回復
+Rescue, sharp rebound
+
+【締めのひとこと（予備・画面非表示） history_comment】
+「もうダメ」の声が出たら、反転は近い。
+When everyone says it's over, the turn is near.
+
+------------------------------------------------------------------------
+
+### [37] e07  saga_ep=1  tier=EXTREME
+period: 通貨 / Currency
+instrument: ISLE/JPY / ISLE/JPY
+
+【見出し brand_name】
+離島コイン、独立宣言で大混乱
+Isle Coin chaos after independence call
+
+【出来事（転換点） anchor_when】
+コインがサザエと交換可能に
+Coins buy turban shells
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+人口80人の島が独立を宣言し、島のコインは大混乱。島名物のサザエと交換できると分かり、一気に買われた。
+An island of 80 people declared independence, and its coin went haywire. Then word spread it bought the island's shellfish—and buyers rushed in.
+
+【波のコツ（短いラベル） anchor_label】
+最後に急上昇
+Late surge
+
+【締めのひとこと（予備・画面非表示） history_comment】
+混乱の中でも、価値が見つかれば一気に買われる。
+Find real value in the chaos, and buyers rush in.
+
+------------------------------------------------------------------------
+
+### [38] e08  saga_ep=1  tier=EXTREME
+period: テック / Tech
+instrument: ペコリ・ラボ / Pekori Labs
+
+【見出し brand_name】
+AIペット、ブームのてっぺんで崩壊
+AI pets collapse at peak hype
+
+【出来事（転換点） anchor_when】
+AIペットにみんな飽きた
+Everyone's bored of AI pets
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+散歩もトイレもいらないAIペットが大ブーム。半年後、飼い主の多くは電源を切ったまま忘れていた。
+AI pets that never need walks or litter boxes became a craze. Six months later, most owners had switched them off and forgotten.
+
+【波のコツ（短いラベル） anchor_label】
+終盤に垂直落下
+Late vertical drop
+
+【締めのひとこと（予備・画面非表示） history_comment】
+ブームの終わりは、飽きた瞬間に来る。
+A craze ends the moment people get bored.
+
+------------------------------------------------------------------------
+
+### [39] e09  saga_ep=2  tier=EXTREME
+period: 飲食 / Restaurants
+instrument: ぷるん洋菓子店 / Purun Patisserie
+
+【見出し brand_name】
+プリン屋本店、閉店セール
+Pudding shop: closing sale
+
+【出来事（転換点） anchor_when】
+本店が閉店セール
+Main shop closing sale
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+隣の競合に客を取られた本店は、閉店セールを出した。開店のときより長い行列ができたが、最終日が過ぎると店は空になった。
+Losing customers to the rival next door, the original shop held a closing sale. The line beat opening day—then the last day ended and the shop was empty.
+
+【波のコツ（短いラベル） anchor_label】
+にぎわいのあと急落
+Rush, then a plunge
+
+【締めのひとこと（予備・画面非表示） history_comment】
+最後のにぎわいは、終わりの合図。
+The final rush is the signal that it's over.
+
+------------------------------------------------------------------------
+
+### [40] e10  saga_ep=1  tier=EXTREME
+period: テック / Tech
+instrument: ティッカー電子 / Ticker Electronics
+
+【見出し brand_name】
+株価表示、数分だけバグる
+Price board glitches for minutes
+
+【出来事（転換点） anchor_when】
+株価ボードの表示が復旧
+Price board fixed
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+駅前の株価ボードが、数分だけ全部の銘柄を「1円」と表示した。同社株は急落したが、「1円の瞬間」の写真が話題になり、ボード注文は増えた。
+For a few minutes the station price board showed every stock at 1 yen. Its maker's stock plunged—but photos of the glitch went viral, and board orders rose.
+
+【波のコツ（短いラベル） anchor_label】
+大暴落、すぐ回復
+Crash, quick recovery
+
+【締めのひとこと（予備・画面非表示） history_comment】
+ありえない暴落は、すぐ戻る。
+Impossible crashes bounce right back.
+
+------------------------------------------------------------------------
+
+### [41] e11  saga_ep=2  tier=EXTREME
+period: 飲食 / Restaurants
+instrument: 黄金堂 / Ogondo
+
+【見出し brand_name】
+金のたい焼き、箔なしでも同額
+Golden taiyaki: same price, no gold
+
+【出来事（転換点） anchor_when】
+金箔なしを同額で販売
+Sold without gold at same price
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+金箔の仕入れが止まり、普通のたい焼きを同じ値段で売った。写真映えしなくなり、並ぶ理由がなくなって行列は消えた。
+Gold leaf ran out, so they sold plain taiyaki at the same price. No photo bait, no reason to wait—the line vanished.
+
+【波のコツ（短いラベル） anchor_label】
+てっぺんから崩れる
+Top collapses
+
+【締めのひとこと（予備・画面非表示） history_comment】
+見た目の材料が消えると、熱狂も消える。
+Lose the look that sold it, and the frenzy goes too.
+
+------------------------------------------------------------------------
+
+### [42] e12  saga_ep=2  tier=EXTREME
+period: テック / Tech
+instrument: ポチッとコマース / Pochitto Commerce
+
+【見出し brand_name】
+10分配送、在庫の投げ売り
+10-minute delivery: inventory fire sale
+
+【出来事（転換点） anchor_when】
+倉庫在庫を9割引き放出
+Warehouse dumped at 90% off
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+赤字を埋めるため、倉庫の商品を9割引きで放出した。荷物は動いたが利益は出ず、会社の株も安売りに付き合った。
+To plug losses they dumped warehouse goods at 90% off. Packages moved, profits did not—and the stock joined the fire sale.
+
+【波のコツ（短いラベル） anchor_label】
+失速のあと投げ売り
+Stall, then dump
+
+【締めのひとこと（予備・画面非表示） history_comment】
+穴埋めの安売りは、株の安売りでもある。
+A fire sale to plug a hole is often a fire sale of the stock.
+
+------------------------------------------------------------------------
+
+### [43] e13  saga_ep=1  tier=EXTREME
+period: テック / Tech
+instrument: おもてなしロボティクス / Omotenashi Robotics
+
+【見出し brand_name】
+ロボ執事、まさかの大ヒット
+Robot butler: surprise smash hit
+
+【出来事（転換点） anchor_when】
+ロボ執事の予約が殺到
+Robot butler preorders flood
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+お茶はこぼす、ドアには挟まる、欠点だらけのロボ執事。それが「かわいい」と言われ、予約が殺到した。
+A robot butler that spills tea and gets stuck in doors. People called it adorable, and preorders poured in.
+
+【波のコツ（短いラベル） anchor_label】
+急騰のあと少し戻る
+Spike, then a small pullback
+
+【締めのひとこと（予備・画面非表示） history_comment】
+急に上がったあとは、少し戻ることも多い。
+After a spike, a pullback is common.
+
+------------------------------------------------------------------------
+
+### [44] e14  saga_ep=3  tier=EXTREME
+period: コイン / Coins
+instrument: ACORN/JPY / ACORN/JPY
+
+【見出し brand_name】
+ドングリコイン、大晦日の一斉売り
+Acorn Coin: New Year's Eve dump
+
+【出来事（転換点） anchor_when】
+大晦日にリスが一斉売却
+Squirrels dump on New Year's Eve
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+同じ冬の大晦日。「もう十分」とリスが一斉に売ると値段は急落した。それでも、冬の入り口のお祭り前よりは高かった。
+Same winter, New Year's Eve. Squirrels sold together saying 'enough' and the price plunged—still above where the early-winter party began.
+
+【波のコツ（短いラベル） anchor_label】
+てっぺんから急落
+Plunge from the peak
+
+【締めのひとこと（予備・画面非表示） history_comment】
+お祭り後の売りは、そろって来ることが多い。
+After a party, selling often arrives together.
+
+------------------------------------------------------------------------
+
+### [45] e15  saga_ep=3  tier=EXTREME
+period: ゲーム / Games
+instrument: ミステリア・ゲームス / Mysteria Games
+
+【見出し brand_name】
+新作ゲーム、伝説の品切れ祭り
+New game: legendary sellout frenzy
+
+【出来事（転換点） anchor_when】
+限定版の予約が品切れ
+Limited preorders sold out
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+限定版が予約だけで全国品切れ。発売前で中身は誰も知らないのに、予約の権利が高値で転売された。
+The limited edition sold out on preorders alone. It isn't out and nobody knows what's inside—but preorder rights sell high.
+
+【波のコツ（短いラベル） anchor_label】
+一気に急騰、高値のまま
+Huge spike, stays high
+
+【締めのひとこと（予備・画面非表示） history_comment】
+本当の品切れは、高値のまま終わることもある。
+A real sellout can stay at the top.
+
+------------------------------------------------------------------------
+
+### [46] v11  saga_ep=2  tier=-
+period: 食品 / Food
+instrument: にゃんフーズHD / Nyan Foods HD
+
+【見出し brand_name】
+ネコ缶、リニューアルでまた回収
+Cat food recall, again after relaunch
+
+【出来事（転換点） anchor_when】
+社長がまた試食
+CEO tastes it again
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+好感度が戻ったあと出した「安全な新味」も、ネコには不評だった。社長はまた会見で一缶食べたが、今度は誰も泣かなかった。
+After goodwill returned, the 'safe new flavor' flopped with cats too. The CEO ate another can on camera—this time nobody cried.
+
+【波のコツ（短いラベル） anchor_label】
+底から戻るが弱く
+Weak bounce from the bottom
+
+【締めのひとこと（予備・画面非表示） history_comment】
+一度戻ったあとの再下落は、戻りが弱い。
+A second slide after a rebound often comes back weaker.
+
+------------------------------------------------------------------------
+
+### [47] v12  saga_ep=2  tier=-
+period: 食品 / Food
+instrument: ぬか福本舗 / Nukafuku Honpo
+
+【見出し brand_name】
+ぬか床、元気すぎて近所迷惑
+Pickle bed too lively for neighbors
+
+【出来事（転換点） anchor_when】
+営業時間を短縮
+Hours cut short
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+かき混ぜすぎて元気になったぬか床は、夜中も泡を立てた。近所の苦情で営業時間を縮めると、落ち着きを取り戻した。
+The over-stirred pickle bed bubbled all night. Neighbors complained, hours were cut, and it finally calmed down.
+
+【波のコツ（短いラベル） anchor_label】
+騒ぎのあと安定
+Settles after the fuss
+
+【締めのひとこと（予備・画面非表示） history_comment】
+元気すぎも、調整すれば戻る。
+Even 'too lively' can settle with a tweak.
+
+------------------------------------------------------------------------
+
+### [48] v13  saga_ep=2  tier=-
+period: 家電 / Gadgets
+instrument: 街角ベンディング / Machikado Vending
+
+【見出し brand_name】
+自販機、おつりを考えすぎる
+Vending machines overthink change
+
+【出来事（転換点） anchor_when】
+考え中を短縮更新
+Faster 'thinking' update
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+復旧後、おつり確認が丁寧すぎて1人あたり1分かかった。駅前に行列ができて不満が出たので、確認を短縮する更新を入れると普通に売れた。
+After the fix, change checks took a full minute per person and station lines formed. A patch that shortened the check restored normal sales.
+
+【波のコツ（短いラベル） anchor_label】
+止まったあと戻る
+Stops, then returns
+
+【締めのひとこと（予備・画面非表示） history_comment】
+直しすぎも、また直せる。
+Over-fixing can be fixed again.
+
+------------------------------------------------------------------------
+
+### [49] z11  saga_ep=2  tier=-
+period: 芸能 / Entertainment
+instrument: ネオライブ・プロ / NeoLive Pro
+
+【見出し brand_name】
+人気Vtuber、本当の大事なお知らせ
+Top VTuber: real big news this time
+
+【出来事（転換点） anchor_when】
+卒業配信を発表
+Graduation stream announced
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+また「大事なお知らせ」と言ったので、みんなが新衣装だと思った。発表は卒業だった。考察は少なかったが、チャットは長かった。
+Another 'big news' tease—fans assumed a new outfit. It was a graduation. Fewer theories, longer chat.
+
+【波のコツ（短いラベル） anchor_label】
+発表で動く
+Moves on the reveal
+
+【締めのひとこと（予備・画面非表示） history_comment】
+同じ言い回しでも、中身が違えば動きは違う。
+Same wording, different news—different move.
+
+------------------------------------------------------------------------
+
+### [50] b11  saga_ep=2  tier=-
+period: 家電 / Gadgets
+instrument: クルクル電機 / Kurukuru Electric
+
+【見出し brand_name】
+ロボ掃除機、ネコ乗せで道が埋まる
+Cat-ride vacuums clog the paths
+
+【出来事（転換点） anchor_when】
+公園でネコ乗せ禁止
+Parks ban cat rides
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+ネコ乗せモードが流行し、散歩道がロボで埋まった。公園が禁止を出すと売れ行きは落ちたが、屋内専用としてまた動き出した。
+Cat-ride mode clogged the walking paths. Park bans hurt sales—then the indoor-only pitch brought them back.
+
+【波のコツ（短いラベル） anchor_label】
+規制のあと戻り
+Bounce after the ban
+
+【締めのひとこと（予備・画面非表示） history_comment】
+流行の止め方を間違えると、別の売り方が見つかる。
+Ban the fad outdoors, and a new pitch appears indoors.
+
+------------------------------------------------------------------------
+
+### [51] z12  saga_ep=2  tier=-
+period: 旅行 / Travel
+instrument: ぬくぬく温泉郷 / Nukunuku Onsen Resorts
+
+【見出し brand_name】
+カピバラ温泉、出演料で湯が足りない
+Capybara spa: fees drain the baths
+
+【出来事（転換点） anchor_when】
+湯量制限を発表
+Bath water rationed
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+出演料で妥結したカピバラは、湯船に長く居座る権利まで取った。湯が足りなくなり制限を出すと、いったんは静かになった。
+After settling appearance fees, the capybaras also won the right to linger. Water ran short; rationing quieted things—for a while.
+
+【波のコツ（短いラベル） anchor_label】
+妥結のあと揺れる
+Wobbles after the deal
+
+【締めのひとこと（予備・画面非表示） history_comment】
+権利を増やしすぎると、湯も株も薄まる。
+Too many rights thin both the baths and the stock.
+
+------------------------------------------------------------------------
+
+### [52] z13  saga_ep=2  tier=-
+period: ペット / Pets
+instrument: ことりペット商会 / Kotori Pet Co.
+
+【見出し brand_name】
+迷子のインコ、誤認捕獲でまた動く
+Lost parrot: wrong bird moves the stock again
+
+【出来事（転換点） anchor_when】
+捕獲鳥が別人と判明
+Caught bird is the wrong one
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+「捕まえた」速報で株が跳ねた。連れて帰った鳥は羽の色が違い、訂正が出ると株は元の位置へ戻った。前回と同じ上がって下がるだけだった。
+A 'we caught it' flash sent the stock flying. The bird's colors were wrong; the correction sent the price back. Same up-then-down as before.
+
+【波のコツ（短いラベル） anchor_label】
+発見のあと揺れる
+Wobbles after the 'find'
+
+【締めのひとこと（予備・画面非表示） history_comment】
+誤報でも一度動けば、訂正で戻る。
+Even a false alarm moves—and the correction moves it back.
+
+------------------------------------------------------------------------
+
+### [53] v14  saga_ep=2  tier=-
+period: 旅行 / Travel
+instrument: 南海アイランド観光 / Nankai Island Tours
+
+【見出し brand_name】
+火山島リゾート、噴火予定が外れる
+Volcano resort: eruption schedule misses
+
+【出来事（転換点） anchor_when】
+予定日に噴火せず
+No eruption on schedule
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+溶岩ピザで客が戻った島は、「噴火が見える日」をカレンダーに載せた。予定日に噴火せず、予約客のキャンセルが続き、株は期待のあと下がった。
+After lava pizza brought guests back, the island put 'eruption viewing days' on a calendar. No eruption on the date, cancellations piled up, and the stock fell after the hype.
+
+【波のコツ（短いラベル） anchor_label】
+期待のあと急落
+Hope, then a plunge
+
+【締めのひとこと（予備・画面非表示） history_comment】
+予定を売りにすると、外れがそのまま材料になる。
+Sell a schedule, and a miss becomes the headline.
+
+------------------------------------------------------------------------
+
+### [54] b12  saga_ep=2  tier=-
+period: 食品 / Food
+instrument: もちもち製菓 / Mochimochi Confectionery
+
+【見出し brand_name】
+人気グミ、無音版でまた品切れ
+Silent gummies sell out again
+
+【出来事（転換点） anchor_when】
+無音グミが品切れ
+Silent gummies sell out
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+キュッに飽きたあと出た「無音グミ」が、静かに品切れした。音がないのに、また工場が足りなくなった。
+After the squeak wore off, 'silent gummies' sold out quietly. No sound—and somehow, not enough factories again.
+
+【波のコツ（短いラベル） anchor_label】
+静かに過熱
+Quiet overheating
+
+【締めのひとこと（予備・画面非表示） history_comment】
+流行の逆を取っても、また足りなくなる。
+Even the opposite of a fad can run short.
+
+------------------------------------------------------------------------
+
+### [55] z14  saga_ep=2  tier=-
+period: 食品 / Food
+instrument: ホットスナック工業 / Hot Snack Industries
+
+【見出し brand_name】
+激辛ポテト、限定パッケージの中身
+Hot chips: what's in the limited bag
+
+【出来事（転換点） anchor_when】
+中身が同じと発覚
+Same chips inside revealed
+
+【フレーバー（図鑑掘り下げ） flavor_text】
+「さらに辛い限定」と売り出したら株が跳ねた。開けてみると中身は前と同じ100倍で、シールだけ新しかった。返品が続き、株も戻した。
+A 'even hotter limited' bag sent the stock up. Inside it was the same 100x chips—only the sticker was new. Returns followed, and the stock gave it back.
+
+【波のコツ（短いラベル） anchor_label】
+限定で乱高下
+Limited-run whipsaw
+
+【締めのひとこと（予備・画面非表示） history_comment】
+名前だけ新しい材料は、長く持たない。
+A new name on old stock doesn't hold.
+
+------------------------------------------------------------------------

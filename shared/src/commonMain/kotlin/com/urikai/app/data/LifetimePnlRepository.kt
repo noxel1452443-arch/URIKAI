@@ -184,13 +184,16 @@ class LifetimePnlRepository(openStore: (String) -> KeyValueStore) {
 
     /** 新しい順（直近の出金が先頭）。 */
     fun getSessionPnlHistory(): List<SessionPnlHistoryEntry> {
+        // お取引明細はプレイ結果中心。カイ給料／お小遣いは残高グラフ側のみ
         return sessionHistoryRawLines().mapNotNull { line ->
             val parts = line.split(SESSION_FIELD_SEP)
             if (parts.size < 3) return@mapNotNull null
+            val en = parts[1]
+            if (en == "Kai's pay" || en == "Kai's allowance") return@mapNotNull null
             val pnl = parts[2].toLongOrNull() ?: return@mapNotNull null
             SessionPnlHistoryEntry(
                 brandNameJp = parts[0],
-                brandNameEn = parts[1],
+                brandNameEn = en,
                 pnl = pnl
             )
         }.asReversed()
@@ -256,6 +259,20 @@ class LifetimePnlRepository(openStore: (String) -> KeyValueStore) {
 
     fun getClaimedRelics(): Set<RelicId> =
         decodeRelics(prefs.getStringSet(KEY_CLAIMED, emptySet()) ?: emptySet())
+
+    /** ホーム受取通知用。プロセスキル後も復元する。 */
+    fun getNewlyPendingToast(): List<RelicId> =
+        RelicId.ordered.filter {
+            it in decodeRelics(prefs.getStringSet(KEY_NEWLY_PENDING_TOAST, emptySet()) ?: emptySet())
+        }
+
+    fun setNewlyPendingToast(ids: Collection<RelicId>) {
+        prefs.edit().putStringSet(KEY_NEWLY_PENDING_TOAST, encodeRelics(ids)).apply()
+    }
+
+    fun clearNewlyPendingToast() {
+        prefs.edit().remove(KEY_NEWLY_PENDING_TOAST).apply()
+    }
 
     fun getPendingRelics(): List<RelicId> {
         val set = decodeRelics(prefs.getStringSet(KEY_PENDING, emptySet()) ?: emptySet())
@@ -386,6 +403,112 @@ class LifetimePnlRepository(openStore: (String) -> KeyValueStore) {
 
     fun getSumikaPendingYen(): Long = prefs.getLong(KEY_SUMIKA_PENDING, 0L).coerceAtLeast(0L)
 
+    fun getSumikaUpgradeDiscountStacks(): Int =
+        prefs.getInt(KEY_SUMIKA_UPGRADE_DISCOUNT_STACKS, 0).coerceAtLeast(0)
+
+    fun isSumikaPayDoubled(): Boolean = prefs.getBoolean(KEY_SUMIKA_PAY_DOUBLED, false)
+
+    fun sumikaDiscountUsesLeftToday(): Int {
+        rollRewardDayIfNeeded()
+        return (Sumika.REWARD_DAILY_CAP - prefs.getInt(KEY_SUMIKA_DISCOUNT_USES_TODAY, 0))
+            .coerceIn(0, Sumika.REWARD_DAILY_CAP)
+    }
+
+    fun sumikaDoubleUsesLeftToday(): Int {
+        rollRewardDayIfNeeded()
+        return (Sumika.REWARD_DAILY_CAP - prefs.getInt(KEY_SUMIKA_DOUBLE_USES_TODAY, 0))
+            .coerceIn(0, Sumika.REWARD_DAILY_CAP)
+    }
+
+    private fun rollRewardDayIfNeeded() {
+        val today = platformTodayEpochDay()
+        if (prefs.getLong(KEY_SUMIKA_REWARD_DAY, Long.MIN_VALUE) == today) return
+        prefs.edit()
+            .putLong(KEY_SUMIKA_REWARD_DAY, today)
+            .putInt(KEY_SUMIKA_DISCOUNT_USES_TODAY, 0)
+            .putInt(KEY_SUMIKA_DOUBLE_USES_TODAY, 0)
+            .putInt(KEY_PAY_DOUBLE_CHOICE_SHOWN_TODAY, 0)
+            .putBoolean(KEY_PAY_DOUBLE_SKIP_NEXT_CHOICE, false)
+            .apply()
+    }
+
+    /**
+     * お給料タップ時に「通常／2倍」選択を出すか。
+     * ルール:
+     * - 2倍不可なら出さない
+     * - 直前に通常／2倍のどちらかで受け取った直後はスキップ（キャンセル閉じは対象外）
+     * - 本日の確定提示回数は日次リワード上限まで
+     * - 通算初回は必ず出す
+     * - 以降は金額帯で確率（大きいほど出やすい）
+     */
+    fun shouldOfferPayDoubleChoice(pendingYen: Long, canOffer: Boolean): Boolean {
+        if (!canOffer || pendingYen <= 0L) return false
+        rollRewardDayIfNeeded()
+        if (prefs.getBoolean(KEY_PAY_DOUBLE_SKIP_NEXT_CHOICE, false)) {
+            prefs.edit().putBoolean(KEY_PAY_DOUBLE_SKIP_NEXT_CHOICE, false).apply()
+            return false
+        }
+        val shownToday = prefs.getInt(KEY_PAY_DOUBLE_CHOICE_SHOWN_TODAY, 0)
+        if (shownToday >= Sumika.REWARD_DAILY_CAP) return false
+        val lifetime = prefs.getInt(KEY_PAY_DOUBLE_CHOICE_LIFETIME, 0)
+        if (lifetime <= 0) return true
+        val p = when {
+            pendingYen >= 1_000L -> 0.55f
+            pendingYen >= 400L -> 0.35f
+            else -> 0.22f
+        }
+        return Random.nextFloat() < p
+    }
+
+    /** 通常受け取り or 2倍を選んで確定したときだけ呼ぶ（外側タップキャンセルでは呼ばない）。 */
+    fun markPayDoubleChoiceShown() {
+        rollRewardDayIfNeeded()
+        val shown = prefs.getInt(KEY_PAY_DOUBLE_CHOICE_SHOWN_TODAY, 0) + 1
+        val life = prefs.getInt(KEY_PAY_DOUBLE_CHOICE_LIFETIME, 0) + 1
+        prefs.edit()
+            .putInt(KEY_PAY_DOUBLE_CHOICE_SHOWN_TODAY, shown)
+            .putInt(KEY_PAY_DOUBLE_CHOICE_LIFETIME, life)
+            .putBoolean(KEY_PAY_DOUBLE_SKIP_NEXT_CHOICE, true)
+            .apply()
+    }
+
+    /** リワード成功後に半額スタック+1。日次上限到達・適用不可なら false。 */
+    fun tryApplyUpgradeDiscount(): Boolean {
+        rollRewardDayIfNeeded()
+        val used = prefs.getInt(KEY_SUMIKA_DISCOUNT_USES_TODAY, 0)
+        if (used >= Sumika.REWARD_DAILY_CAP) return false
+        val level = getSumikaLevel()
+        val unlocked = getSumikaUnlockedGrade()
+        val next = Sumika.nextNormalLevel(level, unlocked)
+            ?: Sumika.nextGradeUpLevel(level, unlocked)
+            ?: return false
+        val base = Sumika.costToReach(next)
+        if (base <= 1L) return false
+        val stacks = getSumikaUpgradeDiscountStacks() + 1
+        prefs.edit()
+            .putInt(KEY_SUMIKA_UPGRADE_DISCOUNT_STACKS, stacks)
+            .putInt(KEY_SUMIKA_DISCOUNT_USES_TODAY, used + 1)
+            .apply()
+        return true
+    }
+
+    /** リワード成功後にお給料ポケットを2倍（1回分・受取まで再適用不可）。 */
+    fun tryDoubleSumikaPay(): Boolean {
+        rollRewardDayIfNeeded()
+        val used = prefs.getInt(KEY_SUMIKA_DOUBLE_USES_TODAY, 0)
+        if (used >= Sumika.REWARD_DAILY_CAP) return false
+        if (isSumikaPayDoubled()) return false
+        val pending = getSumikaPendingYen()
+        if (pending <= 0L) return false
+        val doubled = pending * 2L
+        prefs.edit()
+            .putLong(KEY_SUMIKA_PENDING, doubled)
+            .putBoolean(KEY_SUMIKA_PAY_DOUBLED, true)
+            .putInt(KEY_SUMIKA_DOUBLE_USES_TODAY, used + 1)
+            .apply()
+        return true
+    }
+
     fun sumikaSnapshot(): SumikaSnapshot =
         SumikaSnapshot(
             level = getSumikaLevel(),
@@ -394,6 +517,10 @@ class LifetimePnlRepository(openStore: (String) -> KeyValueStore) {
             cashOutCount = getCashOutCount(),
             unlockedGrade = getSumikaUnlockedGrade(),
             pendingGrade = getSumikaPendingGrade(),
+            upgradeDiscountStacks = getSumikaUpgradeDiscountStacks(),
+            discountUsesLeftToday = sumikaDiscountUsesLeftToday(),
+            payDoubled = isSumikaPayDoubled(),
+            doubleUsesLeftToday = sumikaDoubleUsesLeftToday(),
         )
 
     /** ピーク残高・キャップ到達後の出金から、次グレード報酬を pending に載せる。 */
@@ -464,7 +591,7 @@ class LifetimePnlRepository(openStore: (String) -> KeyValueStore) {
         return SumikaGradeClaimResult(grade = grade, level = level, unlockedGrade = grade)
     }
 
-    /** フォアグラウンド復帰時など。6分刻みで pending を加算。 */
+    /** フォアグラウンド復帰時など。5分刻みで pending を加算。 */
     fun accrueSumikaPassive(nowMs: Long = currentTimeMillis()): Long {
         val level = getSumikaLevel()
         val per = Sumika.passivePerTick(level)
@@ -519,7 +646,8 @@ class LifetimePnlRepository(openStore: (String) -> KeyValueStore) {
         val next = Sumika.nextNormalLevel(level, unlocked)
             ?: Sumika.nextGradeUpLevel(level, unlocked)
             ?: return SumikaUpgradeResult.Fail(SumikaUpgradeFail.MAXED)
-        val cost = Sumika.costToReach(next)
+        val stacks = getSumikaUpgradeDiscountStacks()
+        val cost = Sumika.discountedCost(Sumika.costToReach(next), stacks)
         val balance = getBalance()
         if (balance < cost) return SumikaUpgradeResult.Fail(SumikaUpgradeFail.FUNDS)
         val after = balance - cost
@@ -528,6 +656,7 @@ class LifetimePnlRepository(openStore: (String) -> KeyValueStore) {
             .putLong(KEY_BALANCE, after)
             .putLong(KEY_PEAK_BALANCE, peak)
             .putInt(KEY_SUMIKA_LEVEL, next)
+            .putInt(KEY_SUMIKA_UPGRADE_DISCOUNT_STACKS, 0)
         appendBalanceHistory(editor, BalancePoint(nowMs, after, BalanceEventKind.BED))
         editor.apply()
         evaluateSumikaGradeRewards()
@@ -560,14 +689,10 @@ class LifetimePnlRepository(openStore: (String) -> KeyValueStore) {
             .putLong(KEY_BALANCE, afterBal)
             .putLong(KEY_PEAK_BALANCE, peak)
             .putLong(KEY_SUMIKA_PENDING, 0L)
+            .putBoolean(KEY_SUMIKA_PAY_DOUBLED, false)
             .putStringSet(KEY_PENDING, encodeRelics(pendingRelics))
         appendBalanceHistory(editor, BalancePoint(nowMs, afterBal, BalanceEventKind.KAI))
         editor.apply()
-        recordSessionPnlHistory(
-            brandNameJp = "カイのお給料",
-            brandNameEn = "Kai's pay",
-            pnl = amount,
-        )
         return SumikaCollectResult(
             amount = amount,
             balance = afterBal,
@@ -612,12 +737,7 @@ class LifetimePnlRepository(openStore: (String) -> KeyValueStore) {
             .putStringSet(KEY_PENDING, encodeRelics(pendingRelics))
         appendBalanceHistory(editor, BalancePoint(nowMs, afterBal, BalanceEventKind.KAI))
         editor.apply()
-        recordSessionPnlHistory(
-            brandNameJp = "カイのお小遣い",
-            brandNameEn = "Kai's allowance",
-            pnl = amount,
-        )
-        return SumikaCollectResult(
+return SumikaCollectResult(
             amount = amount,
             balance = afterBal,
             peakBalance = peak,
@@ -641,8 +761,28 @@ class LifetimePnlRepository(openStore: (String) -> KeyValueStore) {
             .putBoolean(KEY_SUMIKA_GRADE_INTRO_DONE, false)
             .putLong(KEY_SUMIKA_PENDING, 0L)
             .putBoolean(KEY_SUMIKA_SUPPRESS_G1, true)
+            .putInt(KEY_SUMIKA_UPGRADE_DISCOUNT_STACKS, 0)
+            .putBoolean(KEY_SUMIKA_PAY_DOUBLED, false)
             .remove(KEY_SUMIKA_PASSIVE_AT)
             .remove(KEY_SUMIKA_CATCHUP_BASE)
+            .putBoolean(KEY_SUMIKA_MIGRATED, true)
+            .apply()
+    }
+
+    /** Debug: 指定グレードを即装備（実機確認用）。 */
+    fun debugForceSumikaGrade(grade: Int) {
+        val g = grade.coerceIn(0, 5)
+        if (g <= 0) {
+            debugResetSumikaToZero()
+            return
+        }
+        val level = Sumika.startLevelForGrade(g)
+        prefs.edit()
+            .putInt(KEY_SUMIKA_LEVEL, level)
+            .putInt(KEY_SUMIKA_UNLOCKED_GRADE, g)
+            .putInt(KEY_SUMIKA_PENDING_GRADE, 0)
+            .putBoolean(KEY_SUMIKA_GRADE_INTRO_DONE, false)
+            .putBoolean(KEY_SUMIKA_SUPPRESS_G1, false)
             .putBoolean(KEY_SUMIKA_MIGRATED, true)
             .apply()
     }
@@ -668,6 +808,7 @@ class LifetimePnlRepository(openStore: (String) -> KeyValueStore) {
         private const val KEY_SESSION_PNL_HISTORY = "session_pnl_history"
         private const val KEY_CLAIMED = "relics_claimed"
         private const val KEY_PENDING = "relics_pending"
+        private const val KEY_NEWLY_PENDING_TOAST = "relics_newly_pending_toast"
         private const val KEY_BALANCE = "account_balance"
         private const val KEY_PEAK_BALANCE = "account_peak_balance"
         private const val KEY_BALANCE_HISTORY = "account_balance_history"
@@ -682,6 +823,14 @@ class LifetimePnlRepository(openStore: (String) -> KeyValueStore) {
         private const val KEY_SUMIKA_PENDING_GRADE = "sumika_pending_grade"
         private const val KEY_SUMIKA_GRADE_INTRO_DONE = "sumika_grade_intro_done"
         private const val KEY_SUMIKA_SUPPRESS_G1 = "sumika_suppress_g1_until_cashout"
+        private const val KEY_SUMIKA_UPGRADE_DISCOUNT_STACKS = "sumika_upgrade_discount_stacks"
+        private const val KEY_SUMIKA_PAY_DOUBLED = "sumika_pay_doubled"
+        private const val KEY_SUMIKA_REWARD_DAY = "sumika_reward_day"
+        private const val KEY_SUMIKA_DISCOUNT_USES_TODAY = "sumika_discount_uses_today"
+        private const val KEY_SUMIKA_DOUBLE_USES_TODAY = "sumika_double_uses_today"
+        private const val KEY_PAY_DOUBLE_CHOICE_SHOWN_TODAY = "pay_double_choice_shown_today"
+        private const val KEY_PAY_DOUBLE_CHOICE_LIFETIME = "pay_double_choice_lifetime"
+        private const val KEY_PAY_DOUBLE_SKIP_NEXT_CHOICE = "pay_double_skip_next_choice"
         private const val KEY_KAI_ALLOWANCE_BLOCKED = "kai_allowance_blocked_until_play"
         const val MAX_ACCRUAL_DAYS = 30
         private const val MS_PER_DAY = 86_400_000L
