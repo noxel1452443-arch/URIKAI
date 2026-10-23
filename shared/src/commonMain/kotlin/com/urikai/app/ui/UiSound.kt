@@ -14,16 +14,20 @@ enum class UiSoundKind {
     CONFIRM,
     /** トグル・適用・図鑑項目など軽いフィードバック */
     SELECT,
+    /** レベルアップ数字のバフ一瞬 */
+    BUFF,
 }
 
 data class UiSoundBus(
     val confirm: () -> Unit = {},
     val select: () -> Unit = {},
+    val buff: () -> Unit = {},
 ) {
     fun play(kind: UiSoundKind) {
         when (kind) {
             UiSoundKind.CONFIRM -> confirm()
             UiSoundKind.SELECT -> select()
+            UiSoundKind.BUFF -> buff()
         }
     }
 }

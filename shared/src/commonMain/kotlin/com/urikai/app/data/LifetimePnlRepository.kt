@@ -8,6 +8,12 @@ import com.urikai.app.game.DisplayLanguage
 import com.urikai.app.game.InvestPlan
 import com.urikai.app.game.RelicEffects
 import com.urikai.app.game.RelicId
+import com.urikai.app.game.Sumika
+import com.urikai.app.game.SumikaCollectResult
+import com.urikai.app.game.SumikaGradeClaimResult
+import com.urikai.app.game.SumikaSnapshot
+import com.urikai.app.game.SumikaUpgradeFail
+import com.urikai.app.game.SumikaUpgradeResult
 import kotlin.random.Random
 
 /**
@@ -62,14 +68,18 @@ class LifetimePnlRepository(openStore: (String) -> KeyValueStore) {
         editor.putString(KEY_BALANCE_HISTORY, next.joinToString("\n"))
     }
 
-    /** 破産後の再スタート（残高を初期額へ）。 */
+    /** 残高0などで任意の出直し（通常フローでは出さない）。 */
     fun restartBalance(nowMs: Long = currentTimeMillis()) {
+        val previous = getBalance()
         val editor = prefs.edit().putLong(KEY_BALANCE, INITIAL_BALANCE)
         appendBalanceHistory(editor, BalancePoint(nowMs, INITIAL_BALANCE, BalanceEventKind.RESTART))
         editor.apply()
+        recordSessionPnlHistory(
+            brandNameJp = "出直し → ¥10,000",
+            brandNameEn = "Fresh start → ¥10,000",
+            pnl = INITIAL_BALANCE - previous,
+        )
     }
-
-    fun isBankrupt(): Boolean = getBalance() < BANKRUPT_BELOW
 
     fun getInvestPlan(): InvestPlan =
         InvestPlan.fromPersisted(prefs.getString(KEY_INVEST_PLAN, null))
@@ -145,6 +155,9 @@ class LifetimePnlRepository(openStore: (String) -> KeyValueStore) {
     }
 
     fun getCashOutCount(): Int = prefs.getInt(KEY_CASH_OUT_COUNT, 0)
+
+    /** 生涯の最大 COMBO（1試合内の最大）。 */
+    fun getBestCombo(): Int = prefs.getInt(KEY_BEST_COMBO, 0)
 
     /** @param pnlYen その試合での口座残高の増減額 */
     fun recordFinalAsset(asset: Int, pnlYen: Long) {
@@ -257,12 +270,17 @@ class LifetimePnlRepository(openStore: (String) -> KeyValueStore) {
      * 入金確定時: 口座残高を更新し、最高到達額でレリックを解放する。
      * レリックの閾値は「初期残高からの増加額」で判定する。
      */
-    fun onCashOut(newBalance: Long, nowMs: Long = currentTimeMillis()): CashOutPersistResult {
+    fun onCashOut(
+        newBalance: Long,
+        sessionMaxCombo: Int = 0,
+        nowMs: Long = currentTimeMillis(),
+    ): CashOutPersistResult {
         val previousBalance = getBalance()
         val previousPeak = getPeakBalance()
         val nextBalance = newBalance.coerceAtLeast(0L)
         val nextPeak = maxOf(previousPeak, nextBalance)
         val cashOuts = getCashOutCount() + 1
+        val nextBestCombo = maxOf(getBestCombo(), sessionMaxCombo.coerceAtLeast(0))
         val newly = RelicId.newlyUnlocked(
             (previousPeak - INITIAL_BALANCE).coerceIn(0L, Int.MAX_VALUE.toLong()).toInt(),
             (nextPeak - INITIAL_BALANCE).coerceIn(0L, Int.MAX_VALUE.toLong()).toInt()
@@ -275,6 +293,7 @@ class LifetimePnlRepository(openStore: (String) -> KeyValueStore) {
             .putLong(KEY_BALANCE, nextBalance)
             .putLong(KEY_PEAK_BALANCE, nextPeak)
             .putInt(KEY_CASH_OUT_COUNT, cashOuts)
+            .putInt(KEY_BEST_COMBO, nextBestCombo)
             .putStringSet(KEY_PENDING, encodeRelics(pending))
         appendBalanceHistory(editor, BalancePoint(nowMs, nextBalance, BalanceEventKind.PLAY))
         editor.apply()
@@ -284,6 +303,7 @@ class LifetimePnlRepository(openStore: (String) -> KeyValueStore) {
             balance = nextBalance,
             peakBalance = nextPeak,
             cashOutCount = cashOuts,
+            bestCombo = nextBestCombo,
             newlyPending = newly.filter { it !in claimed },
             pendingRelics = RelicId.ordered.filter { it in pending },
         )
@@ -312,6 +332,321 @@ class LifetimePnlRepository(openStore: (String) -> KeyValueStore) {
 
     fun isClaimed(id: RelicId): Boolean = id in getClaimedRelics()
 
+
+    fun getSumikaLevel(): Int {
+        migrateLegacyBedRankIfNeeded()
+        ensureSumikaUnlockedGrade()
+        return prefs.getInt(KEY_SUMIKA_LEVEL, 0).coerceIn(0, Sumika.MAX_LEVEL)
+    }
+
+    fun getSumikaUnlockedGrade(): Int {
+        migrateLegacyBedRankIfNeeded()
+        ensureSumikaUnlockedGrade()
+        return prefs.getInt(KEY_SUMIKA_UNLOCKED_GRADE, 0).coerceIn(0, 5)
+    }
+
+    fun getSumikaPendingGrade(): Int =
+        prefs.getInt(KEY_SUMIKA_PENDING_GRADE, 0).coerceIn(0, 5)
+
+    /** 旧寝床／旧Lv → 新モデル（解放グレード付き）。1回だけ。 */
+    private fun migrateLegacyBedRankIfNeeded() {
+        if (prefs.contains(KEY_SUMIKA_MIGRATED)) return
+        val legacy = prefs.getInt("kai_bed_rank", 0)
+        val mapped = when (legacy) {
+            1 -> 1
+            2 -> 10
+            3 -> 25
+            4 -> 45
+            5 -> 70
+            else -> prefs.getInt(KEY_SUMIKA_LEVEL, 0)
+        }
+        val editor = prefs.edit().putBoolean(KEY_SUMIKA_MIGRATED, true)
+        if (mapped > 0) {
+            val lv = prefs.getInt(KEY_SUMIKA_LEVEL, 0).let { if (it > 0) it else mapped }
+            editor.putInt(KEY_SUMIKA_LEVEL, lv)
+            editor.putInt(KEY_SUMIKA_UNLOCKED_GRADE, Sumika.unlockedGradeForLevel(lv))
+        }
+        editor.remove(KEY_SUMIKA_CATCHUP_BASE)
+        editor.apply()
+    }
+
+    private fun ensureSumikaUnlockedGrade() {
+        val level = prefs.getInt(KEY_SUMIKA_LEVEL, 0)
+        if (level <= 0) return
+        if (!prefs.contains(KEY_SUMIKA_UNLOCKED_GRADE)) {
+            prefs.edit()
+                .putInt(KEY_SUMIKA_UNLOCKED_GRADE, Sumika.unlockedGradeForLevel(level))
+                .apply()
+        }
+        // 出金進捗ゲート用の旧キーは破棄
+        if (prefs.contains(KEY_SUMIKA_CATCHUP_BASE)) {
+            prefs.edit().remove(KEY_SUMIKA_CATCHUP_BASE).apply()
+        }
+    }
+
+    fun getSumikaPendingYen(): Long = prefs.getLong(KEY_SUMIKA_PENDING, 0L).coerceAtLeast(0L)
+
+    fun sumikaSnapshot(): SumikaSnapshot =
+        SumikaSnapshot(
+            level = getSumikaLevel(),
+            pendingYen = getSumikaPendingYen(),
+            balance = getBalance(),
+            cashOutCount = getCashOutCount(),
+            unlockedGrade = getSumikaUnlockedGrade(),
+            pendingGrade = getSumikaPendingGrade(),
+        )
+
+    /** ピーク残高・キャップ到達後の出金から、次グレード報酬を pending に載せる。 */
+    fun evaluateSumikaGradeRewards() {
+        if (getSumikaPendingGrade() > 0) return
+        val unlocked = getSumikaUnlockedGrade()
+        // デバッグリセット直後は、次の出金まで草のしき布を出さない（空ホームを確認できるように）
+        if (prefs.getBoolean(KEY_SUMIKA_SUPPRESS_G1, false)) return
+        if (unlocked < 1 && getPeakBalance() >= Sumika.FIRST_GRADE_PEAK_BALANCE) {
+            setSumikaPendingGrade(1)
+            return
+        }
+        // グレード2以降は onCashOut 側で立てる（キャップ到達＋1プレイ）
+    }
+
+    /**
+     * 出金直後: いまの解放グレード上限にいるなら、次グレードを報酬待ちにする。
+     * ヒントは出さず、受け取り可能になって初めて知らせる。
+     */
+    fun offerNextSumikaGradeAfterCashOut() {
+        if (getSumikaPendingGrade() > 0) return
+        val unlocked = getSumikaUnlockedGrade()
+        if (unlocked <= 0 || unlocked >= 5) return
+        val level = getSumikaLevel()
+        val cap = Sumika.maxLevelForUnlockedGrade(unlocked)
+        if (level >= cap) {
+            setSumikaPendingGrade(unlocked + 1)
+        }
+    }
+
+    /** pending グレードのカイ強制ストーリーを見終わったか。 */
+    fun isSumikaGradeIntroDone(): Boolean =
+        prefs.getBoolean(KEY_SUMIKA_GRADE_INTRO_DONE, false)
+
+    fun markSumikaGradeIntroDone() {
+        if (getSumikaPendingGrade() <= 0) return
+        prefs.edit().putBoolean(KEY_SUMIKA_GRADE_INTRO_DONE, true).apply()
+    }
+
+    private fun setSumikaPendingGrade(grade: Int) {
+        prefs.edit()
+            .putInt(KEY_SUMIKA_PENDING_GRADE, grade)
+            .putBoolean(KEY_SUMIKA_GRADE_INTRO_DONE, false)
+            .apply()
+    }
+
+    fun claimSumikaGradeReward(): SumikaGradeClaimResult? {
+        val grade = getSumikaPendingGrade()
+        if (grade <= 0) return null
+        val unlocked = getSumikaUnlockedGrade()
+        if (grade <= unlocked) {
+            prefs.edit()
+                .putInt(KEY_SUMIKA_PENDING_GRADE, 0)
+                .putBoolean(KEY_SUMIKA_GRADE_INTRO_DONE, false)
+                .apply()
+            return null
+        }
+        var level = getSumikaLevel()
+        val editor = prefs.edit()
+            .putInt(KEY_SUMIKA_PENDING_GRADE, 0)
+            .putBoolean(KEY_SUMIKA_GRADE_INTRO_DONE, false)
+            .putInt(KEY_SUMIKA_UNLOCKED_GRADE, grade)
+        if (grade == 1 && level <= 0) {
+            level = 1
+            editor.putInt(KEY_SUMIKA_LEVEL, 1)
+        }
+        editor.apply()
+        return SumikaGradeClaimResult(grade = grade, level = level, unlockedGrade = grade)
+    }
+
+    /** フォアグラウンド復帰時など。6分刻みで pending を加算。 */
+    fun accrueSumikaPassive(nowMs: Long = currentTimeMillis()): Long {
+        val level = getSumikaLevel()
+        val per = Sumika.passivePerTick(level)
+        if (per <= 0L) {
+            if (!prefs.contains(KEY_SUMIKA_PASSIVE_AT)) {
+                prefs.edit().putLong(KEY_SUMIKA_PASSIVE_AT, nowMs).apply()
+            }
+            return 0L
+        }
+        val last = prefs.getLong(KEY_SUMIKA_PASSIVE_AT, -1L)
+        if (last < 0L) {
+            prefs.edit().putLong(KEY_SUMIKA_PASSIVE_AT, nowMs).apply()
+            return 0L
+        }
+        if (nowMs <= last) return 0L
+        val ticks = ((nowMs - last) / Sumika.PASSIVE_INTERVAL_MS).toInt()
+        if (ticks <= 0) return 0L
+        val cap = Sumika.pendingCap(level)
+        val before = getSumikaPendingYen()
+        val add = (per * ticks).coerceAtLeast(0L)
+        val after = (before + add).coerceAtMost(cap)
+        prefs.edit()
+            .putLong(KEY_SUMIKA_PENDING, after)
+            .putLong(KEY_SUMIKA_PASSIVE_AT, last + ticks * Sumika.PASSIVE_INTERVAL_MS)
+            .apply()
+        return after - before
+    }
+
+    /** 出金確定後: プレイ分をお給料ポケットへ＋次グレード報酬判定。 */
+    fun accrueSumikaAfterCashOut(): Long {
+        val level = getSumikaLevel()
+        val pay = Sumika.payPerPlay(level)
+        var added = 0L
+        if (pay > 0L) {
+            val cap = Sumika.pendingCap(level)
+            val before = getSumikaPendingYen()
+            val after = (before + pay).coerceAtMost(cap)
+            prefs.edit().putLong(KEY_SUMIKA_PENDING, after).apply()
+            added = after - before
+        }
+        if (prefs.getBoolean(KEY_SUMIKA_SUPPRESS_G1, false)) {
+            prefs.edit().putBoolean(KEY_SUMIKA_SUPPRESS_G1, false).apply()
+        }
+        offerNextSumikaGradeAfterCashOut()
+        evaluateSumikaGradeRewards()
+        return added
+    }
+
+    fun tryUpgradeSumika(nowMs: Long = currentTimeMillis()): SumikaUpgradeResult {
+        val level = getSumikaLevel()
+        val unlocked = getSumikaUnlockedGrade()
+        val next = Sumika.nextNormalLevel(level, unlocked)
+            ?: Sumika.nextGradeUpLevel(level, unlocked)
+            ?: return SumikaUpgradeResult.Fail(SumikaUpgradeFail.MAXED)
+        val cost = Sumika.costToReach(next)
+        val balance = getBalance()
+        if (balance < cost) return SumikaUpgradeResult.Fail(SumikaUpgradeFail.FUNDS)
+        val after = balance - cost
+        val peak = maxOf(getPeakBalance(), after)
+        val editor = prefs.edit()
+            .putLong(KEY_BALANCE, after)
+            .putLong(KEY_PEAK_BALANCE, peak)
+            .putInt(KEY_SUMIKA_LEVEL, next)
+        appendBalanceHistory(editor, BalancePoint(nowMs, after, BalanceEventKind.BED))
+        editor.apply()
+        evaluateSumikaGradeRewards()
+        val nameJp = Sumika.gradeNameJp(next)
+        val nameEn = Sumika.gradeNameEn(next)
+        recordSessionPnlHistory(
+            brandNameJp = "すみか Lv$next（$nameJp）",
+            brandNameEn = "Sumika Lv$next ($nameEn)",
+            pnl = -cost,
+        )
+        return SumikaUpgradeResult.Ok(level = next, balance = after, peakBalance = peak)
+    }
+
+    fun collectSumikaPay(nowMs: Long = currentTimeMillis()): SumikaCollectResult? {
+        accrueSumikaPassive(nowMs)
+        val amount = getSumikaPendingYen()
+        if (amount <= 0L) return null
+        val beforeBal = getBalance()
+        val afterBal = beforeBal + amount
+        val previousPeak = getPeakBalance()
+        val peak = maxOf(previousPeak, afterBal)
+        val newly = RelicId.newlyUnlocked(
+            (previousPeak - INITIAL_BALANCE).coerceIn(0L, Int.MAX_VALUE.toLong()).toInt(),
+            (peak - INITIAL_BALANCE).coerceIn(0L, Int.MAX_VALUE.toLong()).toInt()
+        )
+        val pendingRelics = getPendingRelics().toMutableSet()
+        val claimed = getClaimedRelics()
+        newly.filter { it !in claimed }.forEach { pendingRelics.add(it) }
+        val editor = prefs.edit()
+            .putLong(KEY_BALANCE, afterBal)
+            .putLong(KEY_PEAK_BALANCE, peak)
+            .putLong(KEY_SUMIKA_PENDING, 0L)
+            .putStringSet(KEY_PENDING, encodeRelics(pendingRelics))
+        appendBalanceHistory(editor, BalancePoint(nowMs, afterBal, BalanceEventKind.KAI))
+        editor.apply()
+        recordSessionPnlHistory(
+            brandNameJp = "カイのお給料",
+            brandNameEn = "Kai's pay",
+            pnl = amount,
+        )
+        return SumikaCollectResult(
+            amount = amount,
+            balance = afterBal,
+            peakBalance = peak,
+            newlyPending = newly.filter { it !in claimed },
+            pendingRelics = RelicId.ordered.filter { it in pendingRelics },
+        )
+    }
+
+    /**
+     * 残高が薄いときのカイお小遣い。
+     * 受け取り後は次の出金まで再受取不可。ただし残高0は例外で再受取可（詰み回避）。
+     */
+    fun canOfferKaiAllowance(): Boolean {
+        val bal = getBalance()
+        if (bal >= KAI_ALLOWANCE_THRESHOLD) return false
+        if (bal <= 0L) return true
+        return !prefs.getBoolean(KEY_KAI_ALLOWANCE_BLOCKED, false)
+    }
+
+    fun kaiAllowanceAmountOrZero(): Long =
+        if (canOfferKaiAllowance()) KAI_ALLOWANCE_YEN else 0L
+
+    fun collectKaiAllowance(nowMs: Long = currentTimeMillis()): SumikaCollectResult? {
+        if (!canOfferKaiAllowance()) return null
+        val amount = KAI_ALLOWANCE_YEN
+        val beforeBal = getBalance()
+        val afterBal = beforeBal + amount
+        val previousPeak = getPeakBalance()
+        val peak = maxOf(previousPeak, afterBal)
+        val newly = RelicId.newlyUnlocked(
+            (previousPeak - INITIAL_BALANCE).coerceIn(0L, Int.MAX_VALUE.toLong()).toInt(),
+            (peak - INITIAL_BALANCE).coerceIn(0L, Int.MAX_VALUE.toLong()).toInt()
+        )
+        val pendingRelics = getPendingRelics().toMutableSet()
+        val claimed = getClaimedRelics()
+        newly.filter { it !in claimed }.forEach { pendingRelics.add(it) }
+        val editor = prefs.edit()
+            .putLong(KEY_BALANCE, afterBal)
+            .putLong(KEY_PEAK_BALANCE, peak)
+            .putBoolean(KEY_KAI_ALLOWANCE_BLOCKED, true)
+            .putStringSet(KEY_PENDING, encodeRelics(pendingRelics))
+        appendBalanceHistory(editor, BalancePoint(nowMs, afterBal, BalanceEventKind.KAI))
+        editor.apply()
+        recordSessionPnlHistory(
+            brandNameJp = "カイのお小遣い",
+            brandNameEn = "Kai's allowance",
+            pnl = amount,
+        )
+        return SumikaCollectResult(
+            amount = amount,
+            balance = afterBal,
+            peakBalance = peak,
+            newlyPending = newly.filter { it !in claimed },
+            pendingRelics = RelicId.ordered.filter { it in pendingRelics },
+        )
+    }
+
+    fun clearKaiAllowanceBlock() {
+        if (prefs.getBoolean(KEY_KAI_ALLOWANCE_BLOCKED, false)) {
+            prefs.edit().putBoolean(KEY_KAI_ALLOWANCE_BLOCKED, false).apply()
+        }
+    }
+
+    /** Debug: すみかを未所持（草のしき布ゲット前）に戻す。 */
+    fun debugResetSumikaToZero() {
+        prefs.edit()
+            .putInt(KEY_SUMIKA_LEVEL, 0)
+            .putInt(KEY_SUMIKA_UNLOCKED_GRADE, 0)
+            .putInt(KEY_SUMIKA_PENDING_GRADE, 0)
+            .putBoolean(KEY_SUMIKA_GRADE_INTRO_DONE, false)
+            .putLong(KEY_SUMIKA_PENDING, 0L)
+            .putBoolean(KEY_SUMIKA_SUPPRESS_G1, true)
+            .remove(KEY_SUMIKA_PASSIVE_AT)
+            .remove(KEY_SUMIKA_CATCHUP_BASE)
+            .putBoolean(KEY_SUMIKA_MIGRATED, true)
+            .apply()
+    }
+
     private fun decodeRelics(raw: Set<String>): Set<RelicId> =
         raw.mapNotNull { name -> RelicId.fromPersistedName(name) }.toSet()
 
@@ -322,6 +657,7 @@ class LifetimePnlRepository(openStore: (String) -> KeyValueStore) {
         private const val PREFS_NAME = "urikai_lifetime_pnl"
         private const val KEY_LIFETIME_PNL = "lifetime_pnl"
         private const val KEY_CASH_OUT_COUNT = "cash_out_count"
+        private const val KEY_BEST_COMBO = "best_combo"
         private val LEGACY_BONUS_KEYS = listOf(
             "active_bonus_run",
             "pending_bonus_run",
@@ -337,12 +673,22 @@ class LifetimePnlRepository(openStore: (String) -> KeyValueStore) {
         private const val KEY_BALANCE_HISTORY = "account_balance_history"
         private const val KEY_INVEST_PLAN = "invest_plan"
         private const val KEY_LAST_ACCRUAL_DAY = "invest_last_accrual_day"
+        private const val KEY_SUMIKA_LEVEL = "sumika_level"
+        private const val KEY_SUMIKA_PENDING = "sumika_pending_yen"
+        private const val KEY_SUMIKA_PASSIVE_AT = "sumika_passive_at_ms"
+        private const val KEY_SUMIKA_MIGRATED = "sumika_migrated_v1"
+        private const val KEY_SUMIKA_CATCHUP_BASE = "sumika_catchup_cashout_base"
+        private const val KEY_SUMIKA_UNLOCKED_GRADE = "sumika_unlocked_grade"
+        private const val KEY_SUMIKA_PENDING_GRADE = "sumika_pending_grade"
+        private const val KEY_SUMIKA_GRADE_INTRO_DONE = "sumika_grade_intro_done"
+        private const val KEY_SUMIKA_SUPPRESS_G1 = "sumika_suppress_g1_until_cashout"
+        private const val KEY_KAI_ALLOWANCE_BLOCKED = "kai_allowance_blocked_until_play"
         const val MAX_ACCRUAL_DAYS = 30
         private const val MS_PER_DAY = 86_400_000L
 
         const val INITIAL_BALANCE = 10_000L
-        /** これを下回ると破産（¥10,000 で再スタート）。 */
-        const val BANKRUPT_BELOW = 5_000L
+        const val KAI_ALLOWANCE_THRESHOLD = 100L
+        const val KAI_ALLOWANCE_YEN = 100L
         private const val MAX_BALANCE_HISTORY = 2_000
 
         private const val SESSION_FIELD_SEP = "\u001f"
@@ -399,6 +745,7 @@ data class CashOutPersistResult(
     val balance: Long,
     val peakBalance: Long,
     val cashOutCount: Int,
+    val bestCombo: Int = 0,
     val newlyPending: List<RelicId>,
     val pendingRelics: List<RelicId>,
 )
@@ -407,7 +754,11 @@ enum class BalanceEventKind(val code: String) {
     OPEN("o"),
     PLAY("p"),
     RESTART("r"),
-    DAILY("d");
+    DAILY("d"),
+    /** カイのお給料（受取時）。 */
+    KAI("k"),
+    /** すみかレベルアップ費用。 */
+    BED("b");
 
     companion object {
         fun fromCode(code: String): BalanceEventKind? = entries.firstOrNull { it.code == code }

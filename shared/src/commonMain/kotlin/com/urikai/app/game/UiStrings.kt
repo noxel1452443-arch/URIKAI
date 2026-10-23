@@ -17,9 +17,10 @@ object UiStrings {
         DisplayLanguage.JP -> "開始"
     }
 
+    /** RESULT の主ボタン。即リスタートではなく START（銘柄選択）へ戻る。 */
     fun retry(lang: DisplayLanguage): String = when (lang) {
-        DisplayLanguage.EN -> "RETRY"
-        DisplayLanguage.JP -> "再挑戦"
+        DisplayLanguage.EN -> "HOME"
+        DisplayLanguage.JP -> "ホームへ"
     }
 
     fun back(lang: DisplayLanguage): String = when (lang) {
@@ -92,14 +93,6 @@ object UiStrings {
         }
     }
 
-    fun chaseHintBest(yenLeft: Int, lang: DisplayLanguage): String {
-        val pct = "+%.1f%%".fmt(yenLeft / 100f)
-        return when (lang) {
-            DisplayLanguage.EN -> "BEST in $pct"
-            DisplayLanguage.JP -> "BESTまであと$pct"
-        }
-    }
-
     fun locked(lang: DisplayLanguage): String = when (lang) {
         DisplayLanguage.EN -> "LOCKED"
         DisplayLanguage.JP -> "未解放"
@@ -120,6 +113,12 @@ object UiStrings {
     }
 
     fun newBadge(): String = "NEW!"
+
+    /** 結果タイトルがニュース（図鑑詳細）を開けることの合図。 */
+    fun resultNewsOpenCue(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "NEWS"
+        DisplayLanguage.JP -> "ニュース"
+    }
 
     fun sortByOrder(lang: DisplayLanguage): String = when (lang) {
         DisplayLanguage.EN -> "NO."
@@ -164,6 +163,10 @@ object UiStrings {
         "FOCUS" to "シンプル",
         "SOFT" to "弱",
         "HARD" to "強",
+        "ADS" to "広告",
+        "REMOVE" to "なしにする",
+        "OWNED" to "購入済",
+        "RESTORE" to "復元",
     )
 
     fun creditsBody(lang: DisplayLanguage): String = when (lang) {
@@ -341,30 +344,207 @@ object UiStrings {
     }
 
     fun relicGiftBadge(lang: DisplayLanguage): String = when (lang) {
-        DisplayLanguage.EN -> "REWARD"
-        DisplayLanguage.JP -> "報酬"
+        DisplayLanguage.EN -> "CLAIM"
+        DisplayLanguage.JP -> "受取"
     }
 
-    /** RESULT 導入後の新規レリック誘導ポップ。 */
+    /** RESULT 導入後の新規解禁誘導ポップ。 */
     fun relicRewardToastTitle(lang: DisplayLanguage): String = when (lang) {
-        DisplayLanguage.EN -> "★ REWARD! ★"
-        DisplayLanguage.JP -> "★ 報酬獲得！ ★"
+        DisplayLanguage.EN -> "★ UNLOCK! ★"
+        DisplayLanguage.JP -> "★ 解禁！ ★"
     }
 
     fun relicRewardToastBody(lang: DisplayLanguage): String = when (lang) {
-        DisplayLanguage.EN -> "Claim it from the reward box on the START screen!"
-        DisplayLanguage.JP -> "開始画面の報酬箱から受け取ろう！"
+        DisplayLanguage.EN -> "Claim it with the button on the START screen!"
+        DisplayLanguage.JP -> "開始画面の「受取」から受け取ろう！"
     }
 
-    /** 報酬箱で受け取った直後のバナー。 */
+    /** 受取直後のバナー。 */
     fun relicGetBanner(lang: DisplayLanguage): String = when (lang) {
         DisplayLanguage.EN -> "★ GET! ★"
         DisplayLanguage.JP -> "★ ゲット！ ★"
     }
 
+    /** 受取後の置き場誘導（カテゴリ分割後）。 */
+    fun relicPlacementHint(id: RelicId, lang: DisplayLanguage): String = when (id.placement()) {
+        UnlockPlacement.LOOK -> when (lang) {
+            DisplayLanguage.EN -> "Open ＊ (bottom-left) to change look / FX"
+            DisplayLanguage.JP -> "左下の＊から見た目・演出を変えられる"
+        }
+        UnlockPlacement.PLAY -> when (lang) {
+            DisplayLanguage.EN -> "Peel the title-card corner for the stamp album"
+            DisplayLanguage.JP -> "タイトルカードの角をめくると切手帳へ"
+        }
+        UnlockPlacement.INVEST -> when (lang) {
+            DisplayLanguage.EN -> "Check it under Balance → Policy"
+            DisplayLanguage.JP -> "口座の「運用方針」で確認できる"
+        }
+    }
+
     fun relicBoxLabel(lang: DisplayLanguage): String = when (lang) {
-        DisplayLanguage.EN -> "REWARDS"
-        DisplayLanguage.JP -> "報酬箱"
+        DisplayLanguage.EN -> "LOOK"
+        DisplayLanguage.JP -> "見た目"
+    }
+
+    fun stylePageTitle(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "＊"
+        DisplayLanguage.JP -> "＊"
+    }
+
+    fun stylePageEmpty(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "Nothing here… yet."
+        DisplayLanguage.JP -> "まだ何もない…"
+    }
+
+    fun styleLookName(id: RelicId, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> when (id) {
+            RelicId.PAPER -> "電子ペーパー"
+            RelicId.SMOOTH -> "なめらか線"
+            RelicId.DARK -> "反転"
+            RelicId.JUDGE -> "判定の華やかさ"
+            RelicId.COMBO -> "COMBOの華やかさ"
+            else -> relicName(id, lang)
+        }
+        DisplayLanguage.EN -> when (id) {
+            RelicId.PAPER -> "E-paper"
+            RelicId.SMOOTH -> "Smooth line"
+            RelicId.DARK -> "Invert"
+            RelicId.JUDGE -> "Judge flourish"
+            RelicId.COMBO -> "COMBO flourish"
+            else -> relicName(id, lang)
+        }
+    }
+
+    fun styleLookBlurb(id: RelicId, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> when (id) {
+            RelicId.PAPER -> "画面の質感が変わる。"
+            RelicId.SMOOTH -> "チャートの結び方が変わる。"
+            RelicId.DARK -> "（廃止）以前の反転テーマ用。"
+            RelicId.JUDGE -> "判定の演出が派手になる。"
+            RelicId.COMBO -> "COMBO表示が派手になる。"
+            else -> relicDescription(id, lang)
+        }
+        DisplayLanguage.EN -> when (id) {
+            RelicId.PAPER -> "Changes the screen texture."
+            RelicId.SMOOTH -> "Changes how the chart connects."
+            RelicId.DARK -> "(Retired) Former invert theme."
+            RelicId.JUDGE -> "Judgment FX gets flashier."
+            RelicId.COMBO -> "COMBO display gets flashier."
+            else -> relicDescription(id, lang)
+        }
+    }
+
+    fun investYieldChip(mult: Float, lang: DisplayLanguage): String {
+        val tenths = kotlin.math.round(mult * 10f).toInt()
+        val value = if (tenths % 10 == 0) {
+            "×${tenths / 10}"
+        } else {
+            "×${tenths / 10}.${tenths % 10}"
+        }
+        return when (lang) {
+            DisplayLanguage.EN -> "Yield $value"
+            DisplayLanguage.JP -> "利回り$value"
+        }
+    }
+
+    fun investAwayChip(days: Int, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "Cap ${days}d"
+        DisplayLanguage.JP -> "反映${days}日"
+    }
+
+    fun investYieldTip(mult: Float, lang: DisplayLanguage): String {
+        val pctUp = kotlin.math.round((mult - 1f) * 100f).toInt().coerceAtLeast(0)
+        return when (lang) {
+            DisplayLanguage.EN ->
+                if (pctUp <= 0) "Daily plan gains: normal"
+                else "Daily plan gains up $pctUp%"
+            DisplayLanguage.JP ->
+                if (pctUp <= 0) "毎日の運用益はそのまま"
+                else "毎日の運用益が${pctUp}%アップする"
+        }
+    }
+
+    fun investAwayTip(days: Int, lang: DisplayLanguage): String {
+        val chip = investAwayChip(days, lang)
+        val next = days + 1
+        return when (lang) {
+            DisplayLanguage.EN ->
+                "$chip\nWhen you return, at most $days days of\ndaily plan moves are applied.\nDay $next and beyond are skipped."
+            DisplayLanguage.JP ->
+                "$chip\nアプリを開けなかったあいだの値動きは、\n最大${days}日分までまとめて反映。\n${next}日目以降は切り捨て。"
+        }
+    }
+
+    fun styleOn(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "ON"
+        DisplayLanguage.JP -> "ON"
+    }
+
+    fun styleOff(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "OFF"
+        DisplayLanguage.JP -> "OFF"
+    }
+
+    /** きせかえ行の操作ボタン。常に「押したあとの行為」を書く（状態表示ではない）。 */
+    fun styleActionUse(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "USE"
+        DisplayLanguage.JP -> "使う"
+    }
+
+    fun styleActionRemove(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "REMOVE"
+        DisplayLanguage.JP -> "外す"
+    }
+
+    fun milestoneNextShort(balanceYen: Long, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "Next: ¥%,d".fmt(balanceYen)
+        DisplayLanguage.JP -> "Next: ¥%,d".fmt(balanceYen)
+    }
+
+    fun milestoneCompleteShort(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "Max"
+        DisplayLanguage.JP -> "Max"
+    }
+
+    fun playBuffBackHint(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "Tap a mount"
+        DisplayLanguage.JP -> "マウントをタップ"
+    }
+
+    fun playBuffStampLocked(slot: PlayBuffSlot, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "${playBuffSlotName(slot, lang)}: locked"
+        DisplayLanguage.JP -> "${playBuffSlotName(slot, lang)}: 未解禁"
+    }
+
+    fun playBuffTip(
+        slot: PlayBuffSlot,
+        active: RelicId?,
+        lang: DisplayLanguage
+    ): String {
+        if (active == null) {
+            return when (lang) {
+                DisplayLanguage.EN -> "${playBuffSlotName(slot, lang)}: OFF (tap to enable)"
+                DisplayLanguage.JP -> "${playBuffSlotName(slot, lang)}: OFF（タップでON）"
+            }
+        }
+        return "${playBuffSlotName(slot, lang)}: ${relicName(active, lang)}"
+    }
+
+    fun playBuffSlotName(slot: PlayBuffSlot, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> when (slot) {
+            PlayBuffSlot.COOLDOWN -> "Charge"
+            PlayBuffSlot.LAG -> "Lag"
+            PlayBuffSlot.PNL -> "Win bonus"
+            PlayBuffSlot.LIFE -> "LIFE"
+            PlayBuffSlot.COMBO_HEAL -> "COMBO heal"
+        }
+        DisplayLanguage.JP -> when (slot) {
+            PlayBuffSlot.COOLDOWN -> "チャージ"
+            PlayBuffSlot.LAG -> "ラグ"
+            PlayBuffSlot.PNL -> "勝ち幅"
+            PlayBuffSlot.LIFE -> "LIFE"
+            PlayBuffSlot.COMBO_HEAL -> "COMBO回復"
+        }
     }
 
     fun relicReceive(lang: DisplayLanguage): String = when (lang) {
@@ -382,6 +562,17 @@ object UiStrings {
         DisplayLanguage.JP -> "切替"
     }
 
+    /** 段階グループで、いま効果に乗っている段階。 */
+    fun relicStageActive(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "ACTIVE"
+        DisplayLanguage.JP -> "適用中"
+    }
+
+    fun relicStageStacked(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "STACKED"
+        DisplayLanguage.JP -> "累積"
+    }
+
     fun relicRevertToGb(lang: DisplayLanguage): String = when (lang) {
         DisplayLanguage.EN -> "Back to GB"
         DisplayLanguage.JP -> "GBに戻す"
@@ -393,8 +584,13 @@ object UiStrings {
     }
 
     fun sessionPnlHistoryTitle(lang: DisplayLanguage): String = when (lang) {
-        DisplayLanguage.EN -> "RECENT ROUNDS"
-        DisplayLanguage.JP -> "勝負ごとの増減"
+        DisplayLanguage.EN -> "STATEMENT"
+        DisplayLanguage.JP -> "お取引明細"
+    }
+
+    fun sessionHistoryRestartLabel(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "Bankrupt restart → ¥10,000"
+        DisplayLanguage.JP -> "破産リセット → ¥10,000"
     }
 
     fun balanceFromStartLine(returnPercent: Float, lang: DisplayLanguage): String = when (lang) {
@@ -408,24 +604,100 @@ object UiStrings {
     }
 
     fun investPlanTitle(lang: DisplayLanguage): String = when (lang) {
-        DisplayLanguage.EN -> "DAILY PLAN"
-        DisplayLanguage.JP -> "運用プラン（毎日反映）"
+        DisplayLanguage.EN -> "POLICY"
+        DisplayLanguage.JP -> "運用方針"
     }
 
-    fun investPlanRate(plan: InvestPlan, lang: DisplayLanguage): String {
-        val mean = formatSignedPercent(plan.dailyMeanPercent)
-        return if (plan.isGuaranteed) {
-            when (lang) {
-                DisplayLanguage.EN -> "$mean/day fixed"
-                DisplayLanguage.JP -> "$mean/日 確定"
-            }
-        } else {
-            val vol = "±%.0f%%".fmt(plan.dailyVolPercent)
-            when (lang) {
-                DisplayLanguage.EN -> "avg $mean/day $vol"
-                DisplayLanguage.JP -> "平均$mean/日 $vol"
+    fun investPlanDetailChip(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "?"
+        DisplayLanguage.JP -> "?"
+    }
+
+    /**
+     * カード上の唯一の数値タグ。性格ラベルとの重複は出さない。
+     * 確定（預金）は1日あたり利率、変動はぶれ幅 ±N%。
+     */
+    fun investPlanTemperTag(plan: InvestPlan, lang: DisplayLanguage): String {
+        if (plan.isGuaranteed) {
+            val rate = formatDailyRate(plan.dailyMeanPercent)
+            return when (lang) {
+                DisplayLanguage.EN -> "+$rate%/day"
+                DisplayLanguage.JP -> "+$rate%/日"
             }
         }
+        val vol = plan.dailyVolPercent.toInt()
+        return "±$vol%"
+    }
+
+    private fun formatDailyRate(percent: Float): String {
+        val t = "%.1f".fmt(percent)
+        return t.trimEnd('0').trimEnd('.')
+    }
+
+    /** 後方互換。 temper タグへ。 */
+    fun investPlanRate(plan: InvestPlan, lang: DisplayLanguage): String =
+        investPlanTemperTag(plan, lang)
+
+    fun investPlanSwingRange(plan: InvestPlan, lang: DisplayLanguage): String =
+        investPlanTemperTag(plan, lang)
+
+    /**
+     * 商品そのものの短いフレーバー（くどくしない）。
+     * カード1文目／説明チップの1文目。
+     */
+    fun investPlanFlavor(plan: InvestPlan, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> when (plan) {
+            InvestPlan.DEPOSIT -> "Park cash in a bank book."
+            InvestPlan.BALANCED -> "A fund mixing stocks and bonds."
+            InvestPlan.GROWTH -> "A fund tilted toward growing companies."
+            InvestPlan.EMERGING -> "A fund invested in emerging markets."
+            InvestPlan.ACORN -> "Drip-buy Acorn Coin over time."
+        }
+        DisplayLanguage.JP -> when (plan) {
+            InvestPlan.DEPOSIT -> "銀行の通帳に預けるタイプ。"
+            InvestPlan.BALANCED -> "株と債券をまぜた投資信託。"
+            InvestPlan.GROWTH -> "成長株に寄せた投資信託。"
+            InvestPlan.EMERGING -> "新興国の相場に投資するファンド。"
+            InvestPlan.ACORN -> "ドングリコインを少しずつ買い足す積立。"
+        }
+    }
+
+    /**
+     * 毎日どう動くか（挙動）。カード2文目。
+     * 旧キャッチ／旧説明1文目をここへ寄せる。
+     */
+    fun investPlanCatch(plan: InvestPlan, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> when (plan) {
+            InvestPlan.DEPOSIT -> "Grows a set bit each day. Almost no swing."
+            InvestPlan.BALANCED -> "Tends to grow; swings stay mild."
+            InvestPlan.GROWTH -> "Chases upside—sometimes misses."
+            InvestPlan.EMERGING -> "Bigger drift, bigger daily weather."
+            InvestPlan.ACORN -> "Feast possible. Empty nest too."
+        }
+        DisplayLanguage.JP -> when (plan) {
+            InvestPlan.DEPOSIT -> "毎日ほぼ決まった分だけ増える。"
+            InvestPlan.BALANCED -> "増えやすく、ぶれは小さめ。"
+            InvestPlan.GROWTH -> "伸びやすいが、空振りもある。"
+            InvestPlan.EMERGING -> "伸びもぶれも大きめ。"
+            InvestPlan.ACORN -> "大勝ちも、巣が空も。"
+        }
+    }
+
+    /**
+     * 説明チップ用。1文目=商品フレーバー、2文目=挙動。
+     * 預金だけ留守反映の一文を足す。
+     */
+    fun investPlanBlurb(plan: InvestPlan, lang: DisplayLanguage): String {
+        val flavor = investPlanFlavor(plan, lang)
+        val behavior = investPlanCatch(plan, lang)
+        val away = when {
+            plan != InvestPlan.DEPOSIT -> ""
+            lang == DisplayLanguage.EN ->
+                " Away days land in a lump when you return."
+            else ->
+                " 開けていなかった日の分も、戻った朝にまとめて入る。"
+        }
+        return "$flavor $behavior$away"
     }
 
     fun investPlanLocked(unlockPeak: Long, lang: DisplayLanguage): String = when (lang) {
@@ -433,8 +705,18 @@ object UiStrings {
         DisplayLanguage.JP -> "最高口座残高 ¥%,d で解放".fmt(unlockPeak)
     }
 
+    fun investPlanSelect(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "TAP TO USE"
+        DisplayLanguage.JP -> "タップで選ぶ"
+    }
+
+    fun investPlanSelected(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "IN USE"
+        DisplayLanguage.JP -> "選択中"
+    }
+
     fun investPlanStripLine(plan: InvestPlan, lang: DisplayLanguage): String =
-        "${plan.displayName(lang)}  ${investPlanRate(plan, lang)}"
+        "${investPlanTitle(lang)} · ${plan.displayName(lang)}  ${investPlanTemperTag(plan, lang)}"
 
     fun awayReportTitle(days: Int, lang: DisplayLanguage): String = when (lang) {
         DisplayLanguage.EN -> if (days == 1) "While you were away (1 day)" else "While you were away ($days days)"
@@ -453,27 +735,15 @@ object UiStrings {
         DisplayLanguage.JP -> "まだ履歴がありません"
     }
 
-    fun firstPlayTutorialTitle(lang: DisplayLanguage): String = when (lang) {
-        DisplayLanguage.EN -> "HOW TO PLAY"
-        DisplayLanguage.JP -> "遊び方"
-    }
-
-    fun firstPlayTutorialStep(step: Int, lang: DisplayLanguage): String = when (lang) {
-        DisplayLanguage.JP -> when (step) {
-            0 -> "URIKAIへようこそ！\nこのゲームは、1分間のチャートを見ながら、1つのボタンで買い・売りをするタイミングゲームです。\n安い所で買って、高い所で売ると、お金が増えるよ。"
-            1 -> "ボタンを押してから、注文されるまでには1秒かかります。\n山と谷をよく見て、いちばんいいタイミングをねらってみよう！"
-            else -> "買った時より安く売ると、LIFEが１つ減ります。すべてなくなるとRETIREになってしまうので気を付けよう！"
-        }
-        DisplayLanguage.EN -> when (step) {
-            0 -> "Welcome to URIKAI!\nIt's a 1-minute timing game: one button to buy and sell on a live chart.\nBuy low, sell high, and your money grows."
-            1 -> "After you press the button, it takes 1 second for the order to fill.\nWatch the peaks and valleys, and aim for the best moment!"
-            else -> "Sell cheaper than you bought and you lose one LIFE. Lose them all and it's RETIRE — so watch out!"
-        }
+    /** チュート／ガイドの説明役。 */
+    fun guideBuddyName(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "KAI"
+        DisplayLanguage.JP -> "カイ"
     }
 
     fun firstPlayTutorialNext(lang: DisplayLanguage): String = when (lang) {
         DisplayLanguage.EN -> "NEXT"
-        DisplayLanguage.JP -> "つぎへ"
+        DisplayLanguage.JP -> "つぎ"
     }
 
     fun firstPlayTutorialStart(lang: DisplayLanguage): String = when (lang) {
@@ -481,59 +751,196 @@ object UiStrings {
         DisplayLanguage.JP -> "はじめる"
     }
 
-    fun resultTutorialTitle(lang: DisplayLanguage): String = when (lang) {
-        DisplayLanguage.EN -> "READING RESULTS"
-        DisplayLanguage.JP -> "結果の見方"
+    fun notebookClose(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "CLOSE"
+        DisplayLanguage.JP -> "とじる"
     }
 
-    fun resultTutorialStep(step: Int, lang: DisplayLanguage): String = when (lang) {
-        DisplayLanguage.JP -> when (step) {
-            0 -> "ゲームが終わると、成績が出ます。\n「＋4.9% ★★☆☆☆」のような大きな表示は、今回の勝負で残高が何％増えた（減った）かと、その評価です。\nタップすると★ごとの目安が見られます。"
-            1 -> "「口座残高」は勝負のあとの残高、となりの＋−の金額は今回増えた（減った）分です。\n口座残高をタップすると、これまでの収益TOP10が見られます。"
-            2 -> "毎回、残高の全額で勝負します。勝つほど次の元手が大きくなり、残高は複利で増えていきます。\n残高が¥5,000を下回ると破産です。"
-            else -> "注文は1秒遅れて届きます。先の波を想像して押すほど、うまくいきやすい。\n何度でも挑戦して、自分のタイミングを見つけてね。"
+    /** ガイド枠右下の進むサイン（大ボタンの代わり）。画素フォントでも欠けない記号。 */
+    fun guideAdvanceCue(actionLabel: String, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "> $actionLabel"
+        DisplayLanguage.JP -> "> $actionLabel"
+    }
+
+    fun notebookButton(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "NOTES"
+        DisplayLanguage.JP -> "ノート"
+    }
+
+    /** カイの節目ひとこと（Away / 破産 / RETIRE）。 */
+    fun kaiAwayLine(diff: Long, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> if (diff >= 0) {
+            "日付、進んでたよ。\nそのぶん、口座にも入ってる。"
+        } else {
+            "日付、進んでたよ。\n……口座のほうも、動いてる。"
         }
-        DisplayLanguage.EN -> when (step) {
-            0 -> "When a game ends, your result appears.\nThe big line like \"+4.9% ★★☆☆☆\" shows how much your balance grew (or shrank) this run, and your rating.\nTap it to see what each ★ takes."
-            1 -> "BALANCE is your balance after the run; the signed amount next to it is what you gained or lost.\nTap the balance to see your top 10 returns."
-            2 -> "Every run bets the whole balance. Win and your next stake grows — your balance compounds.\nFall below ¥5,000 and you go bankrupt."
-            else -> "Orders arrive 1 second late. The more you read ahead, the better you'll do.\nPlay again and find your own timing."
+        DisplayLanguage.EN -> if (diff >= 0) {
+            "Days moved on.\nThe account got the update."
+        } else {
+            "Days moved on.\n……The account moved too."
         }
     }
 
-    fun tutorialGuideButton(lang: DisplayLanguage): String = when (lang) {
-        DisplayLanguage.EN -> "GUIDE"
-        DisplayLanguage.JP -> "ガイド"
+    fun kaiBankruptLine(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> "……出直しだね。\nここから、また積み直せるよ。"
+        DisplayLanguage.EN -> "……A fresh start.\nYou can rebuild from here."
     }
 
-    fun tutorialGuideHubTitle(lang: DisplayLanguage): String = when (lang) {
-        DisplayLanguage.EN -> "GUIDES"
-        DisplayLanguage.JP -> "ガイド"
+    fun kaiRetireLine(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> "気力が尽きた……\nこの勝負は、ここで終わり。"
+        DisplayLanguage.EN -> "Nerve's gone……\nThis round ends here."
     }
 
-    fun tutorialGuideEmpty(lang: DisplayLanguage): String = when (lang) {
-        DisplayLanguage.EN -> "No guides yet.\nFinish a tutorial in play to unlock."
-        DisplayLanguage.JP -> "まだ見られるガイドがありません。\nプレイ中の説明を終えるとここに残ります。"
+    fun notebookHubTitle(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "NOTES"
+        DisplayLanguage.JP -> "ノート"
     }
 
-    fun tutorialGuideName(kind: TutorialGuideKind, lang: DisplayLanguage): String = when (kind) {
-        TutorialGuideKind.FIRST_PLAY -> firstPlayTutorialTitle(lang)
-        TutorialGuideKind.RESULT -> resultTutorialTitle(lang)
+    fun notebookEmpty(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "Nothing here yet.\nTips show up as you play."
+        DisplayLanguage.JP -> "まだ何もないよ。\n遊んでいるうちに、メモが増えていく。"
     }
 
-    fun tutorialGuidePageCount(kind: TutorialGuideKind): Int = when (kind) {
-        TutorialGuideKind.FIRST_PLAY -> 3
-        TutorialGuideKind.RESULT -> 4
+    fun notebookEntryTitle(id: NotebookEntryId, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.JP -> when (id) {
+            NotebookEntryId.HOW_TO_PLAY -> "遊び方"
+            NotebookEntryId.LIFE -> "LIFE"
+            NotebookEntryId.BALANCE -> "口座と残高"
+            NotebookEntryId.SCRAPBOOK -> "図鑑"
+            NotebookEntryId.STAMPS -> "強化の切手"
+            NotebookEntryId.LAG -> "買う／売るの遅れ"
+            NotebookEntryId.AWAY -> "留守のあいだ"
+            NotebookEntryId.LOOK -> "見た目"
+            NotebookEntryId.RESULT -> "結果の見方"
+            NotebookEntryId.COMBO -> "COMBO"
+            NotebookEntryId.BANK -> "破産"
+        }
+        DisplayLanguage.EN -> when (id) {
+            NotebookEntryId.HOW_TO_PLAY -> "How to play"
+            NotebookEntryId.LIFE -> "LIFE"
+            NotebookEntryId.BALANCE -> "Balance"
+            NotebookEntryId.SCRAPBOOK -> "Scrapbook"
+            NotebookEntryId.STAMPS -> "Stamp album"
+            NotebookEntryId.LAG -> "Order delay"
+            NotebookEntryId.AWAY -> "While away"
+            NotebookEntryId.LOOK -> "Looks"
+            NotebookEntryId.RESULT -> "Reading results"
+            NotebookEntryId.COMBO -> "COMBO"
+            NotebookEntryId.BANK -> "Bankrupt"
+        }
     }
 
-    fun tutorialGuidePage(
-        kind: TutorialGuideKind,
-        step: Int,
-        lang: DisplayLanguage
-    ): String = when (kind) {
-        TutorialGuideKind.FIRST_PLAY -> firstPlayTutorialStep(step, lang)
-        TutorialGuideKind.RESULT -> resultTutorialStep(step, lang)
+    fun notebookPageCount(id: NotebookEntryId): Int = when (id) {
+        NotebookEntryId.HOW_TO_PLAY -> 2
+        NotebookEntryId.LIFE -> 2
+        NotebookEntryId.BALANCE -> 3
+        NotebookEntryId.STAMPS -> 2
+        else -> 1
     }
+
+    fun notebookPage(id: NotebookEntryId, step: Int, lang: DisplayLanguage): String = when (id) {
+        NotebookEntryId.HOW_TO_PLAY -> when (lang) {
+            DisplayLanguage.JP -> when (step) {
+                0 -> "この勝負、60秒だよ。\n下のでかボタンで『買う』と『売る』を切り替えてね。"
+                else -> "増やしても減らしても、最後に残ったお金がすべてだよ。\nいってみよう。"
+            }
+            DisplayLanguage.EN -> when (step) {
+                0 -> "This round's 60 seconds.\nBig button down there flips BUY and SELL."
+                else -> "Up or down — the money left at the end is everything.\nLet's go."
+            }
+        }
+        NotebookEntryId.LIFE -> when (lang) {
+            DisplayLanguage.JP -> when (step) {
+                0 -> "うえのほうに、まるい印が出るようになったよ。\n気力のゲージみたいなもの。\n売りがひどく外れると、ひとつ減る。"
+                else -> "なくなったら、その勝負はそこで終わり。\n気をつけていってみよう。"
+            }
+            DisplayLanguage.EN -> when (step) {
+                0 -> "Round marks show up up top now.\nLike a nerve gauge.\nA bad sell knocks one off."
+                else -> "When they're gone, that round ends there.\nTake care out there."
+            }
+        }
+        NotebookEntryId.BALANCE -> when (lang) {
+            DisplayLanguage.JP -> when (step) {
+                0 -> "あ、口座ね。\n口座残高画面の一番上に見える大きな数字が、残高だよ。"
+                1 -> "1回やるごとに増えたり減ったりする、その合計がここ。\nくわしいことは、また今度。"
+                else -> "あとひとつ。\n現実で1日進むごとに、残高は少し動くよ。\n変えたいときは、また口座からどうぞ。"
+            }
+            DisplayLanguage.EN -> when (step) {
+                0 -> "Ah — the account.\nThe big number at the top of the balance screen is the balance."
+                1 -> "It goes up and down each round; the total lives here.\nDetails later."
+                else -> "One more thing.\nEach real-world day, the balance shifts a little.\nWant a change? Open the account again."
+            }
+        }
+        NotebookEntryId.SCRAPBOOK -> when (lang) {
+            DisplayLanguage.JP ->
+                "クリアした銘柄は、図鑑に残るよ。\nまた読みたくなったら、ここへきてね。"
+            DisplayLanguage.EN ->
+                "Cleared names stay in the scrapbook.\nCome back here whenever you want a reread."
+        }
+        NotebookEntryId.STAMPS -> when (lang) {
+            DisplayLanguage.JP -> when (step) {
+                0 -> "……ふうん。\nこんなのがあったんだ。"
+                else -> "受け取った強化が、ここに貼られてるみたい。\nつけ外しもできるよ。\n……ほかにも、まだ空きがあるね。"
+            }
+            DisplayLanguage.EN -> when (step) {
+                0 -> "……Huh.\nThis was here?"
+                else -> "Claimed upgrades get stuck here.\nYou can toggle them.\n……And look — empty slots left."
+            }
+        }
+        NotebookEntryId.LAG -> when (lang) {
+            DisplayLanguage.JP ->
+                "買う／売るは、下にあるでっかいボタンを押した直後には決まらないよ。\n少しあとに反映される。\n急いで連打しても、待ちが発生することがある。"
+            DisplayLanguage.EN ->
+                "BUY / SELL don't land the instant you hit the big button down below.\nThey settle a beat later.\nMash all you want — you'll still wait sometimes."
+        }
+        NotebookEntryId.AWAY -> when (lang) {
+            DisplayLanguage.JP ->
+                "しばらく開けてなかった日のぶんは、口座にまとめて入るよ。\n方針は口座の画面から変えられる。\n日付のほうは、待ってくれないね。"
+            DisplayLanguage.EN ->
+                "Days you didn't open get applied to the account in a lump.\nChange policy on the account screen.\nThe calendar doesn't wait."
+        }
+        NotebookEntryId.LOOK -> when (lang) {
+            DisplayLanguage.JP ->
+                "見た目の切り替えは、スタート画面の左下のマークからできるよ。\n強さは変わらない。\n気分の問題……いちおう、大事。"
+            DisplayLanguage.EN ->
+                "Looks swap from the mark at the bottom-left of the start screen.\nPower stays the same.\nMood stuff……still counts."
+        }
+        NotebookEntryId.RESULT -> when (lang) {
+            DisplayLanguage.JP ->
+                "結果の大きな表示は、その一回の増減と評価だよ。\n口座の数字をタップすると、収益のランキングも見られる。\n見なくても遊べるけどね。"
+            DisplayLanguage.EN ->
+                "The big result line is that run's gain/loss and rating.\nTap the balance number for a returns ranking.\nOptional, really."
+        }
+        NotebookEntryId.COMBO -> when (lang) {
+            DisplayLanguage.JP ->
+                "売りがうまく続くと COMBO が伸びるよ。\nしばらく間を空けると消えるし、MISSでも消える。\n派手さ用だね。"
+            DisplayLanguage.EN ->
+                "Good sells string into a COMBO.\nLeave it idle and it fades; a MISS kills it too.\nMostly for flair."
+        }
+        NotebookEntryId.BANK -> when (lang) {
+            DisplayLanguage.JP ->
+                "口座が下がりすぎると破産になるよ。\nそこからの立て直しもある。\nニュースみたいに、静かに終わるとは限らない。"
+            DisplayLanguage.EN ->
+                "Drop the account too low and it's bankrupt.\nThere is a restart after.\nLike the news — endings aren't always quiet."
+        }
+    }
+
+    /** G5 閉じた直後の1枚（ノート3枚目と同じ文）。 */
+    fun investCloseTipBody(lang: DisplayLanguage): String =
+        notebookPage(NotebookEntryId.BALANCE, 2, lang)
+
+    /** G8-1 ホーム一言（ノート非収録）。 */
+    fun stampCornerHint(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "Huh……something feels different today……?"
+        DisplayLanguage.JP -> "おや……いつもと、何かちがうような……？"
+    }
+
+    // 後方互換エイリアス（呼び出し側の段階移行用）
+    fun firstPlayTutorialStep(step: Int, lang: DisplayLanguage): String =
+        notebookPage(NotebookEntryId.HOW_TO_PLAY, step, lang)
+
+    fun tutorialGuideButton(lang: DisplayLanguage): String = notebookButton(lang)
+    fun tutorialGuideHubTitle(lang: DisplayLanguage): String = notebookHubTitle(lang)
 
     fun totalPlayCountLine(count: Int, lang: DisplayLanguage): String = when (lang) {
         DisplayLanguage.EN -> "PLAYS  $count"
@@ -581,7 +988,7 @@ object UiStrings {
             RelicId.INTEREST_150 -> "運用利回り 1.5×"
             RelicId.MISS_COMBO_HEAL -> "COMBO 回復"
             RelicId.COOLDOWN_50 -> "チャージ −50%"
-            RelicId.PNL_BONUS_150 -> "勝ちボーナス 1.5×"
+            RelicId.PNL_BONUS_150 -> "勝ちボーナス 1.3×"
             RelicId.BONUS_10_200 -> "留守番 60日"
             RelicId.LAG_50 -> "ラグ −50%"
         }
@@ -600,7 +1007,7 @@ object UiStrings {
             RelicId.INTEREST_150 -> "Plan yield 1.5×"
             RelicId.MISS_COMBO_HEAL -> "COMBO heal"
             RelicId.COOLDOWN_50 -> "Charge −50%"
-            RelicId.PNL_BONUS_150 -> "Win bonus 1.5×"
+            RelicId.PNL_BONUS_150 -> "Win bonus 1.3×"
             RelicId.BONUS_10_200 -> "Away cap 60 days"
             RelicId.LAG_50 -> "Lag −50%"
         }
@@ -622,7 +1029,7 @@ object UiStrings {
             RelicId.INTEREST_150 -> "運用プランの平均利回りが 1.5 倍になる（ぶれ幅はそのまま）。"
             RelicId.MISS_COMBO_HEAL -> "COMBO が 3 回貯まるごとに LIFE が 1 回復する。"
             RelicId.COOLDOWN_50 -> "注文後、次に押せるまでのチャージが 50% 短くなり、演出がさらに進化する。"
-            RelicId.PNL_BONUS_150 -> "勝った回の増え幅が 1.5 倍になる。"
+            RelicId.PNL_BONUS_150 -> "勝った回の増え幅が 1.3 倍になる。"
             RelicId.BONUS_10_200 -> "留守の間の運用を、最大 60 日分まで反映する。"
             RelicId.LAG_50 -> "押してから約定するまでのラグが 50% 短くなり、演出がさらに進化する。"
         }
@@ -641,7 +1048,7 @@ object UiStrings {
             RelicId.INTEREST_150 -> "Daily plan average yield becomes 1.5× (swings unchanged)."
             RelicId.MISS_COMBO_HEAL -> "Every 3 COMBO restores 1 LIFE."
             RelicId.COOLDOWN_50 -> "The recharge before your next order is 50% shorter, with further FX."
-            RelicId.PNL_BONUS_150 -> "Gains on a winning round become 1.5×."
+            RelicId.PNL_BONUS_150 -> "Gains on a winning round become 1.3×."
             RelicId.BONUS_10_200 -> "Days away are applied up to 60."
             RelicId.LAG_50 -> "The lag from tap to fill is 50% shorter, with further FX."
         }
@@ -879,10 +1286,328 @@ object UiStrings {
         DisplayLanguage.EN -> "OK"
         DisplayLanguage.JP -> "了解"
     }
+
+    // --- カイのすみか（固定インカム g） ---
+
+    fun sumikaTitle(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "Kai's nest"
+        DisplayLanguage.JP -> "カイのすみか"
+    }
+
+    fun sumikaLevelLine(level: Int, lang: DisplayLanguage): String {
+        val grade = if (lang == DisplayLanguage.EN) {
+            Sumika.gradeNameEn(level)
+        } else {
+            Sumika.gradeNameJp(level)
+        }
+        return if (level <= 0) grade else "Lv.$level  $grade"
+    }
+
+    fun sumikaGradeRewardTitle(grade: Int, lang: DisplayLanguage): String {
+        val name = if (lang == DisplayLanguage.EN) {
+            Sumika.gradeNameEn(grade, asGradeIndex = true)
+        } else {
+            Sumika.gradeNameJp(grade, asGradeIndex = true)
+        }
+        return when (lang) {
+            DisplayLanguage.EN -> "New nest: $name"
+            DisplayLanguage.JP -> "新しいすみか  $name"
+        }
+    }
+
+    fun sumikaGradeRewardClaim(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "Receive"
+        DisplayLanguage.JP -> "受け取る"
+    }
+
+    fun sumikaGradeIntroPageCount(grade: Int): Int = 3
+
+    fun sumikaGradeIntroPage(grade: Int, step: Int, lang: DisplayLanguage): String {
+        val g = grade.coerceIn(1, 5)
+        val s = step.coerceIn(0, 2)
+        return when (lang) {
+            DisplayLanguage.JP -> when (g) {
+                1 -> when (s) {
+                    0 -> "ねえ……ぼく、ずっと地面でねてたんだ。"
+                    1 -> "きみの口座が育ってきたから、わらのすを用意できたよ。"
+                    else -> "ホームの下で受け取ってね。ぼくの、はじめてのすみか。"
+                }
+                2 -> when (s) {
+                    0 -> "わらのすもいいけど……もっとやわらかいのがいいな。"
+                    1 -> "ふかふかざぶとん、用意できたよ。沈むと気持ちいいんだ。"
+                    else -> "ホームの下で受け取ってね。"
+                }
+                3 -> when (s) {
+                    0 -> "むき出しで寝るの、そろそろ卒業したい。"
+                    1 -> "ちいさなドーム。正面の穴から、ひょっこり入れるよ。"
+                    else -> "ホームの下で受け取ってね。"
+                }
+                4 -> when (s) {
+                    0 -> "ドームもいいけど……耳つきの小屋がいいな。"
+                    1 -> "みみや。片耳をひさしにして、入り口を守るよ。"
+                    else -> "ホームの下で受け取ってね。"
+                }
+                else -> when (s) {
+                    0 -> "最上のすみか……ヘッドセットハウスだよ。"
+                    1 -> "ここまで育ててくれて、ありがとう。"
+                    else -> "ホームの下で受け取ってね。ぼく、いちばんいい夢をみる。"
+                }
+            }
+            DisplayLanguage.EN -> when (g) {
+                1 -> when (s) {
+                    0 -> "Hey… I've been sleeping on the ground this whole time."
+                    1 -> "Your balance grew, so I got a straw nest ready."
+                    else -> "Receive it at the bottom of Home. My first nest."
+                }
+                2 -> when (s) {
+                    0 -> "Straw nest is fine, but… I want something softer."
+                    1 -> "I got a plush cushion. Nice to sink into."
+                    else -> "Receive it at the bottom of Home."
+                }
+                3 -> when (s) {
+                    0 -> "Sleeping in the open… time to graduate."
+                    1 -> "A little dome. I can peek in from the front hole."
+                    else -> "Receive it at the bottom of Home."
+                }
+                4 -> when (s) {
+                    0 -> "Dome is nice, but… I want an ear hut."
+                    1 -> "Ear hut. One floppy ear makes the awning."
+                    else -> "Receive it at the bottom of Home."
+                }
+                else -> when (s) {
+                    0 -> "The finest nest… a headset house."
+                    1 -> "Thanks for raising me this far."
+                    else -> "Receive it at the bottom of Home. Best dreams ahead."
+                }
+            }
+        }
+    }
+
+    fun sumikaGradeClaimTitle(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "Got it!"
+        DisplayLanguage.JP -> "ゲット！"
+    }
+
+    fun sumikaGradeClaimName(grade: Int, lang: DisplayLanguage): String =
+        if (lang == DisplayLanguage.EN) {
+            Sumika.gradeNameEn(grade, asGradeIndex = true)
+        } else {
+            Sumika.gradeNameJp(grade, asGradeIndex = true)
+        }
+
+    fun sumikaGradeClaimFlavor(grade: Int, lang: DisplayLanguage): String =
+        if (lang == DisplayLanguage.EN) {
+            Sumika.gradeRewardFlavorEn(grade)
+        } else {
+            Sumika.gradeRewardFlavorJp(grade)
+        }
+
+    fun sumikaGradeUp(grade: Int, cost: Long, lang: DisplayLanguage): String {
+        val name = if (lang == DisplayLanguage.EN) {
+            Sumika.gradeNameEn(grade, asGradeIndex = true)
+        } else {
+            Sumika.gradeNameJp(grade, asGradeIndex = true)
+        }
+        return when (lang) {
+            DisplayLanguage.EN -> "To $name  ¥%,d".fmt(cost)
+            DisplayLanguage.JP -> "${name}にする  ¥%,d".fmt(cost)
+        }
+    }
+
+    fun sumikaGradeCapped(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "That's the top for now"
+        DisplayLanguage.JP -> "いまのすみかは、いちばんだよ"
+    }
+
+    fun sumikaStatPlayLabel(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "Pay / play"
+        DisplayLanguage.JP -> "お給料 / プレイ"
+    }
+
+    fun sumikaStatTimeLabel(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "Pay / 6 min"
+        DisplayLanguage.JP -> "お給料 / 6ふん"
+    }
+
+    fun sumikaUpgrade(cost: Long, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "Level up  ¥%,d".fmt(cost)
+        DisplayLanguage.JP -> "レベルアップ  ¥%,d".fmt(cost)
+    }
+
+    fun sumikaMaxed(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "Max level"
+        DisplayLanguage.JP -> "最大レベル"
+    }
+
+    fun sumikaFundsShort(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "Not enough balance"
+        DisplayLanguage.JP -> "残高が足りない"
+    }
+
+    fun sumikaNextGradePreview(nextLevel: Int, lang: DisplayLanguage): String {
+        val name = if (lang == DisplayLanguage.EN) {
+            Sumika.gradeNameEn(nextLevel)
+        } else {
+            Sumika.gradeNameJp(nextLevel)
+        }
+        return when (lang) {
+            DisplayLanguage.EN -> "Next look: $name"
+            DisplayLanguage.JP -> "次の見た目: $name"
+        }
+    }
+
+    /** 残高が薄いときカイがくれるお小遣い。 */
+    fun kaiAllowanceLine(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN ->
+            "You look broke…\nHere, ¥100 from me.\nJust this once till you play again."
+        DisplayLanguage.JP ->
+            "かわいそうだから、お小遣い分けてあげるよ…\n¥100。次の1プレイまでは、もう一回はあげられないよ。"
+    }
+
+    fun sumikaKaiBalanceLine(balance: Long, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "Balance is ¥%,d.\nNice nest, huh?".fmt(balance)
+        DisplayLanguage.JP -> "いまの残高、¥%,d だよ。\nすみか、いいでしょ。".fmt(balance)
+    }
+
+    fun sumikaKaiLowStakeLine(balance: Long, cost: Long, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN ->
+            "Balance ¥%,d…\nUpgrade is ¥%,d.\nDon't leave yourself too thin.".fmt(balance, cost)
+        DisplayLanguage.JP ->
+            "残高 ¥%,d だね。\nレベルアップは ¥%,d。\n無理すると、つぎの元手が細くなるよ。".fmt(balance, cost)
+    }
+
+    fun sumikaKaiConfirmLine(before: Long, after: Long, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN ->
+            "¥%,d → ¥%,d.\nStill want to level up?".fmt(before, after)
+        DisplayLanguage.JP ->
+            "残高 ¥%,d → ¥%,d になるよ。\nそれでもあげる？".fmt(before, after)
+    }
+
+    /**
+     * シートカイの間欠セリフ。
+     * 有用（システム／稼ぎ）を多め、グレード味付けを2〜3ずつ混ぜる。
+     */
+    fun sumikaKaiIdleLines(
+        grade: Int,
+        balance: Long,
+        payPerPlay: Long,
+        passivePerTick: Long,
+        upgradeCost: Long?,
+        lang: DisplayLanguage,
+    ): List<String> {
+        val g = grade.coerceIn(0, 5)
+        val perHour = (passivePerTick * 10L).coerceAtLeast(0L)
+        val lines = mutableListOf<String>()
+        if (upgradeCost != null && balance < upgradeCost * 3L) {
+            lines += sumikaKaiLowStakeLine(balance, upgradeCost, lang)
+        }
+        when (lang) {
+            DisplayLanguage.JP -> {
+                lines += "いい場所で寝られると、おしごと頑張れるよ！"
+                if (payPerPlay > 0L) {
+                    lines += "きみが1プレイする間に、¥%,d 稼いでおくね".fmt(payPerPlay)
+                }
+                if (perHour > 0L) {
+                    lines += "1時間で、¥%,d くらい稼げるよ".fmt(perHour)
+                    lines += "いまの時給、だいたい ¥%,d かな".fmt(perHour)
+                }
+                lines += "ぼくの時給って高いのかなあ"
+                lines += "すみかに入れられる給料には限界があるよ。\nこまめに受け取ってね"
+                lines += "ホームのポップがいっぱいになったら、忘れずに受け取ってね"
+                lines += "放置してても、すこしずつ貯まるんだ"
+                lines += "プレイが多いほど、お給料もたまるよ"
+                when (g) {
+                    1 -> {
+                        lines += "わらのす……ぺたんだけど、ぼくの場所だよ"
+                        lines += "地面より、ぜんぜんあったかい"
+                        lines += "くさのにおい、ちょっと好き"
+                    }
+                    2 -> {
+                        lines += "ふかふか……沈むと気持ちいい"
+                        lines += "わらのすより、やわらかいね"
+                        lines += "このざぶとん、おしりに合うんだ"
+                    }
+                    3 -> {
+                        lines += "ドームの中、くらいくて落ち着くよ"
+                        lines += "正面の穴から、ひょっこり出てくるね"
+                        lines += "ちいさなへや、ひとりじめ"
+                    }
+                    4 -> {
+                        lines += "片耳ひさし……日よけになるんだ"
+                        lines += "みみやの中、まくらがふかふか"
+                        lines += "耳があると、なんだか落ち着くね"
+                    }
+                    5 -> {
+                        lines += "ヘッドセットハウス……贅沢、かな？"
+                        lines += "いちばん奥で、いい夢みるよ"
+                        lines += "最上のすみかで、きみの口座も見守るね"
+                    }
+                }
+            }
+            DisplayLanguage.EN -> {
+                lines += "A good nest makes work easier!"
+                if (payPerPlay > 0L) {
+                    lines += "While you play one run,\nI'll earn ¥%,d.".fmt(payPerPlay)
+                }
+                if (perHour > 0L) {
+                    lines += "About ¥%,d per hour.".fmt(perHour)
+                    lines += "My hourly pay is\nabout ¥%,d.".fmt(perHour)
+                }
+                lines += "Is my hourly wage high…?"
+                lines += "Nest pay has a cap.\nCollect often, okay?"
+                lines += "If the Home pop fills up,\ndon't forget to collect."
+                lines += "Even while idle,\nit stacks up a little."
+                lines += "More plays mean\nmore nest pay."
+                when (g) {
+                    1 -> {
+                        lines += "Straw nest… flat, but mine."
+                        lines += "Way warmer than the ground."
+                        lines += "I kind of like the grass smell."
+                    }
+                    2 -> {
+                        lines += "So soft… nice to sink into."
+                        lines += "Softer than the straw nest."
+                        lines += "This cushion fits my seat."
+                    }
+                    3 -> {
+                        lines += "Inside the dome feels calm."
+                        lines += "I peek out from the front hole."
+                        lines += "A tiny room, all mine."
+                    }
+                    4 -> {
+                        lines += "Floppy ear awning… shade!"
+                        lines += "Pillow in the ear hut is fluffy."
+                        lines += "Ears make it feel calm."
+                    }
+                    5 -> {
+                        lines += "Headset house… a little fancy?"
+                        lines += "Best dreams in the deepest nook."
+                        lines += "From the finest nest,\nI'll watch your balance."
+                    }
+                }
+            }
+        }
+        return lines
+    }
+
+    fun sumikaKaiLevelUpLine(payPerPlay: Long, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "Pay went up…\n¥%,d per play now!".fmt(payPerPlay)
+        DisplayLanguage.JP -> "お給料、ちょっと上がったよ！\nいまは 1プレイで ¥%,d".fmt(payPerPlay)
+    }
+
+    fun sumikaConfirmBody(cost: Long, after: Long, lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "Spend ¥%,d?\nBalance will be ¥%,d.".fmt(cost, after)
+        DisplayLanguage.JP -> "¥%,d 使ってレベルアップする？\n残高は ¥%,d になるよ。".fmt(cost, after)
+    }
+
+    fun sumikaConfirmOk(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "Level up"
+        DisplayLanguage.JP -> "あげる"
+    }
+
+    fun sumikaConfirmCancel(lang: DisplayLanguage): String = when (lang) {
+        DisplayLanguage.EN -> "Not now"
+        DisplayLanguage.JP -> "やめる"
+    }
 }
 
-/** START のガイドから読み返せるチュートリアル。 */
-enum class TutorialGuideKind {
-    FIRST_PLAY,
-    RESULT,
-}

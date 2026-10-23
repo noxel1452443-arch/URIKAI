@@ -56,6 +56,12 @@ class GameSoundPlayer(private val backend: SoundBackend) {
     /** 決定（大きなボタン・画面進行） */
     fun playUiConfirm() = play(uiConfirmId, rate = 1f, volume = 0.72f)
 
+    /** すみかレベルアップ：数字に一瞬バフが乗る感じ。 */
+    fun playBuffPop() {
+        play(starId, rate = 1.42f, volume = 0.68f)
+        play(chargeIId, rate = 1.28f, volume = 0.38f)
+    }
+
     fun playCountdown(digit: Int) {
         val rate = (0.82f + (6 - digit.coerceIn(1, 5)) * 0.09f).coerceIn(0.75f, 1.25f)
         play(countdownId, rate = rate, volume = 0.72f)

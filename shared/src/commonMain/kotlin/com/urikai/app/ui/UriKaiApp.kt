@@ -80,23 +80,44 @@ private fun UriKaiRoot(viewModel: GameViewModel, onShare: () -> Unit) {
         val scrapbookSort by viewModel.scrapbookSort.collectAsStateWithLifecycle()
         val startSmallText by viewModel.startSmallText.collectAsStateWithLifecycle()
         val balance by viewModel.balance.collectAsStateWithLifecycle()
-        val showBankrupt by viewModel.showBankrupt.collectAsStateWithLifecycle()
         val sessionPnlHistory by viewModel.sessionPnlHistory.collectAsStateWithLifecycle()
         val balanceHistory by viewModel.balanceHistory.collectAsStateWithLifecycle()
         val peakBalance by viewModel.peakBalance.collectAsStateWithLifecycle()
         val investPlan by viewModel.investPlan.collectAsStateWithLifecycle()
         val awayReport by viewModel.awayReport.collectAsStateWithLifecycle()
         val cashOutCount by viewModel.cashOutCount.collectAsStateWithLifecycle()
+        val bestCombo by viewModel.bestCombo.collectAsStateWithLifecycle()
         val pendingRelics by viewModel.pendingRelics.collectAsStateWithLifecycle()
         val newlyPendingRelics by viewModel.newlyPendingRelics.collectAsStateWithLifecycle()
         val claimedRelics by viewModel.claimedRelics.collectAsStateWithLifecycle()
         val relicEffects by viewModel.relicEffects.collectAsStateWithLifecycle()
         val relicStagePrefs by viewModel.relicStagePrefs.collectAsStateWithLifecycle()
+        val disabledUpgradeGroups by viewModel.disabledUpgradeGroups.collectAsStateWithLifecycle()
+        val disabledRelics by viewModel.disabledRelics.collectAsStateWithLifecycle()
         val showFirstPlayTutorial by viewModel.showFirstPlayTutorial.collectAsStateWithLifecycle()
+        val showLifeTutorial by viewModel.showLifeTutorial.collectAsStateWithLifecycle()
+        val showInvestOpenTutorial by viewModel.showInvestOpenTutorial.collectAsStateWithLifecycle()
+        val showInvestCloseTip by viewModel.showInvestCloseTip.collectAsStateWithLifecycle()
+        val showScrapbookTutorial by viewModel.showScrapbookTutorial.collectAsStateWithLifecycle()
+        val showStampCornerHint by viewModel.showStampCornerHint.collectAsStateWithLifecycle()
+        val showStampBackTutorial by viewModel.showStampBackTutorial.collectAsStateWithLifecycle()
+        val lifeMechanicsActive by viewModel.lifeMechanicsActive.collectAsStateWithLifecycle()
+        val notebookUnlocked by viewModel.notebookUnlocked.collectAsStateWithLifecycle()
+        val notebookRead by viewModel.notebookRead.collectAsStateWithLifecycle()
+        val notebookHasUnread by viewModel.notebookHasUnread.collectAsStateWithLifecycle()
         val showContentDisclaimer by viewModel.showContentDisclaimer.collectAsStateWithLifecycle()
         val seLevel by viewModel.seLevel.collectAsStateWithLifecycle()
         val bgmLevel by viewModel.bgmLevel.collectAsStateWithLifecycle()
         val hapticEnabled by viewModel.hapticEnabled.collectAsStateWithLifecycle()
+        val adsRemoved by viewModel.adsRemoved.collectAsStateWithLifecycle()
+        val sumikaLevel by viewModel.sumikaLevel.collectAsStateWithLifecycle()
+        val sumikaPendingYen by viewModel.sumikaPendingYen.collectAsStateWithLifecycle()
+        val sumikaUnlockedGrade by viewModel.sumikaUnlockedGrade.collectAsStateWithLifecycle()
+        val sumikaPendingGrade by viewModel.sumikaPendingGrade.collectAsStateWithLifecycle()
+        val sumikaGradeIntroDone by viewModel.sumikaGradeIntroDone.collectAsStateWithLifecycle()
+        val sumikaClaimCelebrationGrade by viewModel.sumikaClaimCelebrationGrade.collectAsStateWithLifecycle()
+        val balanceCountFrom by viewModel.balanceCountFrom.collectAsStateWithLifecycle()
+        val kaiAllowanceYen by viewModel.kaiAllowanceYen.collectAsStateWithLifecycle()
         val chartsLoadError by viewModel.chartsLoadError.collectAsStateWithLifecycle()
         val devRelicLab by viewModel.devRelicLab.collectAsStateWithLifecycle()
 
@@ -118,8 +139,6 @@ private fun UriKaiRoot(viewModel: GameViewModel, onShare: () -> Unit) {
             scrapbookSort = scrapbookSort,
             startSmallText = startSmallText,
             balance = balance,
-            showBankrupt = showBankrupt,
-            onRestartAfterBankruptcy = viewModel::restartAfterBankruptcy,
             sessionPnlHistory = sessionPnlHistory,
             balanceHistory = balanceHistory,
             peakBalance = peakBalance,
@@ -128,11 +147,33 @@ private fun UriKaiRoot(viewModel: GameViewModel, onShare: () -> Unit) {
             awayReport = awayReport,
             onDismissAwayReport = viewModel::dismissAwayReport,
             cashOutCount = cashOutCount,
+            bestCombo = bestCombo,
             pendingRelics = pendingRelics,
             newlyPendingRelics = newlyPendingRelics,
             claimedRelics = claimedRelics,
             relicEffects = relicEffects,
             showFirstPlayTutorial = showFirstPlayTutorial,
+            showLifeTutorial = showLifeTutorial,
+            showInvestOpenTutorial = showInvestOpenTutorial,
+            showInvestCloseTip = showInvestCloseTip,
+            showScrapbookTutorial = showScrapbookTutorial,
+            showStampCornerHint = showStampCornerHint,
+            showStampBackTutorial = showStampBackTutorial,
+            lifeMechanicsActive = lifeMechanicsActive,
+            notebookUnlocked = notebookUnlocked,
+            notebookRead = notebookRead,
+            notebookHasUnread = notebookHasUnread,
+            onMarkNotebookRead = viewModel::markNotebookRead,
+            onDismissLifeTutorial = viewModel::dismissLifeTutorial,
+            onDismissInvestOpenTutorial = viewModel::dismissInvestOpenTutorial,
+            onDismissInvestCloseTip = viewModel::dismissInvestCloseTip,
+            onDismissScrapbookTutorial = viewModel::dismissScrapbookTutorial,
+            onDismissStampCornerHint = viewModel::dismissStampCornerHint,
+            onDismissStampBackTutorial = viewModel::dismissStampBackTutorial,
+            onBalanceOpened = viewModel::onBalanceOpened,
+            onBalanceClosed = viewModel::onBalanceClosed,
+            onFirstClearNewsDismissed = viewModel::onFirstClearNewsDismissed,
+            onStampBackOpened = viewModel::onStampBackOpened,
             showContentDisclaimer = showContentDisclaimer,
             chartsLoadError = chartsLoadError,
             onDismissContentDisclaimer = viewModel::dismissContentDisclaimer,
@@ -150,13 +191,38 @@ private fun UriKaiRoot(viewModel: GameViewModel, onShare: () -> Unit) {
             onSeLevelChange = viewModel::setSeLevel,
             onBgmLevelChange = viewModel::setBgmLevel,
             onHapticEnabledChange = viewModel::setHapticEnabled,
+            adsRemoved = adsRemoved,
+            onPurchaseRemoveAds = viewModel::purchaseRemoveAds,
+            onRestorePurchases = viewModel::restorePurchases,
+            onDebugSetAdsRemoved = viewModel::debugSetAdsRemoved,
+            onDebugResetSumika = viewModel::debugResetSumika,
+            sumikaLevel = sumikaLevel,
+            sumikaPendingYen = sumikaPendingYen,
+            sumikaUnlockedGrade = sumikaUnlockedGrade,
+            sumikaPendingGrade = sumikaPendingGrade,
+            sumikaGradeIntroDone = sumikaGradeIntroDone,
+            sumikaClaimCelebrationGrade = sumikaClaimCelebrationGrade,
+            onMarkSumikaGradeIntroDone = viewModel::markSumikaGradeIntroDone,
+            onClaimSumikaGrade = viewModel::claimSumikaGradeReward,
+            onDismissSumikaClaimCelebration = viewModel::dismissSumikaClaimCelebration,
+            balanceCountFrom = balanceCountFrom,
+            kaiAllowanceYen = kaiAllowanceYen,
+            onUpgradeSumika = viewModel::upgradeSumika,
+            onCollectSumikaPay = viewModel::collectSumikaPay,
+            onCollectKaiAllowance = viewModel::collectKaiAllowance,
+            onRefreshSumika = viewModel::refreshSumikaUi,
+            onClearBalanceCountFrom = viewModel::clearBalanceCountFrom,
             onScrapbookSortChange = viewModel::setScrapbookSort,
             onShare = onShare,
             onShuffleStartTip = viewModel::shuffleStartAttractTip,
             onClaimRelic = viewModel::claimPendingRelic,
             onToggleRelicVisual = viewModel::toggleRelicVisual,
+            onToggleFxRelic = viewModel::toggleFxRelic,
             onCycleRelicStage = viewModel::cycleRelicStage,
+            onCyclePlayBuff = viewModel::cyclePlayBuff,
             relicStagePrefs = relicStagePrefs,
+            disabledUpgradeGroups = disabledUpgradeGroups,
+            disabledRelics = disabledRelics,
             onDismissFirstPlayTutorial = viewModel::dismissFirstPlayTutorial,
             onResultIntroFinished = viewModel::onResultIntroFinished,
             onRequestAssetRank = viewModel::assetRankBoardForCurrentResult,
@@ -175,7 +241,8 @@ private fun UriKaiRoot(viewModel: GameViewModel, onShare: () -> Unit) {
             onResultStar = viewModel::cueResultStar,
             onResultStamp = viewModel::cueResultStamp,
             onUiConfirm = viewModel::cueUiConfirm,
-            onUiSelect = viewModel::cueUiSelect
+            onUiSelect = viewModel::cueUiSelect,
+            onUiBuff = viewModel::cueUiBuff
         )
     }
 }

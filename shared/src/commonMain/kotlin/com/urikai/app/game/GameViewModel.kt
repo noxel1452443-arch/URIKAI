@@ -130,9 +130,6 @@ class GameViewModel(
     val awayReport: StateFlow<DailyAccrualResult?> = _awayReport.asStateFlow()
 
     /** START で破産演出を出すか。 */
-    private val _showBankrupt = MutableStateFlow(lifetimePnlRepository.isBankrupt())
-    val showBankrupt: StateFlow<Boolean> = _showBankrupt.asStateFlow()
-
     /** 今回の元手（開始時の口座残高）。 */
     private var stakeBalance: Long = lifetimePnlRepository.getBalance()
 
@@ -143,6 +140,43 @@ class GameViewModel(
 
     private val _cashOutCount = MutableStateFlow(lifetimePnlRepository.getCashOutCount())
     val cashOutCount: StateFlow<Int> = _cashOutCount.asStateFlow()
+
+    private val _bestCombo = MutableStateFlow(lifetimePnlRepository.getBestCombo())
+    val bestCombo: StateFlow<Int> = _bestCombo.asStateFlow()
+
+    private val _adsRemoved = MutableStateFlow(settingsRepository.isAdsRemoved())
+    val adsRemoved: StateFlow<Boolean> = _adsRemoved.asStateFlow()
+
+    private val _sumikaLevel = MutableStateFlow(lifetimePnlRepository.getSumikaLevel())
+    val sumikaLevel: StateFlow<Int> = _sumikaLevel.asStateFlow()
+
+    private val _sumikaPendingYen = MutableStateFlow(lifetimePnlRepository.getSumikaPendingYen())
+    val sumikaPendingYen: StateFlow<Long> = _sumikaPendingYen.asStateFlow()
+
+    private val _sumikaUnlockedGrade = MutableStateFlow(lifetimePnlRepository.getSumikaUnlockedGrade())
+    val sumikaUnlockedGrade: StateFlow<Int> = _sumikaUnlockedGrade.asStateFlow()
+
+    private val _sumikaPendingGrade = MutableStateFlow(lifetimePnlRepository.getSumikaPendingGrade())
+    val sumikaPendingGrade: StateFlow<Int> = _sumikaPendingGrade.asStateFlow()
+
+    /** pending グレードの強制ストーリーを見終わったか（受取チップ表示ゲート）。 */
+    private val _sumikaGradeIntroDone = MutableStateFlow(lifetimePnlRepository.isSumikaGradeIntroDone())
+    val sumikaGradeIntroDone: StateFlow<Boolean> = _sumikaGradeIntroDone.asStateFlow()
+
+    /** 受け取り直後の獲得演出（0なら非表示）。 */
+    private val _sumikaClaimCelebrationGrade = MutableStateFlow(0)
+    val sumikaClaimCelebrationGrade: StateFlow<Int> = _sumikaClaimCelebrationGrade.asStateFlow()
+
+    /** 口座残高カウントアップ演出用（受取前→受取後）。 */
+    private val _balanceCountFrom = MutableStateFlow<Long?>(null)
+    val balanceCountFrom: StateFlow<Long?> = _balanceCountFrom.asStateFlow()
+
+    /** カイお小遣いポップ（0なら非表示）。 */
+    private val _kaiAllowanceYen = MutableStateFlow(lifetimePnlRepository.kaiAllowanceAmountOrZero())
+    val kaiAllowanceYen: StateFlow<Long> = _kaiAllowanceYen.asStateFlow()
+
+    private var sumikaPassiveJob: Job? = null
+    private var leavingResultToHome: Boolean = false
 
     private val _pendingRelics = MutableStateFlow(lifetimePnlRepository.getPendingRelics())
     val pendingRelics: StateFlow<List<RelicId>> = _pendingRelics.asStateFlow()
@@ -159,18 +193,22 @@ class GameViewModel(
     })
     val claimedRelics: StateFlow<List<RelicId>> = _claimedRelics.asStateFlow()
 
-    private val _relicEffects = MutableStateFlow(
-        RelicEffects.fromClaimed(
-            lifetimePnlRepository.getClaimedRelics(),
-            settingsRepository.getRelicStagePrefs()
-        )
-    )
+    private val _relicEffects = MutableStateFlow(buildRelicEffects())
     val relicEffects: StateFlow<RelicEffects> = _relicEffects.asStateFlow()
 
     private val _relicStagePrefs =
         MutableStateFlow(settingsRepository.getRelicStagePrefs())
     val relicStagePrefs: StateFlow<Map<RelicUpgradeGroup, RelicId>> =
         _relicStagePrefs.asStateFlow()
+
+    private val _disabledUpgradeGroups =
+        MutableStateFlow(settingsRepository.getDisabledUpgradeGroups())
+    val disabledUpgradeGroups: StateFlow<Set<RelicUpgradeGroup>> =
+        _disabledUpgradeGroups.asStateFlow()
+
+    private val _disabledRelics =
+        MutableStateFlow(settingsRepository.getDisabledRelics())
+    val disabledRelics: StateFlow<Set<RelicId>> = _disabledRelics.asStateFlow()
 
     /**
      * 開発用レリックラボ。null=本番。非null=各レリックON/OFF（セーブは汚さない）。
@@ -180,6 +218,37 @@ class GameViewModel(
 
     private val _showFirstPlayTutorial = MutableStateFlow(false)
     val showFirstPlayTutorial: StateFlow<Boolean> = _showFirstPlayTutorial.asStateFlow()
+
+    private val _showLifeTutorial = MutableStateFlow(false)
+    val showLifeTutorial: StateFlow<Boolean> = _showLifeTutorial.asStateFlow()
+
+    private val _showInvestOpenTutorial = MutableStateFlow(false)
+    val showInvestOpenTutorial: StateFlow<Boolean> = _showInvestOpenTutorial.asStateFlow()
+
+    private val _showInvestCloseTip = MutableStateFlow(false)
+    val showInvestCloseTip: StateFlow<Boolean> = _showInvestCloseTip.asStateFlow()
+
+    private val _showScrapbookTutorial = MutableStateFlow(false)
+    val showScrapbookTutorial: StateFlow<Boolean> = _showScrapbookTutorial.asStateFlow()
+
+    private val _showStampCornerHint = MutableStateFlow(false)
+    val showStampCornerHint: StateFlow<Boolean> = _showStampCornerHint.asStateFlow()
+
+    private val _showStampBackTutorial = MutableStateFlow(false)
+    val showStampBackTutorial: StateFlow<Boolean> = _showStampBackTutorial.asStateFlow()
+
+    private val _notebookUnlocked = MutableStateFlow(settingsRepository.getUnlockedNotebookIds())
+    val notebookUnlocked: StateFlow<Set<NotebookEntryId>> = _notebookUnlocked.asStateFlow()
+
+    private val _notebookRead = MutableStateFlow(settingsRepository.getReadNotebookIds())
+    val notebookRead: StateFlow<Set<NotebookEntryId>> = _notebookRead.asStateFlow()
+
+    private val _notebookHasUnread = MutableStateFlow(settingsRepository.hasUnreadNotebook())
+    val notebookHasUnread: StateFlow<Boolean> = _notebookHasUnread.asStateFlow()
+
+    /** LIFE 球・MISS削りが有効か（導入チュート後）。 */
+    private val _lifeMechanicsActive = MutableStateFlow(settingsRepository.hasSeenLifeTutorial())
+    val lifeMechanicsActive: StateFlow<Boolean> = _lifeMechanicsActive.asStateFlow()
 
     private val _showContentDisclaimer = MutableStateFlow(!settingsRepository.hasSeenContentDisclaimer())
     val showContentDisclaimer: StateFlow<Boolean> = _showContentDisclaimer.asStateFlow()
@@ -193,15 +262,38 @@ class GameViewModel(
     private val _hapticEnabled = MutableStateFlow(settingsRepository.isHapticEnabled())
     val hapticEnabled: StateFlow<Boolean> = _hapticEnabled.asStateFlow()
 
-    /** 起動後最初のSTART表示か（RETRY前はチュートリアル固定） */
-    private var isFirstStartAfterLaunch = true
-
     init {
         lifetimePnlRepository.clearLegacyBonusFlags()
         refreshStartSmallTextForCurrentState()
         sanitizeLockedCosmetics()
         accrueDailyPlan()
+        onPlayBuffUnlockedVisible()
+        evaluateSilentNotebookUnlocks()
         syncBgmAmbient()
+        refreshSumikaPending()
+        // 再インストール時など、Play 側の購入状態を静かに反映
+        restorePurchases()
+    }
+
+    private fun refreshSumikaPending() {
+        lifetimePnlRepository.accrueSumikaPassive()
+        lifetimePnlRepository.evaluateSumikaGradeRewards()
+        _sumikaLevel.value = lifetimePnlRepository.getSumikaLevel()
+        _sumikaPendingYen.value = lifetimePnlRepository.getSumikaPendingYen()
+        _sumikaUnlockedGrade.value = lifetimePnlRepository.getSumikaUnlockedGrade()
+        _sumikaPendingGrade.value = lifetimePnlRepository.getSumikaPendingGrade()
+        _sumikaGradeIntroDone.value = lifetimePnlRepository.isSumikaGradeIntroDone()
+        _kaiAllowanceYen.value = lifetimePnlRepository.kaiAllowanceAmountOrZero()
+    }
+
+    private fun startSumikaPassiveTicker() {
+        sumikaPassiveJob?.cancel()
+        sumikaPassiveJob = viewModelScope.launch {
+            while (isActive) {
+                delay(30_000L)
+                refreshSumikaPending()
+            }
+        }
     }
 
     fun selectInvestPlan(plan: InvestPlan) {
@@ -213,6 +305,109 @@ class GameViewModel(
 
     fun dismissAwayReport() {
         _awayReport.value = null
+        unlockNotebookSilent(NotebookEntryId.AWAY)
+    }
+
+    private fun refreshNotebookState() {
+        _notebookUnlocked.value = settingsRepository.getUnlockedNotebookIds()
+        _notebookRead.value = settingsRepository.getReadNotebookIds()
+        _notebookHasUnread.value = settingsRepository.hasUnreadNotebook()
+    }
+
+    private fun unlockNotebookSilent(id: NotebookEntryId) {
+        if (settingsRepository.unlockNotebookUnread(id)) {
+            refreshNotebookState()
+        }
+    }
+
+    fun markNotebookRead(id: NotebookEntryId) {
+        settingsRepository.markNotebookRead(id)
+        refreshNotebookState()
+    }
+
+    fun onBalanceOpened() {
+        if (_uiState.value.gameState != GameState.START) return
+        if (!settingsRepository.hasSeenInvestOpenTutorial()) {
+            _showInvestOpenTutorial.value = true
+        }
+    }
+
+    fun onBalanceClosed() {
+        if (_uiState.value.gameState != GameState.START) return
+        if (settingsRepository.hasSeenInvestOpenTutorial() &&
+            !settingsRepository.hasSeenInvestCloseTip()
+        ) {
+            _showInvestCloseTip.value = true
+        }
+    }
+
+    fun dismissInvestOpenTutorial() {
+        if (!_showInvestOpenTutorial.value) return
+        settingsRepository.setInvestOpenTutorialSeen()
+        _showInvestOpenTutorial.value = false
+        refreshNotebookState()
+    }
+
+    fun dismissInvestCloseTip() {
+        if (!_showInvestCloseTip.value) return
+        settingsRepository.setInvestCloseTipSeen()
+        _showInvestCloseTip.value = false
+    }
+
+    fun dismissScrapbookTutorial() {
+        if (!_showScrapbookTutorial.value) return
+        settingsRepository.setScrapbookTutorialSeen()
+        _showScrapbookTutorial.value = false
+        refreshNotebookState()
+    }
+
+    fun onFirstClearNewsDismissed() {
+        if (!settingsRepository.hasSeenScrapbookTutorial()) {
+            _showScrapbookTutorial.value = true
+        }
+    }
+
+    fun onPlayBuffUnlockedVisible() {
+        if (settingsRepository.hasSeenStampCornerHint()) return
+        val hasBuff = PlayBuffSlot.entries.any { slot ->
+            slot.ownedIn(_claimedRelics.value.toSet()).isNotEmpty()
+        }
+        if (hasBuff) {
+            _showStampCornerHint.value = true
+        }
+    }
+
+    fun dismissStampCornerHint() {
+        if (!_showStampCornerHint.value) return
+        settingsRepository.setStampCornerHintSeen()
+        _showStampCornerHint.value = false
+    }
+
+    fun onStampBackOpened() {
+        if (settingsRepository.hasSeenStampBackTutorial()) return
+        _showStampBackTutorial.value = true
+    }
+
+    fun dismissStampBackTutorial() {
+        if (!_showStampBackTutorial.value) return
+        settingsRepository.setStampBackTutorialSeen()
+        _showStampBackTutorial.value = false
+        refreshNotebookState()
+    }
+
+    /** 出金・コンボ到達などに応じてサイレント項目を解禁。 */
+    private fun evaluateSilentNotebookUnlocks() {
+        val plays = _cashOutCount.value
+        if (plays >= 5) unlockNotebookSilent(NotebookEntryId.LAG)
+        if (plays >= 3) unlockNotebookSilent(NotebookEntryId.RESULT)
+        if (plays >= 3 &&
+            _claimedRelics.value.any { it.placement() == UnlockPlacement.LOOK }
+        ) {
+            unlockNotebookSilent(NotebookEntryId.LOOK)
+        }
+        if (settingsRepository.getLifetimeMaxCombo() >= 3) {
+            unlockNotebookSilent(NotebookEntryId.COMBO)
+        }
     }
 
     /** 日付が変わっていれば運用プランを反映。START に戻るたびにも確認する。 */
@@ -226,7 +421,6 @@ class GameViewModel(
         _peakBalance.value = lifetimePnlRepository.getPeakBalance()
         _balanceHistory.value = lifetimePnlRepository.getBalanceHistory()
         _pendingRelics.value = lifetimePnlRepository.getPendingRelics()
-        _showBankrupt.value = lifetimePnlRepository.isBankrupt()
         stakeBalance = _balance.value
         if (result.after != result.before) _awayReport.value = result
     }
@@ -280,13 +474,13 @@ class GameViewModel(
             AppLayer.PLAY -> when (_uiState.value.gameState) {
                 GameState.START -> {
                     if (_showContentDisclaimer.value) return
-                    if (_showBankrupt.value) return
-                    if (_showFirstPlayTutorial.value) return
+                    if (_balance.value <= 0L) return
+                    if (isForceSpeechBlocking()) return
                     soundPlayer.playUiConfirm()
                     startGame()
                 }
                 GameState.PLAYING -> {
-                    if (_showFirstPlayTutorial.value) return
+                    if (isForceSpeechBlocking()) return
                     if (_chartFrame.value.retireLocked) return
                     if (_uiState.value.isOrderProcessing) {
                         nudgePendingOrder()
@@ -308,7 +502,7 @@ class GameViewModel(
                         if (!_resultIntroFinished.value) return
                         if (_newlyPendingRelics.value.isNotEmpty()) return
                         soundPlayer.playUiConfirm()
-                        resetToStart()
+                        leaveResultToHome()
                     }
                 }
             }
@@ -316,7 +510,7 @@ class GameViewModel(
     }
 
     fun openScrapbook() {
-        if (_showFirstPlayTutorial.value) return
+        if (isForceSpeechBlocking()) return
         if (_chartFrame.value.retireLocked) return
         if (_uiState.value.gameState == GameState.PLAYING ||
             _uiState.value.gameState == GameState.FINISHING
@@ -333,7 +527,7 @@ class GameViewModel(
     }
 
     fun openOption() {
-        if (_showFirstPlayTutorial.value) return
+        if (isForceSpeechBlocking()) return
         if (_chartFrame.value.retireLocked) return
         if (_uiState.value.gameState == GameState.PLAYING ||
             _uiState.value.gameState == GameState.FINISHING
@@ -342,6 +536,15 @@ class GameViewModel(
         _appLayer.value = AppLayer.OPTION
         syncBgmAmbient()
     }
+
+    /** カイ強制吹き出し中は操作を止める（角ヒントは除く）。 */
+    private fun isForceSpeechBlocking(): Boolean =
+        _showFirstPlayTutorial.value ||
+            _showLifeTutorial.value ||
+            _showInvestOpenTutorial.value ||
+            _showInvestCloseTip.value ||
+            _showScrapbookTutorial.value ||
+            _showStampBackTutorial.value
 
     fun closeOption() {
         _appLayer.value = AppLayer.PLAY
@@ -353,21 +556,20 @@ class GameViewModel(
         _showContentDisclaimer.value = false
     }
 
-    /** 破産演出のボタン：口座残高を初期額へ戻す。 */
-    fun restartAfterBankruptcy() {
-        if (!_showBankrupt.value) return
-        lifetimePnlRepository.restartBalance()
-        _balance.value = lifetimePnlRepository.getBalance()
-        _balanceHistory.value = lifetimePnlRepository.getBalanceHistory()
-        stakeBalance = _balance.value
-        _showBankrupt.value = false
-        soundPlayer.playUiConfirm()
-    }
-
     fun dismissFirstPlayTutorial() {
         if (!_showFirstPlayTutorial.value) return
         settingsRepository.setFirstPlayTutorialSeen()
         _showFirstPlayTutorial.value = false
+        refreshNotebookState()
+        beginSessionClock()
+    }
+
+    fun dismissLifeTutorial() {
+        if (!_showLifeTutorial.value) return
+        settingsRepository.setLifeTutorialSeen()
+        _showLifeTutorial.value = false
+        _lifeMechanicsActive.value = true
+        refreshNotebookState()
         beginSessionClock()
     }
 
@@ -410,6 +612,8 @@ class GameViewModel(
 
     fun cueUiSelect() = soundPlayer.playUiSelect()
 
+    fun cueUiBuff() = soundPlayer.playBuffPop()
+
     fun assetRankBoardForCurrentResult(): AssetRankBoard? {
         val result = _chartFrame.value.resultInfo ?: return null
         return lifetimePnlRepository.buildAssetRankBoard(
@@ -449,7 +653,7 @@ class GameViewModel(
         _chartLineStyle.value = style
     }
 
-    /** 報酬箱から見た目レリックを適用／既定に戻す。 */
+    /** 見た目ページからテーマ／チャートを適用／既定に戻す。 */
     fun toggleRelicVisual(id: RelicId) {
         when (id) {
             RelicId.PAPER -> {
@@ -460,11 +664,7 @@ class GameViewModel(
                 }
             }
             RelicId.DARK -> {
-                if (_lcdTheme.value == LcdThemeMode.E_PAPER_INVERT) {
-                    applyDefaultLcd()
-                } else {
-                    setLcdTheme(LcdThemeMode.E_PAPER_INVERT)
-                }
+                // 反転テーマは廃止。所持は残すが見た目切替はしない。
             }
             RelicId.SMOOTH -> {
                 if (_chartLineStyle.value == ChartLineStyle.SMOOTH) {
@@ -486,19 +686,33 @@ class GameViewModel(
         refreshRelicState()
         when (id) {
             RelicId.PAPER -> setLcdTheme(LcdThemeMode.E_PAPER)
-            RelicId.DARK -> setLcdTheme(LcdThemeMode.E_PAPER_INVERT)
+            RelicId.DARK -> Unit // 反転テーマ廃止
             RelicId.SMOOTH -> setChartLineStyle(ChartLineStyle.SMOOTH)
             else -> Unit
         }
         soundPlayer.playFinish()
         hapticPlayer.tickPayoutClaim(big = true)
+        onPlayBuffUnlockedVisible()
+        evaluateSilentNotebookUnlocks()
         return true
     }
+
+    /** 初期化時は [_devRelicLab] 未準備のため、既定はリポジトリの claimed のみ見る。 */
+    private fun buildRelicEffects(
+        claimed: Set<RelicId> = lifetimePnlRepository.getClaimedRelics()
+    ): RelicEffects = RelicEffects.fromClaimed(
+        claimed = claimed,
+        stagePrefs = settingsRepository.getRelicStagePrefs(),
+        disabled = settingsRepository.getDisabledRelics(),
+        disabledGroups = settingsRepository.getDisabledUpgradeGroups(),
+    )
 
     private fun refreshRelicState() {
         val claimed = effectiveClaimedRelics()
         val prefs = settingsRepository.getRelicStagePrefs()
         _relicStagePrefs.value = prefs
+        _disabledUpgradeGroups.value = settingsRepository.getDisabledUpgradeGroups()
+        _disabledRelics.value = settingsRepository.getDisabledRelics()
         val lab = _devRelicLab.value
         _claimedRelics.value = if (lab != null) {
             RelicId.ordered
@@ -510,18 +724,64 @@ class GameViewModel(
         } else {
             lifetimePnlRepository.getPendingRelics()
         }
-        _relicEffects.value = RelicEffects.fromClaimed(claimed, prefs)
+        _relicEffects.value = buildRelicEffects(claimed)
     }
 
-    /** 報酬箱の段階切替。効果グループは実行時補正も更新。 */
+    /** 見た目ページの段階切替（運用・プレイ強化以外）。 */
     fun cycleRelicStage(group: RelicUpgradeGroup) {
         val owned = group.members.filter { it in effectiveClaimedRelics() }
-        if (owned.size < 2) return
+        if (owned.isEmpty()) return
+        if (owned.size == 1) {
+            val disabled = group in settingsRepository.getDisabledUpgradeGroups()
+            if (disabled) {
+                settingsRepository.setRelicStagePref(group, owned.first())
+            } else {
+                settingsRepository.setUpgradeGroupDisabled(group, true)
+            }
+            refreshRelicState()
+            soundPlayer.playUiSelect()
+            return
+        }
+        val disabled = group in settingsRepository.getDisabledUpgradeGroups()
         val prefs = settingsRepository.getRelicStagePrefs()
         val current = prefs[group]?.takeIf { it in owned } ?: owned.maxBy { it.threshold }
-        val idx = owned.indexOf(current).coerceAtLeast(0)
-        val next = owned[(idx + 1) % owned.size]
-        settingsRepository.setRelicStagePref(group, next)
+        if (disabled) {
+            settingsRepository.setRelicStagePref(group, owned.minBy { it.threshold })
+        } else {
+            val idx = owned.indexOf(current).coerceAtLeast(0)
+            if (idx >= owned.lastIndex) {
+                settingsRepository.setUpgradeGroupDisabled(group, true)
+            } else {
+                settingsRepository.setRelicStagePref(group, owned[idx + 1])
+            }
+        }
+        refreshRelicState()
+        soundPlayer.playUiSelect()
+    }
+
+    /** ホームのプレイ強化アイコン。OFF→下位→上位→OFF。 */
+    fun cyclePlayBuff(slot: PlayBuffSlot) {
+        val claimed = effectiveClaimedRelics()
+        val owned = slot.ownedIn(claimed)
+        if (owned.isEmpty()) return
+        when {
+            slot.group != null -> cycleRelicStage(slot.group)
+            slot.single != null -> {
+                val id = slot.single
+                val off = id in settingsRepository.getDisabledRelics()
+                settingsRepository.setRelicDisabled(id, !off)
+                refreshRelicState()
+                soundPlayer.playUiSelect()
+            }
+        }
+    }
+
+    /** 演出（JUDGE / COMBO）のON/OFF。 */
+    fun toggleFxRelic(id: RelicId) {
+        if (id != RelicId.JUDGE && id != RelicId.COMBO) return
+        if (id !in effectiveClaimedRelics()) return
+        val off = id in settingsRepository.getDisabledRelics()
+        settingsRepository.setRelicDisabled(id, !off)
         refreshRelicState()
         soundPlayer.playUiSelect()
     }
@@ -557,7 +817,7 @@ class GameViewModel(
         return when (mode) {
             LcdThemeMode.GAME_BOY -> true
             LcdThemeMode.E_PAPER -> fx.paperUnlocked
-            LcdThemeMode.E_PAPER_INVERT -> fx.darkUnlocked
+            LcdThemeMode.E_PAPER_INVERT -> false // 反転テーマ廃止
         }
     }
 
@@ -622,19 +882,27 @@ class GameViewModel(
 
     fun setAppForeground(foreground: Boolean) {
         bgmPlayer.setForeground(foreground)
+        if (foreground) {
+            refreshSumikaPending()
+            startSumikaPassiveTicker()
+        } else {
+            sumikaPassiveJob?.cancel()
+            sumikaPassiveJob = null
+        }
     }
 
-    /** START / RESULT / 図鑑 / CONFIG では流し、PLAYING / FINISHING では止める。 */
+    /**
+     * 全画面で流す（テスター「プレイ中が寂しい」対応）。
+     * PLAYING 中は音量を少しダックしてチャート集中を邪魔しにくくする。
+     */
     private fun syncBgmAmbient() {
-        val allow = when {
-            !_bgmLevel.value.isOn -> false
-            _appLayer.value != AppLayer.PLAY -> true
-            else -> when (_uiState.value.gameState) {
-                GameState.PLAYING, GameState.FINISHING -> false
-                GameState.START, GameState.RESULT -> true
-            }
-        }
-        bgmPlayer.setAmbientAllowed(allow)
+        val on = _bgmLevel.value.isOn
+        bgmPlayer.setAmbientAllowed(on)
+        val base = _bgmLevel.value.bgmVolume()
+        val playing = _appLayer.value == AppLayer.PLAY &&
+            (_uiState.value.gameState == GameState.PLAYING ||
+                _uiState.value.gameState == GameState.FINISHING)
+        bgmPlayer.setTargetVolume(if (playing) base * 0.62f else base)
     }
 
     fun setHapticEnabled(enabled: Boolean) {
@@ -651,7 +919,7 @@ class GameViewModel(
         refreshScrapbook()
     }
 
-    /** タイトルカードを弾いたときのヒント差し替え */
+    /** タイトルカードを弾いたときの格言差し替え */
     fun shuffleStartAttractTip() {
         if (_uiState.value.gameState != GameState.START) return
         _startSmallText.value = StartScreenCopy.randomSmallText(_displayLanguage.value)
@@ -693,8 +961,13 @@ class GameViewModel(
         entries: List<ScrapbookEntry>,
         sort: ScrapbookSort
     ): List<ScrapbookEntry> {
+        // 同一銘柄は隣接しやすい（続きに気づく手がかり）が、話数ラベルは出さない
+        val instrumentOrder = entries.map { it.instrumentKey }.distinct()
         return when (sort) {
-            ScrapbookSort.BY_ORDER -> entries
+            ScrapbookSort.BY_ORDER -> entries.sortedWith(
+                compareBy<ScrapbookEntry> { instrumentOrder.indexOf(it.instrumentKey) }
+                    .thenBy { it.sagaEp }
+            )
             ScrapbookSort.BY_BEST -> entries.sortedWith(
                 compareByDescending<ScrapbookEntry> { it.bestAsset ?: -1 }
                     .thenBy { it.stageId }
@@ -703,13 +976,26 @@ class GameViewModel(
     }
 
     private fun pickRandomStage(): StageChart {
-        val standard = stages.filter { !isExtremeStageId(it.stageId) }
-        val extreme = stages.filter { isExtremeStageId(it.stageId) }
-        require(standard.isNotEmpty()) { "No standard stages in charts.csv" }
+        val unlockedIds = scrapbookRepository.unlockedStageIds(stages)
+        val eligible = stages.filter { stage ->
+            isSagaEligible(stage, unlockedIds)
+        }
+        val standard = eligible.filter { !isExtremeStageId(it.stageId) }
+        val extreme = eligible.filter { isExtremeStageId(it.stageId) }
+        require(standard.isNotEmpty()) { "No standard stages eligible in charts.csv" }
         if (extreme.isNotEmpty() && Random.nextFloat() < EXTREME_STAGE_SPAWN_CHANCE) {
             return extreme.random(Random)
         }
         return standard.random(Random)
+    }
+
+    /** 物語の第1話、または前話が解放済みなら抽選対象。 */
+    private fun isSagaEligible(stage: StageChart, unlockedIds: Set<String>): Boolean {
+        if (stage.sagaEp <= 1) return true
+        val prev = stages.find {
+            it.instrumentName == stage.instrumentName && it.sagaEp == stage.sagaEp - 1
+        } ?: return false
+        return prev.stageId in unlockedIds
     }
 
     private fun isExtremeStageId(stageId: String): Boolean =
@@ -718,11 +1004,16 @@ class GameViewModel(
     private fun startGame() {
         if (stages.isEmpty() || _chartsLoadError.value != null) return
         prepareSession()
-        if (!settingsRepository.hasSeenFirstPlayTutorial()) {
-            _chartFrame.update { it.copy(isRunning = false) }
-            _showFirstPlayTutorial.value = true
-        } else {
-            beginSessionClock()
+        when {
+            !settingsRepository.hasSeenFirstPlayTutorial() -> {
+                _chartFrame.update { it.copy(isRunning = false) }
+                _showFirstPlayTutorial.value = true
+            }
+            !settingsRepository.hasSeenLifeTutorial() -> {
+                _chartFrame.update { it.copy(isRunning = false) }
+                _showLifeTutorial.value = true
+            }
+            else -> beginSessionClock()
         }
     }
 
@@ -1063,6 +1354,7 @@ class GameViewModel(
         val comboIncreased = nextCombo > prevCombo
         if (nextCombo > maxFillCombo) {
             maxFillCombo = nextCombo
+            settingsRepository.noteLifetimeMaxCombo(nextCombo)
         }
         val nextExpires = when {
             nextCombo <= 0 -> 0L
@@ -1076,6 +1368,7 @@ class GameViewModel(
         var lifeLossToken = _chartFrame.value.lifeLossTokenEpochMs
         var lifeLossOrb = _chartFrame.value.lifeLossOrbIndex
         if (quality == FillQuality.MISS &&
+            _lifeMechanicsActive.value &&
             !isForcedClose &&
             _uiState.value.gameState == GameState.PLAYING &&
             !isRetiredRun
@@ -1173,22 +1466,129 @@ class GameViewModel(
             result.finalAsset,
             result.endBalance - result.startBalance
         )
-        val persist = lifetimePnlRepository.onCashOut(result.endBalance)
+        val persist = lifetimePnlRepository.onCashOut(
+            newBalance = result.endBalance,
+            sessionMaxCombo = maxFillCombo,
+        )
         lifetimePnlRepository.recordSessionPnlHistory(
             brandNameJp = if (result.isRetired) UiStrings.retireBanner() else stage.brandName,
             brandNameEn = if (result.isRetired) UiStrings.retireBanner() else stage.brandNameEn,
             pnl = persist.balance - persist.previousBalance
         )
+        lifetimePnlRepository.accrueSumikaAfterCashOut()
+        lifetimePnlRepository.clearKaiAllowanceBlock()
+        _sumikaPendingYen.value = lifetimePnlRepository.getSumikaPendingYen()
+        _sumikaPendingGrade.value = lifetimePnlRepository.getSumikaPendingGrade()
+        _sumikaUnlockedGrade.value = lifetimePnlRepository.getSumikaUnlockedGrade()
+        _kaiAllowanceYen.value = lifetimePnlRepository.kaiAllowanceAmountOrZero()
         _balance.value = persist.balance
         _balanceHistory.value = lifetimePnlRepository.getBalanceHistory()
         _peakBalance.value = persist.peakBalance
         _sessionPnlHistory.value = lifetimePnlRepository.getSessionPnlHistory()
         _cashOutCount.value = persist.cashOutCount
+        _bestCombo.value = persist.bestCombo
         _pendingRelics.value = persist.pendingRelics
         _newlyPendingRelics.value = persist.newlyPending
         _resultIntroFinished.value = false
         refreshRelicState()
         _chartFrame.update { it.copy(resultPayoutClaimed = true) }
+        evaluateSilentNotebookUnlocks()
+    }
+
+    /** すみかシートを開いたときなど、パッシブを即時反映。 */
+    fun refreshSumikaUi() {
+        refreshSumikaPending()
+    }
+
+    fun upgradeSumika() {
+        if (_uiState.value.gameState != GameState.START) return
+        when (val result = lifetimePnlRepository.tryUpgradeSumika()) {
+            is SumikaUpgradeResult.Ok -> {
+                _sumikaLevel.value = result.level
+                _balance.value = result.balance
+                _peakBalance.value = result.peakBalance
+                _sumikaUnlockedGrade.value = lifetimePnlRepository.getSumikaUnlockedGrade()
+                _sumikaPendingGrade.value = lifetimePnlRepository.getSumikaPendingGrade()
+                _sumikaGradeIntroDone.value = lifetimePnlRepository.isSumikaGradeIntroDone()
+                _kaiAllowanceYen.value = lifetimePnlRepository.kaiAllowanceAmountOrZero()
+                _balanceHistory.value = lifetimePnlRepository.getBalanceHistory()
+                _sessionPnlHistory.value = lifetimePnlRepository.getSessionPnlHistory()
+                soundPlayer.playUiConfirm()
+            }
+            is SumikaUpgradeResult.Fail -> {
+                soundPlayer.playUiSelect()
+            }
+        }
+    }
+
+    fun collectSumikaPay() {
+        if (_uiState.value.gameState != GameState.START) return
+        val from = _balance.value
+        val result = lifetimePnlRepository.collectSumikaPay() ?: return
+        _balanceCountFrom.value = from
+        _balance.value = result.balance
+        _peakBalance.value = result.peakBalance
+        _sumikaPendingYen.value = 0L
+        _kaiAllowanceYen.value = lifetimePnlRepository.kaiAllowanceAmountOrZero()
+        _balanceHistory.value = lifetimePnlRepository.getBalanceHistory()
+        _sessionPnlHistory.value = lifetimePnlRepository.getSessionPnlHistory()
+        if (result.pendingRelics.isNotEmpty()) {
+            _pendingRelics.value = result.pendingRelics
+        }
+        if (result.newlyPending.isNotEmpty()) {
+            _newlyPendingRelics.value = result.newlyPending
+        }
+        refreshRelicState()
+        soundPlayer.playUiConfirm()
+        hapticPlayer.tickPayoutClaim(big = result.amount >= 500L)
+    }
+
+    fun collectKaiAllowance() {
+        if (_uiState.value.gameState != GameState.START) return
+        val from = _balance.value
+        val result = lifetimePnlRepository.collectKaiAllowance() ?: return
+        _balanceCountFrom.value = from
+        _balance.value = result.balance
+        _peakBalance.value = result.peakBalance
+        _kaiAllowanceYen.value = 0L
+        _balanceHistory.value = lifetimePnlRepository.getBalanceHistory()
+        _sessionPnlHistory.value = lifetimePnlRepository.getSessionPnlHistory()
+        if (result.pendingRelics.isNotEmpty()) {
+            _pendingRelics.value = result.pendingRelics
+        }
+        if (result.newlyPending.isNotEmpty()) {
+            _newlyPendingRelics.value = result.newlyPending
+        }
+        refreshRelicState()
+        soundPlayer.playUiConfirm()
+        hapticPlayer.tickPayoutClaim(big = false)
+    }
+
+    fun markSumikaGradeIntroDone() {
+        if (_sumikaPendingGrade.value <= 0) return
+        lifetimePnlRepository.markSumikaGradeIntroDone()
+        _sumikaGradeIntroDone.value = true
+    }
+
+    fun claimSumikaGradeReward() {
+        if (_uiState.value.gameState != GameState.START) return
+        if (!_sumikaGradeIntroDone.value) return
+        val result = lifetimePnlRepository.claimSumikaGradeReward() ?: return
+        _sumikaLevel.value = result.level
+        _sumikaUnlockedGrade.value = result.unlockedGrade
+        _sumikaPendingGrade.value = 0
+        _sumikaGradeIntroDone.value = false
+        _sumikaClaimCelebrationGrade.value = result.grade
+        soundPlayer.playUiConfirm()
+        hapticPlayer.tickPayoutClaim(big = true)
+    }
+
+    fun dismissSumikaClaimCelebration() {
+        _sumikaClaimCelebrationGrade.value = 0
+    }
+
+    fun clearBalanceCountFrom() {
+        _balanceCountFrom.value = null
     }
 
     private fun currentTotalAsset(markPrice: Int): Int {
@@ -1421,6 +1821,66 @@ class GameViewModel(
         hapticPlayer.tickEndgameHeart(intensity)
     }
 
+    /**
+     * リザルト確定後のホーム戻り。
+     * 広告除去前はインタースティシャル候補（頻度キャップ付き）。未準備なら即ホーム。
+     */
+    private fun leaveResultToHome() {
+        if (leavingResultToHome) return
+        leavingResultToHome = true
+        val removed = _adsRemoved.value
+        val eligible = if (!removed) {
+            settingsRepository.bumpAdEligibleCashOut()
+        } else {
+            0
+        }
+        // 3出金に1回。初回出金では出さない。
+        val shouldOfferAd = !removed && eligible >= 3 && eligible % 3 == 0
+        if (!shouldOfferAd) {
+            leavingResultToHome = false
+            resetToStart()
+            return
+        }
+        services.monetization.maybeShowInterstitial(adsRemoved = false) {
+            leavingResultToHome = false
+            resetToStart()
+        }
+    }
+
+    fun purchaseRemoveAds() {
+        if (_adsRemoved.value) return
+        services.monetization.purchaseRemoveAds { purchased ->
+            if (purchased) {
+                settingsRepository.setAdsRemoved(true)
+                _adsRemoved.value = true
+            }
+        }
+    }
+
+    fun restorePurchases() {
+        services.monetization.restorePurchases { removed ->
+            if (removed) {
+                settingsRepository.setAdsRemoved(true)
+                _adsRemoved.value = true
+            }
+        }
+    }
+
+    /** Debug / スタブ用。本番 Billing 接続後は purchase 経路のみ。 */
+    fun debugSetAdsRemoved(removed: Boolean) {
+        if (!services.isDebugBuild) return
+        settingsRepository.setAdsRemoved(removed)
+        _adsRemoved.value = removed
+    }
+
+    /** Debug: すみかを Lv0（しき布受け取り前）に戻す。 */
+    fun debugResetSumika() {
+        if (!services.isDebugBuild) return
+        lifetimePnlRepository.debugResetSumikaToZero()
+        refreshSumikaPending()
+        soundPlayer.playUiSelect()
+    }
+
     private fun resetToStart() {
         cancelJobs()
         cash = INITIAL_ASSET
@@ -1432,25 +1892,24 @@ class GameViewModel(
         sessionMaxHealth = MAX_HEALTH
         sessionHealth = MAX_HEALTH
         isRetiredRun = false
-        isFirstStartAfterLaunch = false
-        _startSmallText.value = StartScreenCopy.randomSmallText(_displayLanguage.value)
+        _startSmallText.value = StartScreenCopy.launchTutorial(_displayLanguage.value, orderLagMs())
         _uiState.value = GameUiState()
         _chartFrame.value = ChartFrame()
         _resultIntroFinished.value = false
         _newlyPendingRelics.value = emptyList()
         stakeBalance = _balance.value
-        _showBankrupt.value = lifetimePnlRepository.isBankrupt()
         accrueDailyPlan()
+        refreshSumikaPending()
+        onPlayBuffUnlockedVisible()
+        evaluateSilentNotebookUnlocks()
         syncBgmAmbient()
     }
 
     private fun refreshStartSmallTextForCurrentState() {
         if (_uiState.value.gameState != GameState.START) return
-        _startSmallText.value = if (isFirstStartAfterLaunch) {
+        // 既定はルール一行。格言はフリック（shuffleStartAttractTip）だけ。
+        _startSmallText.value =
             StartScreenCopy.launchTutorial(_displayLanguage.value, orderLagMs())
-        } else {
-            StartScreenCopy.randomSmallText(_displayLanguage.value)
-        }
     }
 
     private fun cancelPendingOrdersOnTimeout() {
